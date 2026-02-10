@@ -174,6 +174,72 @@ import DocImage from '~/components/DocImage.astro';
 
 Images inside `.doc-image-row` share equal width (`flex: 1`) and stack vertically on screens ≤640px. The `.doc-image-row` styles are defined inside `DocImage.astro` via `:global()` and are available on any page that renders a `DocImage`.
 
+### Badge Component & tb-badge
+
+`src/components/Badge.astro` — thin wrapper around Starlight's `<Badge>` with custom styles.
+
+#### tb-badge
+
+A text-only accent badge: no border, no background, `--sl-color-text-accent` color, `font-weight: 600`, `vertical-align: top`.
+
+**Styles defined in** `src/components/Badge.astro` via `<style is:global>`:
+
+| Class | Size |
+|-------|------|
+| `.tb-badge` (default, `size="small"`) | 0.75rem (12px) |
+| `.tb-badge` + `size="medium"` | 0.875rem (14px) |
+
+**Usage in MDX:**
+
+```mdx
+import Badge from '~/components/Badge.astro';
+
+{/* 12px — default */}
+<Badge text="NEW" class="tb-badge" />
+
+{/* 14px */}
+<Badge text="NEW" class="tb-badge" size="medium" />
+```
+
+**Active sidebar item** — when the parent link has `aria-current="page"`, `.tb-badge` inherits the link's text color (avoids invisible badge on accent background).
+
+#### Where to configure the badge
+
+| Goal | Where to configure |
+|------|--------------------|
+| Badge **only in sidebar** (link or group) | `astro.sidebar.ts` only |
+| Badge **on page title AND sidebar** | page frontmatter `sidebar.badge` only |
+
+**Sidebar only** — configure in `astro.sidebar.ts`, do NOT add `sidebar.badge` to the page frontmatter:
+
+```ts
+// single page link
+{ slug: 'docs/concepts/data-visualization', badge: { text: 'NEW', class: 'tb-badge' } }
+
+// group label
+{
+  label: 'Key concepts',
+  badge: { text: 'NEW', class: 'tb-badge' },
+  items: [...],
+}
+```
+
+**Page title + sidebar** — add `sidebar.badge` to the page frontmatter. The custom `PageTitle.astro` reads this field and renders the badge next to `<h1>` at `size="medium"`. No changes to `astro.sidebar.ts` needed — Starlight automatically picks up `sidebar.badge` from frontmatter and shows it on the sidebar link too:
+
+```yaml
+---
+title: My Page
+sidebar:
+  badge:
+    text: NEW
+    class: tb-badge
+---
+```
+
+- `text` — badge label (required)
+- `variant` — `default` | `note` | `tip` | `caution` | `danger` | `success` (optional, default: `default`)
+- `class` — CSS class, use `tb-badge` for the text-only style
+
 ### YouTubeVideo Component
 
 `src/components/YouTubeVideo.astro` — responsive YouTube video embed that fills the full content width.
