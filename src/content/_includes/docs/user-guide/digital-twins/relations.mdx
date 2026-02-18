@@ -1,148 +1,92 @@
 import DocLink from '@components/DocLink.astro';
 import { Products } from '~/models/site.models';
 
-**Relations** in ThingsBoard represent **directed connections between two entities**. They allow you to model real-world relationships (like hierarchy, ownership, or control) in your IoT solution.
+**Relations** connect two entities within the same <DocLink product={props.product} path='TODO'>Tenant</DocLink>, modeling real-world relationships such as hierarchy, ownership, or dependency.
 
-A relation has the following properties:
-- A relation connects two entities within the same <DocLink product={props.product} path='TODO'>Tenant</DocLink>.
-- Each relation has a **direction**: _From_ and _To_.
-- Each relation has a **relation type** (string), for example: _Contains_, _Manages_, _Uses_, _Supports_.
-- You can define **custom relation types** depending on your needs.
+Each relation has:
+- A **direction**: _From_ (source) → _To_ (target)
+- A **type**: a free-text string (e.g., _Contains_, _Manages_, or any custom value)
 
-## Why Use Relations?
+## Direction
 
-Relations help you model logical and physical connections between entities such as:
-- A building (asset) contains multiple devices.
-- A customer manages assigned assets and devices.
-- A gateway device is connected to multiple sensors.
+A relation always flows from one entity to another. The **From** entity is the source; the **To** entity is the target.
 
-Relations are commonly used for:
-- Representing entity hierarchies (e.g., Customer → Asset → Device)
-- Navigating related entities in dashboards
-- Performing relation-based processing in rule chains
-- Filtering, aggregating, and visualizing data across entity groups
+**Example:** To express that _Region A_ contains _Field A_:
+- **From**: Region A (Asset)
+- **To**: Field A (Asset)
+- **Type**: Contains
 
-## Relation Direction and Types
+Direction matters: querying relations _from_ Region A lists its children; querying relations _to_ Field A reveals its parent.
 
-### Direction
+## Relation Types
 
-Relations in ThingsBoard are **directional**:
-- **From** – the source entity
-- **To** – the target entity
+The type is a free-text string — use built-in conventions or define your own:
 
-Direction is important because most API queries and rule engine operations depend on it to determine which entities are considered parent/child.
-The same relation type behaves differently depending on whether you query relations **from** an entity or **to** an entity.
+| Type | Meaning |
+|------|---------|
+| Contains | A hierarchically contains B |
+| Manages | A manages or is responsible for B |
+| Uses | A depends on or uses B |
+| Supports | A provides abstract support to B |
 
-### Relation Types
+Any string is valid: `Contains`, `Manages`, `AbsolutelyNewRelationType` — ThingsBoard places no restrictions on type names.
 
-Relation types define the meaning of the relationship. Common examples:
-- **Contains** - Entity A contains Entity B (hierarchy)
-- **Manages** - Entity A manages Entity B
-- **Uses** - Entity A uses or depends on Entity B
-- **Supports** - abstract dependency or support relationship
+## Creating Relations
 
-You can create **your own relation types** if needed.
-
-## Creating and Managing Relations
-
-Relations are created and managed in the ThingsBoard UI from the **Relations** tab on the entity details page.
-
-To create a relation:
 1. Open the entity details page.
-2. Navigate to the **Relations** tab.
+2. Go to the **Relations** tab.
 3. Select the relation **direction** (**From** or **To**).
-4. Click the "**+**" button to open the **Add relation** dialog.
-5. In the dialog, specify the **Relation type** (for example, _Contains_).
-6. Define the **relation type** and select the **related entity**.
-7. (Optional) Fill in the **Additional info (JSON)** field if additional metadata is required.
-8. Click **Add** to create the relation.
+4. Click **+** to open the **Add relation** dialog.
+5. Enter the **Relation type** — type any string, for example `Contains` or a custom value like `AbsolutelyNewRelationType`.
+6. Select the **target entity**.
+7. Optionally fill in **Additional info (JSON)** for metadata.
+8. Click **Add**.
 
-## How Relations Are Used in ThingsBoard
+## Hierarchy Example
 
-Relations are widely used across the ThingsBoard platform to build hierarchical models, simplify entity navigation, and implement advanced data processing scenarios.
+The _Contains_ relation models parent–child structures. For example:
 
-### In Dashboards
-
-Relations enable dashboards to dynamically resolve and display entities without hardcoding identifiers.
-They are commonly used in:
-- <DocLink product={props.product} path='TODO'>Entity aliases</DocLink>
-- Dashboard states
-- Widgets that display related entity data (for example, Alarms table)
-
-<DocLink product={props.product} path='TODO'>Widgets</DocLink> can display alarms, telemetry and attributes from related entities, filter entities based on relationships, visualize hierarchical structures (_Customer_ → _Assets_ → _Devices_).
-
-This enables reusable dashboards that adapt automatically to different customers and deployments.
-
-### In Rule Engine
-
-Relations are actively used in the ThingsBoard <DocLink product={props.product} path='TODO'>Rule Engine</DocLink> to route messages, enrich telemetry, and forward data between related entities.
-
-Common relation-based nodes include: <DocLink product={props.product} path='TODO'>Check relation presence</DocLink>, <DocLink product={props.product} path='TODO'>Related device attributes</DocLink>, <DocLink product={props.product} path='TODO'>Related entity data</DocLink>, <DocLink product={props.product} path='TODO'>Duplicate to related</DocLink>.
-
-These nodes allow rule chains to validate relations, fetch data from related entities, and propagate messages based on relation direction and type.
-
-### In Calculated Fields
-
-Relations can also be used in <DocLink product={props.product} path='TODO'>Calculated fields</DocLink> to dynamically compute values based on related entities.
-
-Typical use cases include:
-- <DocLink product={props.product} path='TODO'>Propagation</DocLink> – transforming or propagating data to related entities
-- <DocLink product={props.product} path='TODO'>Related entities aggregation</DocLink> – aggregating latest data (min, max, avg, sum, count, etc.) from related entities
-- <DocLink product={props.product} path='TODO'>Geofencing</DocLink> – detecting enter/exit events relative to related geozones and generating notifications
-
-## API and Tools
-
-Relations can also be created, queried, and deleted programmatically using the ThingsBoard <DocLink product={props.product} path='TODO'>REST API</DocLink>.
-
-A relation is represented as a JSON object containing:
-- **from** (entityType + id)
-- **to** (entityType + id)
-- **type** (the relation name)
-- **typeGroup** (optional categorization)
-- optional **additionalInfo** (custom JSON)
-
-**Example:**
-
-```json
-{
-  "from": {
-    "id": "156c853f-89b1-321b-635j-y8febb2784h4",
-    "entityType": "DEVICE"
-  },
-  "to": {
-    "id": "784f394c-42b6-435a-983c-b7beff2784f9",
-    "entityType": "DEVICE"
-  },
-  "type": "Contains",
-  "typeGroup": "COMMON",
-  "version": 0,
-  "additionalInfo": {}
-}
-```
-
-## Example Hierarchy Using Relations
-
-The following example illustrates how the _Contains_ relation can be used to model a hierarchical structure in ThingsBoard.
-
-In this example:
-- **Region A** is defined as an **Asset**.
-- Region A contains two child assets: **Field A** and **Field B**.
-- Each field contains multiple **Devices**, such as moisture sensors and irrigation systems.
-
-This forms the following hierarchy:
+- Region A → **Contains** → Field A
+- Region A → **Contains** → Field B
+- Field A → **Contains** → Moisture Sensor
+- Field B → **Contains** → Irrigation System
 
 {props.product === Products.CE
   ? <img src="/images/key-concepts/relations-ce.svg" alt="Relations hierarchy example" />
   : <img src="/images/key-concepts/relations-pe.svg" alt="Relations hierarchy example" />
 }
 
-The _Contains_ relation follows the direction:
-**From (Parent) → To (Child)**
+## Where Relations Are Used
 
-In this case:
-- Region A → Contains → Field A
-- Region A → Contains → Field B
-- Field A → Contains → Devices
-- Field B → Contains → Devices
+### Dashboards
 
-This structure demonstrates how relations are used to model real-world physical or logical hierarchies such as geographic regions, production areas, facilities, or equipment groups.
+Relations power <DocLink product={props.product} path='TODO'>entity aliases</DocLink> that dynamically resolve related entities — enabling reusable dashboards that adapt automatically to different customers and deployments. Widgets can display telemetry, attributes, and alarms from related entities and visualize hierarchies without hardcoded identifiers.
+
+### Rule Engine
+
+The <DocLink product={props.product} path='TODO'>Rule Engine</DocLink> uses relations to route messages, enrich telemetry, and propagate data. Key nodes: <DocLink product={props.product} path='TODO'>Check relation presence</DocLink>, <DocLink product={props.product} path='TODO'>Related device attributes</DocLink>, <DocLink product={props.product} path='TODO'>Related entity data</DocLink>, <DocLink product={props.product} path='TODO'>Duplicate to related</DocLink>.
+
+### Calculated Fields
+
+<DocLink product={props.product} path='TODO'>Calculated fields</DocLink> can traverse relations to compute values dynamically:
+- <DocLink product={props.product} path='TODO'>Propagation</DocLink> — transform and push data to related entities
+- <DocLink product={props.product} path='TODO'>Related entities aggregation</DocLink> — compute min/max/avg/sum/count across related entities
+- <DocLink product={props.product} path='TODO'>Geofencing</DocLink> — detect enter/exit events relative to related geozones
+
+## REST API
+
+Relations can be created, queried, and deleted via the <DocLink product={props.product} path='TODO'>REST API</DocLink>. A relation is represented as:
+
+```json
+{
+  "from": { "id": "156c853f-89b1-321b-635j-y8febb2784h4", "entityType": "DEVICE" },
+  "to":   { "id": "784f394c-42b6-435a-983c-b7beff2784f9", "entityType": "DEVICE" },
+  "type": "Contains",
+  "additionalInfo": {}
+}
+```
+
+Fields:
+- **from** / **to** — entity type and UUID of the source and target
+- **type** — the relation type string
+- **additionalInfo** — optional custom JSON metadata
