@@ -1,1 +1,37 @@
-{/* TODO: Add content */}
+import DocLink from '@components/DocLink.astro';
+
+ThingsBoard supports multiple transport protocols for device connectivity. The protocol you choose determines the available **credential types** and **communication model**.
+
+## Supported Protocols
+
+| Protocol | Credential types | Communication model |
+|----------|-----------------|---------------------|
+| **MQTT** | Access Token, MQTT Basic, X.509 Certificate | Bidirectional, persistent connection |
+| **HTTP** | Access Token, X.509 Certificate | Request/response, polling |
+| **CoAP** | Access Token, X.509 Certificate | Lightweight request/response |
+| **LwM2M** | Pre-Shared Key (PSK), X.509 Certificate, No-Sec | Optimized for constrained devices |
+| **SNMP** | Community string (v1/v2c), USM credentials (v3) | Poll-based, network devices |
+| **Gateway API** | Access Token (gateway device) | Proxies data for downstream devices |
+
+## Credential Types
+
+**Access Token** — a static string passed with each request. Default for HTTP and MQTT. Simple to configure, suitable for most use cases.
+
+**MQTT Basic** — username/password pair over MQTT. Useful when integrating with brokers that require standard MQTT authentication.
+
+**X.509 Certificate** — mutual TLS authentication. Recommended for production deployments requiring strong device identity.
+
+**LwM2M credentials** — PSK or X.509 specific to the LwM2M protocol stack for constrained devices (e.g., NB-IoT, Zigbee gateways).
+
+## Getting Started
+
+Each protocol has a dedicated integration guide with connection examples, credential setup, and payload format references:
+
+- <DocLink product={props.product} path='TODO'>MQTT API</DocLink>
+- <DocLink product={props.product} path='TODO'>HTTP API</DocLink>
+- <DocLink product={props.product} path='TODO'>CoAP API</DocLink>
+- <DocLink product={props.product} path='TODO'>LwM2M API</DocLink>
+- <DocLink product={props.product} path='TODO'>SNMP API</DocLink>
+- <DocLink product={props.product} path='TODO'>Gateway API</DocLink>
+
+For a hands-on walkthrough using your device, use the built-in **Check connectivity** tool from the <DocLink product={props.product} path='TODO'>device details page</DocLink> — it generates a ready-to-run command for your chosen protocol and OS.
