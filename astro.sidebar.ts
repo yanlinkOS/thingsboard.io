@@ -130,6 +130,15 @@ const guideItems = (prefix: string) => [
 	},
 ];
 
+const recipeItems = (prefix: string) => [
+	{
+		label: 'Sending Data',
+		items: [
+			`${prefix}/python-telemetry`,
+		],
+	},
+];
+
 const referenceItems = (prefix: string) => [
 	`${prefix}/configuration-reference`,
 	{
@@ -178,6 +187,11 @@ export const opensourceSidebar: SidebarConfig = [
 		items: guideItems('docs/user-guide'),
 	},
 	{
+		label: 'Recipes',
+		translations: { uk: 'Рецепти' },
+		items: recipeItems('docs/recipes'),
+	},
+	{
 		label: 'Reference',
 		translations: { uk: 'Довідник' },
 		items: referenceItems('docs/reference'),
@@ -216,6 +230,11 @@ export const peSidebar: SidebarConfig = [
 		label: 'Guides',
 		translations: { uk: 'Посібники' },
 		items: guideItems('docs/pe/user-guide'),
+	},
+	{
+		label: 'Recipes',
+		translations: { uk: 'Рецепти' },
+		items: recipeItems('docs/pe/recipes'),
 	},
 	{
 		label: 'Reference',
