@@ -21,7 +21,6 @@ const guideItems = (prefix: string) => [
 			`${prefix}/connectivity-status`,
 			`${prefix}/claiming`,
 			`${prefix}/provisioning`,
-			`${prefix}/bulk-provisioning`,
 			`${prefix}/ota-updates`,
 			`${prefix}/command-and-control`,
 		],
@@ -131,6 +130,21 @@ const guideItems = (prefix: string) => [
 	},
 ];
 
+const referenceItems = (prefix: string) => [
+	`${prefix}/configuration-reference`,
+	{
+		label: 'MQTT API',
+		items: [
+			`${prefix}/mqtt-api/getting-connected`,
+			`${prefix}/mqtt-api/telemetry`,
+			`${prefix}/mqtt-api/attributes`,
+			`${prefix}/mqtt-api/rpc`,
+			`${prefix}/mqtt-api/claiming`,
+			`${prefix}/mqtt-api/provisioning`,
+		],
+	},
+];
+
 export const opensourceSidebar: SidebarConfig = [
 	{
 		label: 'Getting Started',
@@ -166,12 +180,7 @@ export const opensourceSidebar: SidebarConfig = [
 	{
 		label: 'Reference',
 		translations: { uk: 'Довідник' },
-		items: [
-			'docs/reference/configuration-reference',
-			'docs/reference/cli-reference',
-			'docs/reference/api-reference',
-			'docs/reference/error-reference',
-		],
+		items: referenceItems('docs/reference'),
 	},
 ];
 
@@ -207,6 +216,11 @@ export const peSidebar: SidebarConfig = [
 		label: 'Guides',
 		translations: { uk: 'Посібники' },
 		items: guideItems('docs/pe/user-guide'),
+	},
+	{
+		label: 'Reference',
+		translations: { uk: 'Довідник' },
+		items: referenceItems('docs/pe/reference'),
 	},
 	{
 		label: 'PE Features',
