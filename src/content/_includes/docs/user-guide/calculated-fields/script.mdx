@@ -25,12 +25,13 @@ Use Script when you need:
 
 ### Arguments
 
-Script fields support **Latest telemetry**, **Attribute**, and **Time series rolling** argument types.
-The data source can be the current entity, another Device/Asset, the Customer, the Current tenant,
-or the Current owner.
+Script fields support three argument types. The data source can be the current entity, another
+Device/Asset, the Customer, the Current tenant, or the Current owner.
 
-For full argument configuration details, see
-<DocLink product={props.product} path="user-guide/calculated-fields">Calculated Fields — Arguments</DocLink>.
+- **Attribute** — a single attribute value (Server, Client, or Shared scope) with an optional default fallback.
+- **Latest telemetry** — the most recent value of a telemetry key, with an optional default fallback.
+- **Time series rolling** — a sliding historical window of telemetry values. Exposes aggregation methods
+  and merge utilities — see [Rolling Argument API](#rolling-argument-api) below.
 
 ### Script Function
 
@@ -103,6 +104,91 @@ time series record.
 
 For output strategy options, see
 <DocLink product={props.product} path="user-guide/calculated-fields">Calculated Fields — Output Strategy</DocLink>.
+
+## Rolling Argument API
+
+When an argument uses the **Time series rolling** type, it exposes a rich API for aggregating and
+aligning historical telemetry. The argument is passed directly as a function parameter (e.g., `temperature`)
+and provides:
+
+- `.timeWindow` — `{ startTs, endTs }` of the configured window
+- `.values` — array of `{ ts, value }` records within the window
+- Aggregation methods and merge utilities described below
+
+### Aggregation Methods
+
+All methods accept an optional `ignoreNaN` boolean (default `true`):
+
+| Method | `ignoreNaN = true` (default) | `ignoreNaN = false` |
+|--------|------------------------------|---------------------|
+| `max()` | Highest value, ignoring NaN | NaN if any NaN exists |
+| `min()` | Lowest value, ignoring NaN | NaN if any NaN exists |
+| `mean()`, `avg()` | Average, ignoring NaN | NaN if any NaN exists |
+| `std()` | Standard deviation, ignoring NaN | NaN if any NaN exists |
+| `median()` | Median, ignoring NaN | NaN if any NaN exists |
+| `count()` | Count of values, ignoring NaN | Count including NaN |
+| `last()` | Most recent non-NaN value | Last value even if NaN |
+| `first()` | Oldest non-NaN value | First value even if NaN |
+| `sum()` | Total sum, ignoring NaN | NaN if any NaN exists |
+
+**Given this rolling argument:**
+
+```json
+{
+  "temperature": {
+    "timeWindow": { "startTs": 1740643762896, "endTs": 1740644662896 },
+    "values": [
+      { "ts": 1740644350000, "value": 72.32 },
+      { "ts": 1740644360000, "value": 72.86 },
+      { "ts": 1740644370000, "value": 73.58 },
+      { "ts": 1740644380000, "value": "NaN" }
+    ]
+  }
+}
+```
+
+```js
+var avgTemp = temperature.mean();        // 72.92
+var tempMax = temperature.max();         // 73.58
+var valueCount = temperature.count();    // 3
+
+var avgTempNaN = temperature.mean(false);     // NaN
+var tempMaxNaN = temperature.max(false);      // NaN
+var valueCountNaN = temperature.count(false); // 4
+```
+
+### Merging Rolling Arguments
+
+Use `merge` and `mergeAll` to align timestamps across multiple telemetry streams.
+Missing values at a given timestamp are filled with the most recent known value;
+if no previous value exists, `NaN` is used.
+
+| Method | Description |
+|--------|-------------|
+| `merge(other, settings?)` | Merge with one other rolling argument |
+| `mergeAll(others, settings?)` | Merge with an array of rolling arguments |
+
+`settings` (optional): `{ ignoreNaN: boolean, timeWindow: { startTs, endTs } }`
+
+Each merged record has the shape `{ ts, v1, v2, ... }` where `v1` is the value from the calling
+argument and `v2`, `v3`, ... are values from the merged arguments.
+
+**Merge two arguments:**
+
+```js
+var merged = temperature.merge(humidity, { ignoreNaN: false });
+// merged.values[i] = { ts, v1: tempValue, v2: humidityValue }
+```
+
+**Merge three or more arguments:**
+
+```js
+var merged = temperature.mergeAll([humidity, pressure], { ignoreNaN: true });
+// merged.values[i] = { ts, v1: tempValue, v2: humidityValue, v3: pressureValue }
+```
+
+**Common use cases:** sensor data synchronization, anomaly detection across multiple streams,
+predictive maintenance combining vibration, temperature, and operational status.
 
 ## Example 1: Fahrenheit to Celsius
 
