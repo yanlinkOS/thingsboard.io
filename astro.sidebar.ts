@@ -137,6 +137,12 @@ const recipeItems = (prefix: string) => [
 			`${prefix}/python-telemetry`,
 		],
 	},
+	{
+		label: 'Storage & Retention',
+		items: [
+			`${prefix}/configure-telemetry-ttl`,
+		],
+	},
 ];
 
 const referenceItems = (prefix: string) => [
