@@ -117,6 +117,33 @@ import ImageGallery from '@components/ImageGallery.astro';
 )}
 ```
 
+### YouTubeVideo Component
+
+`src/components/YouTubeVideo.astro` — responsive YouTube video embed that fills the full content width.
+
+**Features:**
+- Fills 100% of the available content width
+- Maintains 16:9 aspect ratio at all viewport sizes
+- Uses `class` (not `id`) — multiple videos per page are supported
+- No JavaScript required
+
+**Props:**
+
+```ts
+interface Props {
+  videoId: string;  // YouTube video ID, e.g. '3xRWm1W1IM4'
+  title?: string;   // Accessible iframe title (default: 'YouTube video')
+}
+```
+
+**Usage in MDX:**
+
+```mdx
+import YouTubeVideo from '~/components/YouTubeVideo.astro';
+
+<YouTubeVideo videoId="3xRWm1W1IM4" title="ThingsBoard overview" />
+```
+
 ### Product System & Version Switcher
 
 #### Products enum
