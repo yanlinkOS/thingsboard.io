@@ -463,6 +463,28 @@ Configuration reference and error docs are auto-generated from the Astro source 
 - `src/pages/` — special routes: root redirect, language redirects, 404, OG image generation
 - `src/pages/[lang]/` — dynamic per-language routes (index, install, tutorial redirects)
 
+### Static Files (public/)
+
+Files that must be served as-is (not processed by the build) go in the `public/` directory. They are copied to `dist/` preserving the path structure, and are available at the root URL.
+
+**Use `public/` for:**
+- JSON files available for download
+- PDFs or other binary assets linked from docs
+- Any file referenced by a direct URL (not via `astro:assets`)
+
+**Do NOT put these in `src/assets/`** — that directory is for images processed via `astro:assets` (optimization, format conversion).
+
+**Example — downloadable JSON:**
+
+File location: `public/resources/airconditioners_dashboard.json`
+
+Link in MDX:
+```html
+<a href="/resources/airconditioners_dashboard.json" download="airconditioners_dashboard.json">
+  airconditioners_dashboard.json
+</a>
+```
+
 ## Code Style
 
 - Tabs for indentation in code files; spaces for JSON, Markdown, MDX, YAML, TOML
