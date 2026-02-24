@@ -72,8 +72,7 @@ The submit strategy controls how messages from a polled batch are submitted to r
   Many rule nodes perform async writes — for example, **Save Time Series** dispatches
   multiple commands to the Cassandra driver concurrently and the write confirmations can
   arrive out of submission order. If two messages from the same device arrive within
-  milliseconds of each other, the later value may be stored before the earlier one,
-  producing an incorrect latest-value record.
+  milliseconds of each other, the later value may be stored before the earlier one.
 
   Use a sequential strategy whenever preserved ordering matters:
 
