@@ -83,6 +83,7 @@ const guideItems = (prefix: string) => [
 				items: [
 					{ label: 'Overview', slug: `${prefix}/rule-engine` },
 					{ label: 'Queues', slug: `${prefix}/rule-engine/queues` },
+					{ label: 'Monitoring', slug: `${prefix}/rule-engine/monitoring` },
 				],
 			},
 			`${prefix}/rule-nodes`,

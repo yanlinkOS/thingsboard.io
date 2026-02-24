@@ -98,6 +98,12 @@ message can still end as Success:
   └──────────────┘
 ```
 
+To track Success, Failure, and Timeout counts across all rule chains, use the
+<DocLink product={props.product} path="user-guide/rule-engine/monitoring#statistics">Statistics dashboard</DocLink>.
+To investigate why a specific node failed, enable
+<DocLink product={props.product} path="user-guide/rule-engine/monitoring#debug">Debug mode</DocLink>
+on that node.
+
 ## Managing Rule Chains
 
 ### Create a Rule Chain
@@ -161,21 +167,13 @@ inputs before deploying:
 | **Script area** | The TBEL/JS function |
 | **Output** | Execution result |
 
-## Debug
+## Monitoring
 
-Enable **Debug mode** on a node via its configuration window or the **Debug** toggle in the chain
-editor. When enabled, ThingsBoard records every incoming and outgoing message with the relation
-type used. Click the **Events** icon on the node to review them.
-
-<Aside type="caution">
-  Debug mode records every execution. Disable it in production once the node is validated.
-</Aside>
-
-## Statistics
-
-A built-in Rule Engine statistics dashboard is automatically available for each tenant.
-Access it via **API Usage → View statistics** to monitor message processing rates, error counts,
-and queue lag.
+ThingsBoard provides a **Statistics** dashboard for tracking throughput, failures, and
+exceptions across all queues, and **Debug** mode for per-node message tracing. See
+<DocLink product={props.product} path="user-guide/rule-engine/monitoring">Rule Engine Monitoring</DocLink>
+for the full reference, including the debug event columns, the two debug modes, and the
+step-by-step troubleshooting workflow.
 
 ## Queues
 
