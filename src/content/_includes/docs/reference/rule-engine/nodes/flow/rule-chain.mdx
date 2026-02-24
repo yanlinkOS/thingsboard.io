@@ -1,0 +1,53 @@
+import DocLink from '@components/DocLink.astro';
+
+Forwards the incoming message to another rule chain for processing. The message is delivered to the input node of the target rule chain.
+
+---
+
+## Configuration
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Rule chain** | Yes | The target rule chain to forward the message to |
+| **Forward to originator's default rule chain** | No | When enabled, the target is resolved dynamically from the originator's <DocLink product={props.product} path="user-guide/device-profiles">Device Profile</DocLink> or Asset Profile instead of the configured rule chain. For all other originator types, the configured rule chain is used as a fallback. |
+
+---
+
+## Processing algorithm
+
+```plaintext
+  incoming message
+        │
+        ▼
+  forwardMsgToDefaultRuleChain?
+  ┌──────────┬───────────────────┐
+  │ No       │ Yes               │
+  ▼          ▼                   │
+  Use        Originator is       │
+  configured Device or Asset?    │
+  rule chain ┌─────┬─────────┐   │
+             │ Yes │ No      │   │
+             ▼     ▼         │   │
+          Profile  Configured│   │
+          rule     rule      │   │
+          chain    chain     │   │
+        └─────────────────────┘
+               │
+               ▼
+        Forward to input node
+        of target rule chain
+```
+
+---
+
+## Output connections
+
+The output connections of this node are determined by the **Output** nodes in the target rule chain. The calling rule chain resumes from those outputs.
+
+---
+
+## Usage notes
+
+- Use this node to decompose complex logic into reusable sub-chains.
+- Combined with **Forward to originator's default rule chain**, a single node can dispatch different device types to their profile-specific rule chains without branching.
+- The **Output** node in a sub-chain returns control to the node that called it via the **Rule chain** node.

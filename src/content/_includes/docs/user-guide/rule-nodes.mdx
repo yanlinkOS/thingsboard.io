@@ -53,7 +53,7 @@ produce `True`/`False` outputs for boolean evaluations, or named connections for
 | **Entity type filter** | Passes or blocks messages based on the originator entity type |
 | **Entity type switch** | Routes to a connection named after the originator entity type |
 | **GPS geofencing filter** | Routes based on whether GPS coordinates fall inside a configured geofence |
-| **Message type filter** | Passes or blocks messages based on the message type |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/filter/message-type-filter">Message type filter</DocLink>** | Passes or blocks messages based on the message type |
 | **Message type switch** | Routes to a connection named after the message type |
 | **Script** | Routes using a boolean TBEL/JS function — `True` or `False` output |
 | **Switch** | Routes to one or more connections returned by a TBEL/JS function |
@@ -71,7 +71,7 @@ them into message metadata for use by downstream nodes.
 | **Customer attributes** | Adds server-side attributes or latest telemetry from the originator's customer |
 | **Customer details** | Adds customer details (name, email, address, etc.) from the originator's customer |
 | **Fetch device credentials** | Adds device credential type and value of the originator device |
-| **Originator attributes** | Adds client, shared, and server attributes and/or latest telemetry from the originator |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/enrichment/originator-attributes">Originator attributes</DocLink>** | Adds client, shared, and server attributes and/or latest telemetry from the originator |
 | **Originator fields** | Adds entity details (name, label, profile, etc.) from the originator |
 | **Originator telemetry** | Adds historical time series from the originator within a time interval, with optional aggregation |
 | **Related device attributes** | Adds attributes and/or latest telemetry from a related device found via configurable relation query |
@@ -93,7 +93,7 @@ Modify the content, structure, or originator of messages.
 | **Delete key-value pairs** | Removes specified keys from message data or metadata |
 | **JSON path** | Extracts a portion of message data using a JSONPath expression and replaces the full payload |
 | **Rename keys** | Renames keys in message data or metadata according to a configured mapping |
-| **Script** | Executes a TBEL/JS function to transform data, metadata, and type; supports multiple output messages |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/transformation/script">Script</DocLink>** | Executes a TBEL/JS function to transform data, metadata, and type; supports multiple output messages |
 | **Split array msg** | Splits a JSON array payload into individual messages, one per array element |
 | **To email** | Prepares a message for email dispatch using configurable sender, recipients, subject, and body templates |
 | **Duplicate to group** <PEOnly /> | Duplicates the message to every entity in a specified entity group |
@@ -112,7 +112,7 @@ system state.
 | **Calculated fields** | Triggers calculated field processing for incoming data without persisting the original to the database |
 | **Clear alarm** | Clears active alarms for the originator |
 | **Copy to view** | Replicates attribute changes from devices/assets to their associated entity views |
-| **Create alarm** | Creates a new alarm or updates an existing active alarm for the originator |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/action/create-alarm">Create alarm</DocLink>** | Creates a new alarm or updates an existing active alarm for the originator |
 | **Create relation** | Creates a relation between the originator and a configured target entity |
 | **Delete attributes** | Deletes specified attributes from the originator |
 | **Delete relation** | Removes a relation from the originator to a configured entity |
@@ -157,7 +157,7 @@ Publish data to third-party services and external systems.
 | **Kafka** | Publishes message data to an Apache Kafka topic |
 | **MQTT** | Publishes message data to an external MQTT broker |
 | **RabbitMQ** | Publishes message data to a RabbitMQ exchange |
-| **REST API call** | Sends an HTTP request to an external endpoint; returns the response as outgoing message data |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/external/rest-api-call">REST API call</DocLink>** | Sends an HTTP request to an external endpoint; returns the response as outgoing message data |
 | **Send email** | Sends an email via SMTP (supports TLS and proxy configuration) |
 | **Send notification** | Sends a notification via the notification center using a configured template |
 | **Send SMS** | Sends SMS via AWS SNS, Twilio, or SMPP provider |
@@ -175,7 +175,7 @@ Control how messages move between rule chains and queues.
 |------|-------------|
 | **Acknowledge** | Acknowledges the message in the queue and forwards it to the next nodes |
 | **Checkpoint** | Transfers the message to a specified queue for separate or sequential processing |
-| **Rule chain** | Forwards the message to a configured rule chain |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/flow/rule-chain">Rule chain</DocLink>** | Forwards the message to a configured rule chain |
 | **Output** | Returns the processing result from a sub-chain back to the calling Rule Chain node |
 
 ---
@@ -191,6 +191,6 @@ Compute statistical metrics and aggregations on data streams or groups of entiti
 | Node | Description |
 |------|-------------|
 | **Aggregate latest** | Periodically aggregates attributes or latest telemetry from child entities for a set of parent entities |
-| **Aggregate stream** | Computes MIN, MAX, SUM, AVG, COUNT, or UNIQUE from an incoming data stream |
+| **<DocLink product={props.product} path="reference/rule-engine/nodes/analytics/aggregate-stream">Aggregate stream</DocLink>** | Computes MIN, MAX, SUM, AVG, COUNT, or UNIQUE from an incoming data stream |
 | **Alarms count** | Counts alarms as each new alarm message arrives |
 | **Alarms count (deprecated)** | Periodically counts alarms for a selected set of entities |

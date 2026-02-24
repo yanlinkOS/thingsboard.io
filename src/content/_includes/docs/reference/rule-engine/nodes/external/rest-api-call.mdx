@@ -1,0 +1,88 @@
+import DocLink from '@components/DocLink.astro';
+import { Aside } from '@astrojs/starlight/components';
+
+Sends an HTTP request to an external endpoint and routes the response back as the outgoing message. Supports URL and header templating, multiple HTTP methods, configurable credentials, and optional proxy.
+
+---
+
+## Configuration
+
+### Request
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Endpoint URL pattern** | Yes | Full URL of the external endpoint. Supports `${metadata.key}` and `${data.key}` substitution. |
+| **Request method** | Yes | `GET`, `POST`, `PUT`, `PATCH`, or `DELETE` |
+| **Headers** | No | Key-value pairs sent as HTTP headers. Values support `${metadata.key}` substitution. |
+| **Parse response to plain text** | No | Store the response body as a plain string instead of parsing it as JSON |
+| **Ignore request body** | No | Send a request without a body (useful for `GET`/`DELETE`) |
+| **Read timeout (ms)** | No | Maximum time to wait for a response before failing (default: no timeout) |
+| **Max parallel requests** | No | Maximum concurrent in-flight requests to this node (default: unlimited) |
+
+### Credentials
+
+| Type | Fields |
+|------|--------|
+| **Anonymous** | No credentials sent |
+| **Basic** | Username and password |
+| **PEM Certificate** | Client certificate, private key, and CA certificate for mutual TLS |
+
+### Proxy
+
+Configure an optional HTTP, HTTPS, or SOCKS proxy. Supports proxy username/password authentication. Leave empty to use system proxy settings (if any).
+
+---
+
+## Output message
+
+### On success (2xx response)
+
+The outgoing message data is replaced by the response body. The following keys are added to metadata:
+
+| Key | Value |
+|-----|-------|
+| `status` | HTTP status text (e.g. `OK`) |
+| `statusCode` | HTTP status code (e.g. `200`) |
+| `statusReason` | Full status reason phrase |
+| *(response headers)* | Each response header added as a metadata key |
+
+### On failure (non-2xx or connection error)
+
+The message data is unchanged. The following keys are added to metadata:
+
+| Key | Value |
+|-----|-------|
+| `error` | Error message or HTTP status description |
+| `error_body` | Response body from the server (if any) |
+
+---
+
+## Output connections
+
+| Connection | Condition |
+|------------|-----------|
+| `Success` | HTTP 2xx response received |
+| `Failure` | Non-2xx response, connection error, or unexpected exception |
+
+---
+
+## Example — Unlock a smart lock
+
+**Goal:** send a `POST` command to unlock a door, using the device ID as part of the URL.
+
+**Configuration:**
+- **URL:** `https://lock-api.example.com/devices/${metadata.deviceId}/unlock`
+- **Method:** `POST`
+- **Credentials:** Basic (`admin` / `secret`)
+- **Headers:** `Content-Type: application/json`
+
+**Incoming message metadata:** `{ "deviceId": "abc-123" }`
+
+**Request sent:** `POST https://lock-api.example.com/devices/abc-123/unlock`
+
+**Response:** `200 OK`, body = `{"status": "unlocked"}`
+
+**Outgoing message:**
+- **Data:** `{"status": "unlocked"}`
+- **Metadata:** original metadata + `statusCode=200`, `status=OK`
+- **Routed via:** `Success`

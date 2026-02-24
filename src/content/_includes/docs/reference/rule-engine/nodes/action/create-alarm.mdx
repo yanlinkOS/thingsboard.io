@@ -1,0 +1,90 @@
+import DocLink from '@components/DocLink.astro';
+import { Aside } from '@astrojs/starlight/components';
+
+Creates a new alarm or updates an existing active alarm for the message originator. Outputs `Created` or `Updated` depending on whether an active alarm of the same type already existed.
+
+---
+
+## Configuration
+
+The node operates in one of two modes:
+
+| Mode | Description |
+|------|-------------|
+| **Node configuration** (default) | Alarm type, severity, and other fields are specified in the node configuration, optionally using `${metadata.key}` templates |
+| **Use message alarm data** | The incoming message is parsed as a ThingsBoard Alarm object; all alarm fields are read directly from the message payload |
+
+### Node configuration fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Alarm type** | Yes | String that identifies the alarm class. Supports `${metadata.key}` substitution. |
+| **Alarm severity** | Yes | `CRITICAL`, `MAJOR`, `MINOR`, `WARNING`, or `INDETERMINATE` |
+| **Dynamic severity** | No | When enabled, severity is read from `metadata.severity` of the incoming message instead of the static configured value |
+| **Propagate** | No | Propagate the alarm to related entities via configured relation types |
+| **Propagate to owner** | No | Propagate to the direct owner (customer or tenant) |
+| **Propagate to owner hierarchy** | No | Propagate to all ancestors in the ownership hierarchy up to the tenant |
+| **Propagate to tenant** | No | Always propagate to the tenant, regardless of hierarchy |
+| **Propagate relation types** | No | List of relation type names used for propagation (e.g. `Contains`, `Manages`) |
+| **Alarm details script** | No | TBEL/JS function that returns a JSON object with additional alarm details. Receives `msg`, `metadata`, `msgType`, and `metadata.prevAlarmDetails` (set to the previous alarm's details JSON on updates). |
+
+---
+
+## Processing algorithm
+
+```plaintext
+  incoming message
+        │
+        ▼
+  Search for active alarm
+  of the same type on the originator
+        │
+  ┌─────┴──────┐
+  │ Not found  │  Found
+  ▼            ▼
+  Create      Update
+  new alarm   existing alarm
+  (ACTIVE_    (refresh endTs,
+  UNACK)      run details script)
+        │            │
+        ▼            ▼
+    Created      Updated
+```
+
+---
+
+## Outgoing message
+
+On both `Created` and `Updated`, the outgoing message payload is the full Alarm object in ThingsBoard format, and the message type is set to `ALARM`.
+
+---
+
+## Output connections
+
+| Connection | Condition |
+|------------|-----------|
+| `Created` | No active alarm of the same type existed — a new alarm was created |
+| `Updated` | An active alarm of the same type already existed — it was updated |
+| `Failure` | Script threw an exception or an unexpected error occurred |
+
+---
+
+## Examples
+
+### Example 1 — New alarm created
+
+**Configuration:** Alarm type = `HighTemperature`, Severity = `MAJOR`.
+
+**Incoming message:** `POST_TELEMETRY_REQUEST`, data = `{"temperature": 45.5}`, no active alarm on originator.
+
+**Result:** alarm created with status `ACTIVE_UNACK`, severity `MAJOR`. Outgoing message routed via `Created` with the alarm object as payload.
+
+---
+
+### Example 2 — Existing alarm updated
+
+**Configuration:** same as Example 1. Details script adds `{"currentTemp": msg.temperature}`.
+
+**Incoming message:** `POST_TELEMETRY_REQUEST`, data = `{"temperature": 47.2}`, active `HighTemperature` alarm already exists.
+
+**Result:** alarm `endTs` refreshed, details updated to `{"currentTemp": 47.2}`. Outgoing message routed via `Updated`.

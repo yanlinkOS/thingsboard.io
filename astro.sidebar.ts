@@ -259,6 +259,47 @@ const referenceItems = (prefix: string) => [
 		collapsed: true,
 		items: [
 			`${prefix}/rule-engine/message-types`,
+			{
+				label: 'Rule Nodes',
+				collapsed: true,
+				items: [
+					{
+						label: 'Filter',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/filter/message-type-filter`],
+					},
+					{
+						label: 'Enrichment',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/enrichment/originator-attributes`],
+					},
+					{
+						label: 'Transformation',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/transformation/script`],
+					},
+					{
+						label: 'Action',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/action/create-alarm`],
+					},
+					{
+						label: 'External',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/external/rest-api-call`],
+					},
+					{
+						label: 'Flow',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/flow/rule-chain`],
+					},
+					{
+						label: 'Analytics',
+						collapsed: true,
+						items: [`${prefix}/rule-engine/nodes/analytics/aggregate-stream`],
+					},
+				],
+			},
 		],
 	},
 ];

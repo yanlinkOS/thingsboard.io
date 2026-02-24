@@ -1,0 +1,45 @@
+import DocLink from '@components/DocLink.astro';
+
+Checks the incoming message type against a configured set of message types and routes it via `True` or `False`.
+
+See <DocLink product={props.product} path="reference/rule-engine/message-types">Message Types</DocLink> for the list of built-in types.
+
+---
+
+## Configuration
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Select message types** | Yes | One or more message types to match against. The message is routed `True` if its type is in this set. |
+
+---
+
+## Output connections
+
+| Connection | Condition |
+|------------|-----------|
+| `True` | Incoming message type matches any configured type |
+| `False` | Incoming message type does not match any configured type |
+| `Failure` | Unexpected error during processing |
+
+---
+
+## Examples
+
+### Example 1 — Match → `True`
+
+**Configuration:** types = `POST_TELEMETRY_REQUEST`, `POST_ATTRIBUTES_REQUEST`
+
+**Incoming message type:** `POST_TELEMETRY_REQUEST`
+
+**Result:** routed via `True`.
+
+---
+
+### Example 2 — No match → `False`
+
+**Configuration:** types = `POST_ATTRIBUTES_REQUEST`, `TO_SERVER_RPC_REQUEST`
+
+**Incoming message type:** `POST_TELEMETRY_REQUEST`
+
+**Result:** routed via `False`.

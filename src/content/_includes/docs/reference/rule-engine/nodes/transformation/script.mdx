@@ -1,0 +1,117 @@
+import DocLink from '@components/DocLink.astro';
+import { Aside } from '@astrojs/starlight/components';
+
+Executes a user-defined TBEL or JavaScript function to transform message payload, metadata, or type. Can also produce multiple output messages from a single input (fan-out).
+
+---
+
+## Script function
+
+The function receives three parameters and must return a single object or an array of objects:
+
+```js
+function transform(msg, metadata, msgType) {
+    // msg      — parsed JSON payload (object)
+    // metadata — key-value string pairs
+    // msgType  — message type string
+
+    // Single output:
+    return { msg: msg, metadata: metadata, msgType: msgType };
+
+    // Fan-out (multiple outputs):
+    // return [
+    //   { msg: msg1, metadata: metadata1, msgType: 'TYPE_A' },
+    //   { msg: msg2, metadata: metadata2, msgType: 'TYPE_B' },
+    // ];
+}
+```
+
+<Aside type="caution">
+  If the function throws an exception, the message is routed via `Failure`. Always validate input fields before accessing them.
+</Aside>
+
+---
+
+## Configuration
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Script language** | Yes | `TBEL` (recommended) or `JavaScript` |
+| **Script body** | Yes | The transformation function body |
+
+---
+
+## Output connections
+
+| Connection | Condition |
+|------------|-----------|
+| `Success` | Function executed without error; one outgoing message per returned object |
+| `Failure` | Script threw an exception or an unexpected error occurred |
+
+---
+
+## Examples
+
+### Example 1 — Fan-out: one message per metric
+
+**Goal:** split a `metrics` array into individual `API_REQUEST` messages.
+
+**Input message:**
+```json
+{
+  "metrics": [
+    { "key": "temperature", "value": 22.5 },
+    { "key": "humidity",    "value": 60.1 }
+  ]
+}
+```
+
+**Script (TBEL):**
+```js
+function transform(msg, metadata, msgType) {
+    var result = [];
+    foreach (var m : msg.metrics) {
+        result.add({
+            msg:      { key: m.key, value: m.value },
+            metadata: metadata,
+            msgType:  'API_REQUEST'
+        });
+    }
+    return result;
+}
+```
+
+**Result:** two `API_REQUEST` messages emitted — one for `temperature`, one for `humidity`.
+
+---
+
+### Example 2 — Parse a REST API response into telemetry format
+
+**Goal:** convert a custom `observations` array from a REST response into `POST_TELEMETRY_REQUEST` format.
+
+**Input message data:**
+```json
+{
+  "observations": [
+    { "time": "2024-01-15T10:00:00Z", "temp": 21.0 },
+    { "time": "2024-01-15T11:00:00Z", "temp": 21.8 }
+  ]
+}
+```
+
+**Script (TBEL):**
+```js
+function transform(msg, metadata, msgType) {
+    var result = [];
+    foreach (var o : msg.observations) {
+        result.add({
+            msg:      { ts: new Date(o.time).getTime(), values: { temperature: o.temp } },
+            metadata: metadata,
+            msgType:  'POST_TELEMETRY_REQUEST'
+        });
+    }
+    return result;
+}
+```
+
+**Result:** two `POST_TELEMETRY_REQUEST` messages, each with a Unix timestamp and temperature value.
