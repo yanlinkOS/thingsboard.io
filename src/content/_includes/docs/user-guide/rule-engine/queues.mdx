@@ -8,9 +8,10 @@ polls its assigned queues and processes messages in batches.
 ThingsBoard supports two queue backends:
 
 - **Kafka** — distributed, durable, and production-ready. Messages survive service restarts.
-  Best for high throughput and fault-tolerant deployments.
-- **In-Memory** — lightweight and fast. Messages are lost on restart. Best for development
-  or small-scale environments.
+  Can be used in monolith deployments; **required** in cluster deployments.
+- **In-Memory** — lightweight and fast. Messages are lost on restart. Available in
+  **monolith deployments only** — not supported in cluster mode. Suitable for development
+  or small-scale single-node environments.
 
 ```plaintext
   ┌──────────────┐   poll    ┌──────────────────┐   submit   ┌──────────────────┐
@@ -65,6 +66,23 @@ The submit strategy controls how messages from a polled batch are submitted to r
   Device A: msg2 ──▶ [processing]   ← submitted before msg1 is ack'd
   Device B: msg1 ──▶ [processing]
 ```
+
+<Aside type="caution">
+  **Burst** and **Batch** do not guarantee message order within a single originator.
+  Many rule nodes perform async writes — for example, **Save Time Series** dispatches
+  multiple commands to the Cassandra driver concurrently and the write confirmations can
+  arrive out of submission order. If two messages from the same device arrive within
+  milliseconds of each other, the later value may be stored before the earlier one,
+  producing an incorrect latest-value record.
+
+  Use a sequential strategy whenever preserved ordering matters:
+
+  | Strategy | Ordering scope | Speed |
+  |----------|---------------|-------|
+  | **Sequential by originator** | Per entity — entities still process in parallel | Fast |
+  | **Sequential by tenant** | Per tenant — all entities for a tenant serialized | Slow |
+  | **Sequential** | Global — one message at a time across all entities | Very slow — rarely used |
+</Aside>
 
 ## Retry (Processing) Strategies
 
@@ -132,6 +150,20 @@ Three queues are pre-configured out of the box:
 
 <Aside type="note">
   The **Main** queue settings can be adjusted, but it cannot be renamed or deleted.
+</Aside>
+
+<Aside type="caution">
+  **HighPriority** retries failed and timed-out messages indefinitely (default configuration).
+  If a rule chain routed to this queue contains a logical error that causes every message to
+  fail, processing of that rule chain will stall completely — new messages queue up but are
+  never acknowledged.
+
+  To detect this, monitor the
+  <DocLink product={props.product} path="user-guide/rule-engine/monitoring#statistics">Rule Engine Statistics</DocLink>
+  dashboard (rising permanent-failure count or flat success line) or watch the Kafka topic
+  lag for the HighPriority queue. Once detected, fix the logical error in the rule chain and
+  save it — the updated chain will be applied to the next retry attempt, unblocking
+  processing.
 </Aside>
 
 ## Create a Queue
