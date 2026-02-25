@@ -19,6 +19,7 @@
     "lint:linkcheck:nobuild": "node --experimental-transform-types ./scripts/lint-linkcheck.ts",
     "lint:slugcheck": "node ./scripts/lint-slugcheck.mjs",
     "lint:eslint": "eslint .",
+    "lint:steps": "node --experimental-transform-types ./scripts/lint-steps.ts",
     "netlify:build": "pnpm ${NETLIFY_BUILD_SCRIPT:-build}",
     "lunaria:build": "node --experimental-transform-types ./scripts/lunaria.mts"
   },

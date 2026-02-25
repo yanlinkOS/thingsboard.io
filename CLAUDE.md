@@ -498,6 +498,16 @@ The CE page would be identical but pass `product={Products.CE}`.
 
 **Rules for _includes:**
 - Never use markdown tables inside `{...}` JSX expressions — use HTML `<table>` instead (MDX parses markdown only inside JSX angle-bracket tags, not curly braces)
+- Never use `<Steps>` with a markdown numbered list inside `{...}` JSX expressions (e.g. `{condition && (<>...<Steps>1. item</Steps>...</>)}`). Inside `{...}`, markdown lists are not compiled to `<ol>` and `<Steps>` receives no child elements, causing a build error. Use explicit `<ol>/<li>` HTML instead:
+  ```mdx
+  <Steps>
+    <ol>
+      <li>First step.</li>
+      <li>Second step.</li>
+    </ol>
+  </Steps>
+  ```
+  Outside of `{...}` JSX expressions (top-level or inside `<ComponentTag>` children), `<Steps>` with a markdown numbered list works normally.
 - Use `props.product` (not `Astro.props`) inside include files since they receive props as a component
 - Conditional blocks: `{props.product === Products.PE && (<>...</>)}` or ternary `{props.product === Products.CE ? <A/> : <B/>}`
 
