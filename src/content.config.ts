@@ -261,7 +261,10 @@ export const collections = {
 				const result = await fetch('https://astro.badg.es/api/v1/top-contributors.json').then(
 					(res) => res.json()
 				);
-				return result.data.map((contributor: any) => ({ id: contributor.username, ...contributor }));
+				return result.data.map((contributor: any) => ({
+					id: contributor.username,
+					...contributor,
+				}));
 			} catch {
 				return [];
 			}

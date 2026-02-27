@@ -60,8 +60,7 @@ export function rehypeMdxIncludeHeadings(): Plugin<[], Root> {
 			for (const statement of estree.body) {
 				if (statement.type !== 'ImportDeclaration') continue;
 				const source = statement.source?.value;
-				if (!source || !source.startsWith(INCLUDES_ALIAS) || !source.endsWith('.mdx'))
-					continue;
+				if (!source || !source.startsWith(INCLUDES_ALIAS) || !source.endsWith('.mdx')) continue;
 
 				for (const spec of statement.specifiers) {
 					if (spec.type === 'ImportDefaultSpecifier') {
