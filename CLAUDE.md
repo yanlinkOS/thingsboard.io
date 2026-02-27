@@ -141,7 +141,7 @@ interface Props {
 }
 ```
 
-**Suffix mapping:** CE → `-ce`, PE → `-pe`, PASS → `-paas`, PASS_EU → `-paas-eu`, EDGE → `-edge`, EDGE_PE → `-edge-pe`, GW → `-gw`, TRENDZ → `-trendz`, MOBILE → `-mobile`, MOBILE_PE → `-mobile-pe`, TBMQ → `-tbmq`, TBMQ_PE → `-tbmq-pe`, LICENSE → `-license`.
+**Suffix mapping:** CE → `-ce`, PE → `-pe`, PAAS → `-paas`, PAAS_EU → `-paas-eu`, EDGE → `-edge`, EDGE_PE → `-edge-pe`, GW → `-gw`, TRENDZ → `-trendz`, MOBILE → `-mobile`, MOBILE_PE → `-mobile-pe`, TBMQ → `-tbmq`, TBMQ_PE → `-tbmq-pe`, LICENSE → `-license`.
 
 **Example:** `src="/src/assets/images/guide/step-1.png"` with `product=PE` resolves to `/src/assets/images/guide/step-1-pe.png`.
 
@@ -599,6 +599,7 @@ The CE page would be identical but pass `product={Products.CE}`.
 
 **Rules for _includes:**
 - Never use markdown tables inside `{...}` JSX expressions — use HTML `<table>` instead (MDX parses markdown only inside JSX angle-bracket tags, not curly braces)
+- Never use fenced code blocks (`` ``` ``) inside `{...}` JSX expressions — `${...}` inside the block is parsed as a JSX expression and the build fails. Use `<pre><code>{'content with ${literal} dollar braces'}</code></pre>` instead, where the content is a JS string literal so `${...}` is treated as plain text
 - Never use `<Steps>` with a markdown numbered list inside `{...}` JSX expressions (e.g. `{condition && (<>...<Steps>1. item</Steps>...</>)}`). Inside `{...}`, markdown lists are not compiled to `<ol>` and `<Steps>` receives no child elements, causing a build error. Use explicit `<ol>/<li>` HTML instead:
   ```mdx
   <Steps>
