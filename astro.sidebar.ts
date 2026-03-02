@@ -113,7 +113,12 @@ const guideItems = (prefix: string) => [
 	{
 		label: 'Integrations',
 		collapsed: true,
-		items: [`${prefix}/integrations`, `${prefix}/integrations-comparison`],
+		items: [
+			`${prefix}/integrations`,
+			`${prefix}/integrations/chirpstack`,
+			`${prefix}/integrations/aws-iot`,
+			`${prefix}/integrations-comparison`,
+		],
 	},
 	{
 		label: 'White-labeling',
@@ -449,15 +454,15 @@ const mainSidebarItems = (prefix: string, extraRecipeItems: SidebarConfig = []):
 		items: guideItems(`${prefix}/user-guide`),
 	},
 	{
-		label: 'Installation',
-		collapsed: true,
-		items: installationItems(prefix),
-	},
-	{
 		label: 'Recipes',
 		collapsed: true,
 		translations: { uk: 'Рецепти' },
 		items: [...recipeItems(`${prefix}/recipes`), ...extraRecipeItems],
+	},
+	{
+		label: 'Installation',
+		collapsed: true,
+		items: installationItems(prefix),
 	},
 	{
 		label: 'Reference',
@@ -579,7 +584,13 @@ export const trendzSidebar: SidebarConfig = [
 	{
 		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
-		items: ['docs/trendz'],
+		items: [
+			'docs/trendz',
+			{
+				label: 'Key concepts',
+				items: ['docs/trendz/concepts/business-entities'],
+			},
+		],
 	},
 ];
 
