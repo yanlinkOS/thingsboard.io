@@ -230,67 +230,6 @@ Most integrations (MQTT, AWS IoT, etc.) push downlinks asynchronously — each R
 
 Some integrations (SigFox, generic HTTP) can only push downlinks **synchronously** in reply to an uplink request. In this case, the last downlink message is queued until the next uplink arrives for that device.
 
-### Example
-
-Suppose temperature and humidity upload frequency attributes are updated via the REST API, and you want to push the update to an external MQTT broker. You also want to include the `firmwareVersion` attribute. The topic should contain the device name.
-
-<Tabs>
-<TabItem label="TBEL (Recommended)">
-```js maxLines=20 collapsible
-// Encode downlink data from incoming Rule Engine message
-// msg - JSON message payload
-// msgType - message type, e.g. 'ATTRIBUTES_UPDATED'
-// metadata - key-value pairs with additional data
-// integrationMetadata - integration-specific fields
-
-var data = {};
-
-data.tempFreq = msg.temperatureUploadFrequency;
-data.humFreq = msg.humidityUploadFrequency;
-data.firmwareVersion = metadata['ss_firmwareVersion'];
-
-var result = {
-    contentType: "JSON",
-    data: JSON.stringify(data),
-    metadata: {
-        topic: metadata['deviceType'] + '/' + metadata['deviceName'] + '/upload'
-    }
-};
-
-return result;
-```
-</TabItem>
-<TabItem label="JavaScript">
-```js maxLines=20 collapsible
-// Encode downlink data from incoming Rule Engine message
-// msg - JSON message payload
-// msgType - message type, e.g. 'ATTRIBUTES_UPDATED'
-// metadata - key-value pairs with additional data
-// integrationMetadata - integration-specific fields
-
-var data = {};
-
-data.tempFreq = msg.temperatureUploadFrequency;
-data.humFreq = msg.humidityUploadFrequency;
-data.firmwareVersion = metadata['ss_firmwareVersion'];
-
-var result = {
-    contentType: "JSON",
-    data: JSON.stringify(data),
-    metadata: {
-        topic: metadata['deviceType'] + '/' + metadata['deviceName'] + '/upload'
-    }
-};
-
-return result;
-```
-</TabItem>
-</Tabs>
-
-To invoke downlink processing, configure a Rule Chain with an **Integration Downlink** node. Connect it to handle the relevant message types (e.g. "Attributes Updated"):
-
-<DocImage src="/src/assets/images/user-guide/integrations/downlink-rule-chain-example-pe.png" alt="Downlink rule chain example" />
-
 ## Converters library
 
 The Converters Library is a built-in collection of ready-to-use uplink decoder functions for over 100 devices, supporting six popular LoRaWAN network servers. It significantly simplifies integration setup.
@@ -366,7 +305,7 @@ Both systems serve different use cases and complement each other.
 
 | Integration | Guide |
 |---|---|
-| HTTP | <DocLink product={props.product} path="TODO">HTTP Integration</DocLink> |
+| HTTP | <DocLink product={props.product} path="user-guide/integrations/http">HTTP Integration</DocLink> |
 | MQTT | <DocLink product={props.product} path="TODO">MQTT Integration</DocLink> |
 | CoAP | <DocLink product={props.product} path="TODO">CoAP Integration</DocLink> |
 | OPC-UA | <DocLink product={props.product} path="TODO">OPC-UA Integration</DocLink> |

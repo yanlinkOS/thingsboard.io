@@ -115,9 +115,9 @@ const guideItems = (prefix: string) => [
 		collapsed: true,
 		items: [
 			`${prefix}/integrations`,
+			`${prefix}/integrations/http`,
 			`${prefix}/integrations/chirpstack`,
 			`${prefix}/integrations/aws-iot`,
-			`${prefix}/integrations-comparison`,
 		],
 	},
 	{
