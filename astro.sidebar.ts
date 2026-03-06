@@ -363,19 +363,23 @@ const apisAndSdksItems = (prefix: string) => [
 	{
 		label: 'Server-side APIs',
 		collapsed: true,
-		badge: { text: 'Soon', class: 'tb-badge' },
-		items: [],
+		items: [`${prefix}/reference/rest-api`],
 	},
 	{
 		label: 'Server-side REST Clients',
 		collapsed: true,
-		badge: { text: 'Soon', class: 'tb-badge' },
-		items: [],
+		items: [
+			`${prefix}/reference/java-rest-client`,
+			`${prefix}/reference/python-rest-client`,
+		],
 	},
 	{
 		label: 'Mobile',
 		collapsed: true,
-		items: [`${prefix}/reference/dart-client`],
+		items: [
+			`${prefix}/reference/dart-client`,
+			`${prefix}/reference/mobile-app`,
+		],
 	},
 ];
 
