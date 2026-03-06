@@ -15,6 +15,9 @@ pnpm install
 # Development
 pnpm dev              # Start dev server
 pnpm build            # Production build
+pnpm build:fast       # Fast build (skips OG image generation) — use this for verification
+
+**Build policy:** Before running any build, always ask the user: "Run `pnpm build:fast` to verify, or skip?"
 pnpm preview          # Preview production build
 
 # Quality checks
