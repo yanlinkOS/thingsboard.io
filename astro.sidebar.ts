@@ -938,6 +938,51 @@ export const licenseSidebar: SidebarConfig = [
 	},
 ];
 
+/** Maps tab group label → URL to navigate when the tab is clicked (optional per-group). */
+export type SidebarTabLinks = Partial<Record<string, string>>;
+export const opensourceSidebarTabLinks: SidebarTabLinks = {
+	'Getting Started': '/docs/',
+	'Installation': '/docs/installation/',
+	'APIs & SDKs': '/docs/reference/apis-and-sdks/',
+};
+export const peSidebarTabLinks: SidebarTabLinks = {
+	'Getting Started': '/docs/pe/',
+	'Installation': '/docs/pe/installation/',
+	'APIs & SDKs': '/docs/pe/reference/apis-and-sdks/',
+};
+
+export const paasSidebarTabLinks: SidebarTabLinks = {};
+export const paasEuSidebarTabLinks: SidebarTabLinks = {};
+export const edgeSidebarTabLinks: SidebarTabLinks = {};
+export const edgePeSidebarTabLinks: SidebarTabLinks = {};
+export const gwSidebarTabLinks: SidebarTabLinks = {};
+export const tbmqSidebarTabLinks: SidebarTabLinks = {};
+export const tbmqPeSidebarTabLinks: SidebarTabLinks = {};
+export const mobileSidebarTabLinks: SidebarTabLinks = {};
+export const mobilePeSidebarTabLinks: SidebarTabLinks = {};
+export const trendzSidebarTabLinks: SidebarTabLinks = {};
+export const licenseSidebarTabLinks: SidebarTabLinks = {};
+
+/**
+ * Maps URL prefix → tab navigation links for that product's sidebar.
+ * Order matters: more specific prefixes must come before less specific ones.
+ */
+export const sidebarTabLinksByPrefix: ReadonlyArray<[string, SidebarTabLinks]> = [
+	['/docs/pe/', peSidebarTabLinks],
+	['/docs/paas/eu/', paasEuSidebarTabLinks],
+	['/docs/paas/', paasSidebarTabLinks],
+	['/docs/edge/pe/', edgePeSidebarTabLinks],
+	['/docs/edge/', edgeSidebarTabLinks],
+	['/docs/mqtt-broker/pe/', tbmqPeSidebarTabLinks],
+	['/docs/mqtt-broker/', tbmqSidebarTabLinks],
+	['/docs/mobile/pe/', mobilePeSidebarTabLinks],
+	['/docs/mobile/', mobileSidebarTabLinks],
+	['/docs/trendz/', trendzSidebarTabLinks],
+	['/docs/iot-gateway/', gwSidebarTabLinks],
+	['/docs/license-server/', licenseSidebarTabLinks],
+	['/docs/', opensourceSidebarTabLinks],
+];
+
 /**
  * Combined sidebar configuration.
  * Route middleware in routeData.ts filters this to show only
