@@ -428,6 +428,39 @@ const { platformQuery = '' } = Astro.props;
 		}
 	}
 
+	// Mobile app pages — non-transparent header, but hide divider + style buttons
+	#mobile-app,
+	#mobile-pe {
+		header.header {
+			.divider {
+				display: none;
+			}
+
+			.n-button {
+				&.price {
+					border: 1px solid $color-border;
+					color: $color-text-primary;
+					background-color: transparent;
+
+					&:hover {
+						border: 2px solid $color-text-primary;
+					}
+				}
+
+				&.try {
+					background-color: $color-primary;
+					color: $color-white;
+
+					&:hover {
+						color: $color-primary;
+						box-shadow: none;
+						background-color: $color-white;
+					}
+				}
+			}
+		}
+	}
+
 	// Scrolled header state (flip-nav)
 	#home,
 	#thingsboard-paas,
@@ -545,6 +578,8 @@ const { platformQuery = '' } = Astro.props;
 	#partners,
 	#thingsboard-edge,
 	#mqtt-broker,
+	#mobile-app,
+	#mobile-pe,
 	#pricing,
 	#use-cases,
 	#docs,
