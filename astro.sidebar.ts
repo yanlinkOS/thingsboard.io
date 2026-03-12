@@ -3,6 +3,7 @@ import type { StarlightUserConfig } from '@astrojs/starlight/types';
 type SidebarConfig = NonNullable<StarlightUserConfig['sidebar']>;
 
 const guideItems = (prefix: string, { isPE = false } = {}) => [
+	{ label: 'Guides', slug: prefix },
 	{
 		label: 'Digital Twins',
 		collapsed: true,
@@ -427,6 +428,7 @@ const apisAndSdksItems = (prefix: string) => [
 const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) => {
 	const basePrefix = prefix.replace('/reference', '');
 	return [
+	{ label: 'Reference', slug: `${prefix}` },
 	{
 		label: 'Architecture',
 		collapsed: true,
@@ -456,37 +458,6 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 			`${prefix}/configuration/vc-executor-config`,
 			`${prefix}/configuration/js-executor-config`,
 			...extraConfigItems,
-		],
-	},
-	{
-		label: 'Widgets',
-		collapsed: true,
-		items: [
-			`${prefix}/widgets/widget-library`,
-			`${prefix}/widgets/chart-widget`,
-			`${prefix}/widgets/map-widgets`,
-			`${prefix}/widgets/entity-table-widget`,
-			`${prefix}/widgets/markdown-html-card`,
-		],
-	},
-	{
-		label: 'Notification System',
-		collapsed: true,
-		items: [
-			`${prefix}/notification-system/template-parameters`,
-			`${prefix}/notification-system/rule-triggers`,
-			`${basePrefix}/user-guide/ui/sms-provider-settings`,
-			`${basePrefix}/user-guide/ui/slack-settings`,
-			`${basePrefix}/user-guide/ui/microsoft-teams-settings`,
-		],
-	},
-	{
-		label: 'TBEL',
-		collapsed: true,
-		items: [
-			{ label: 'Overview', slug: `${basePrefix}/user-guide/tbel` },
-			`${basePrefix}/user-guide/tbel/language-guide`,
-			`${basePrefix}/user-guide/tbel/helper-functions`,
 		],
 	},
 	{
@@ -639,6 +610,38 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 					},
 				],
 			},
+		],
+	},
+	{
+		label: 'Notification System',
+		collapsed: true,
+		items: [
+			`${prefix}/notification-system/template-parameters`,
+			`${prefix}/notification-system/rule-triggers`,
+			`${basePrefix}/user-guide/ui/mail-settings`,
+			`${basePrefix}/user-guide/ui/sms-provider-settings`,
+			`${basePrefix}/user-guide/ui/slack-settings`,
+			`${basePrefix}/user-guide/ui/microsoft-teams-settings`,
+		],
+	},
+	{
+		label: 'TBEL',
+		collapsed: true,
+		items: [
+			{ label: 'Overview', slug: `${basePrefix}/user-guide/tbel` },
+			`${basePrefix}/user-guide/tbel/language-guide`,
+			`${basePrefix}/user-guide/tbel/helper-functions`,
+		],
+	},
+	{
+		label: 'Widgets',
+		collapsed: true,
+		items: [
+			`${prefix}/widgets/widget-library`,
+			`${prefix}/widgets/chart-widget`,
+			`${prefix}/widgets/map-widgets`,
+			`${prefix}/widgets/entity-table-widget`,
+			`${prefix}/widgets/markdown-html-card`,
 		],
 	},
 ];
@@ -980,13 +983,17 @@ export const licenseSidebar: SidebarConfig = [
 export type SidebarTabLinks = Partial<Record<string, string>>;
 export const opensourceSidebarTabLinks: SidebarTabLinks = {
 	'Getting Started': '/docs/',
+	'Guides': '/docs/user-guide/',
 	'Installation': '/docs/installation/',
 	'APIs & SDKs': '/docs/reference/apis-and-sdks/',
+	'Reference': '/docs/reference/',
 };
 export const peSidebarTabLinks: SidebarTabLinks = {
 	'Getting Started': '/docs/pe/',
+	'Guides': '/docs/pe/user-guide/',
 	'Installation': '/docs/pe/installation/',
 	'APIs & SDKs': '/docs/pe/reference/apis-and-sdks/',
+	'Reference': '/docs/pe/reference/',
 };
 
 export const paasSidebarTabLinks: SidebarTabLinks = {};
