@@ -770,9 +770,26 @@ export const peSidebar: SidebarConfig = mainSidebarItems('docs/pe', [
 /** Cloud (PaaS) documentation sidebar (pages at /docs/paas/) */
 export const paasSidebar: SidebarConfig = [
 	{
-		label: 'Getting Started NA',
+		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
-		items: ['docs/paas/getting-started'],
+		items: [
+			{
+				label: 'Welcome to IoT!',
+				translations: { uk: 'Новий проект' },
+				items: ['docs/paas/why-thingsboard', 'docs/paas/tutorial/getting-started'],
+			},
+			{
+				label: 'Key concepts',
+				translations: { uk: 'Новий проект' },
+				items: [
+					'docs/paas/concepts/multi-tenancy',
+					'docs/paas/concepts/digital-twin-model',
+					'docs/paas/concepts/data-processing',
+					'docs/paas/concepts/alarms-and-notifications',
+					'docs/paas/concepts/data-visualization',
+				],
+			},
+		],
 	},
 	{
 		label: 'Guides',
@@ -810,9 +827,26 @@ export const paasSidebar: SidebarConfig = [
 
 export const paasEuSidebar: SidebarConfig = [
 	{
-		label: 'Getting Started EU',
+		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
-		items: ['docs/paas/eu/getting-started'],
+		items: [
+			{
+				label: 'Welcome to IoT!',
+				translations: { uk: 'Новий проект' },
+				items: ['docs/paas/eu/why-thingsboard', 'docs/paas/eu/tutorial/getting-started'],
+			},
+			{
+				label: 'Key concepts',
+				translations: { uk: 'Новий проект' },
+				items: [
+					'docs/paas/eu/concepts/multi-tenancy',
+					'docs/paas/eu/concepts/digital-twin-model',
+					'docs/paas/eu/concepts/data-processing',
+					'docs/paas/eu/concepts/alarms-and-notifications',
+					'docs/paas/eu/concepts/data-visualization',
+				],
+			},
+		],
 	},
 	{
 		label: 'Guides',
