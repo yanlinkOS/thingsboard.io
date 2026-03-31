@@ -261,6 +261,16 @@ const isLong = entry.tagline.length + entry.text.reduce((s, p) => s + p.length, 
 		}
 	}
 
+	// ─── Read more — expanded state ───
+	.cf-card-body--clamped.cf-card-body--expanded {
+		max-height: none;
+		overflow: visible;
+
+		&::after {
+			display: none;
+		}
+	}
+
 	// ─── Case study pill ───
 	.cf-case-study-link {
 		display: inline-flex;
@@ -301,3 +311,24 @@ const isLong = entry.tagline.length + entry.text.reduce((s, p) => s + p.length, 
 		}
 	}
 </style>
+
+<script>
+	function initFeedbackCards() {
+		document.querySelectorAll<HTMLButtonElement>('.cf-read-more').forEach((btn) => {
+			if (btn.dataset.initialized) return;
+			btn.dataset.initialized = 'true';
+
+			btn.addEventListener('click', () => {
+				const card = btn.closest('.cf-card');
+				const body = card?.querySelector('.cf-card-body');
+				const textEl = btn.querySelector('.cf-read-more-text');
+				const expanded = body?.classList.toggle('cf-card-body--expanded');
+				btn.classList.toggle('cf-read-more--expanded', expanded);
+				if (textEl) textEl.textContent = expanded ? 'Read less' : 'Read more';
+			});
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', initFeedbackCards);
+	document.addEventListener('astro:page-load', initFeedbackCards);
+</script>
