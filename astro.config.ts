@@ -11,7 +11,6 @@ import { rehypeMdxIncludeHeadings } from './config/plugins/rehype-mdx-include-he
 import { rehypeTasklistEnhancer } from './config/plugins/rehype-tasklist-enhancer';
 
 import icon from 'astro-icon';
-import tailwind from '@astrojs/tailwind';
 import svgo from 'vite-plugin-svgo';
 import { fileURLToPath } from 'node:url';
 
@@ -94,7 +93,6 @@ export default defineConfig({
 	},
 	integrations: [
 		icon(),
-		tailwind({ applyBaseStyles: false }),
 		devServerFileWatcher([
 			'./config/**', // Custom plugins and integrations
 			'./astro.sidebar.ts', // Sidebar configuration file
