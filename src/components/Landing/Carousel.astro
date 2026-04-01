@@ -57,9 +57,9 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 9)}`;
 									<a href={item.href} class="carousel-link">
 										{item.linkLabel || 'Learn more'}
 										<span class="arrow-container">
-											<Icon name="fa-solid:chevron-right" class="arrow first" />
-											<Icon name="fa-solid:chevron-right" class="arrow second" />
-											<Icon name="fa-solid:chevron-right" class="arrow third" />
+											<Icon name="tabler:chevron-right" class="arrow first" />
+											<Icon name="tabler:chevron-right" class="arrow second" />
+											<Icon name="tabler:chevron-right" class="arrow third" />
 										</span>
 									</a>
 								</div>
@@ -74,7 +74,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 9)}`;
 										/>
 										<div class="overlay">
 											<div class="eye">
-												<Icon name="fa-regular:eye" class="icon" />
+												<Icon name="tabler:eye" class="icon" />
 												See more about {item.title}
 											</div>
 										</div>
@@ -269,7 +269,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 9)}`;
 		position: absolute;
 		top: 4px;
 		left: 0;
-		font-size: 13px;
+		font-size: 16px;
 		transition: transform $transition-base;
 		color: $color-primary;
 	}
