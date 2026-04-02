@@ -115,6 +115,12 @@
 		font-size: 13px;
 	}
 
+	@media (min-width: 72rem) {
+		html[data-has-sidebar] #cookie-banner {
+			left: var(--sl-sidebar-width);
+		}
+	}
+
 	@media (max-width: 600px) {
 		#cookie-banner {
 			flex-direction: column;

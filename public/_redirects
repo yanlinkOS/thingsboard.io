@@ -2,7 +2,7 @@
 # Add redirects here only for Netlify-specific rules (splats, proxies).
 # For standard page redirects, use `redirects` in astro.config.ts instead.
 
-/sitemap.xml /sitemap-0.xml 301
+/sitemap.xml /sitemap-index.xml 301
 
 /docs/contact-us/ /contact-us/ 301
 /docs/services/ /services/ 301

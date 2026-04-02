@@ -23,6 +23,9 @@ const site = NETLIFY_PREVIEW_SITE || 'https://thingsboard.io/';
 export default defineConfig({
     site,
     base: '/',
+    build: {
+        inlineStylesheets: 'always',
+    },
     redirects,
     vite: {
         resolve: {
