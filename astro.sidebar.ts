@@ -2414,14 +2414,8 @@ export const gwSidebar: SidebarConfig = [
 		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
 		items: [
-			{
-				label: 'What is ThingsBoard IoT Gateway?',
-				items: [
-					'docs/iot-gateway/architecture',
-					'docs/iot-gateway/features-overview',
-					'docs/iot-gateway/getting-started',
-				],
-			},
+			'docs/iot-gateway/getting-started',
+			'docs/iot-gateway/what-is-thingsboard-iot-gateway',
 		],
 	},
 	{
@@ -2710,7 +2704,7 @@ const tbmqReferenceItems = (prefix: string): SidebarConfig => [
 /** TBMQ Community Broker sidebar (pages at /docs/mqtt-broker/) */
 export const tbmqSidebar: SidebarConfig = [
 	{
-		label: 'Getting started',
+		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
 		items: [
 			{
@@ -2718,7 +2712,7 @@ export const tbmqSidebar: SidebarConfig = [
 				translations: { uk: 'Новий проєкт' },
 				items: [
 					{ label: 'Why TBMQ?', slug: 'docs/mqtt-broker/why-tbmq' },
-					{ label: 'Getting started', slug: 'docs/mqtt-broker/getting-started' },
+					{ label: 'Getting Started', slug: 'docs/mqtt-broker/getting-started' },
 				],
 			},
 			{
@@ -2762,7 +2756,7 @@ export const tbmqSidebar: SidebarConfig = [
 /** TBMQ PE Broker sidebar (pages at /docs/mqtt-broker/pe/) */
 export const tbmqPeSidebar: SidebarConfig = [
 	{
-		label: 'Getting started',
+		label: 'Getting Started',
 		translations: { uk: 'Початок роботи' },
 		items: [
 			{
@@ -2770,7 +2764,7 @@ export const tbmqPeSidebar: SidebarConfig = [
 				translations: { uk: 'Новий проєкт' },
 				items: [
 					{ label: 'Why TBMQ?', slug: 'docs/mqtt-broker/pe/why-tbmq' },
-					{ label: 'Getting started', slug: 'docs/mqtt-broker/pe/getting-started' },
+					{ label: 'Getting Started', slug: 'docs/mqtt-broker/pe/getting-started' },
 				],
 			},
 			{
@@ -3221,14 +3215,14 @@ export const gwSidebarTabLinks: SidebarTabLinks = {
 };
 
 export const tbmqSidebarTabLinks: SidebarTabLinks = {
-	'Getting started': '/docs/mqtt-broker/',
+	'Getting Started': '/docs/mqtt-broker/',
 	'Guides': '/docs/mqtt-broker/guides/',
 	'Installation': '/docs/mqtt-broker/install/installation-options/',
 	'Reference': '/docs/mqtt-broker/reference/',
 	'Releases': '/docs/mqtt-broker/changelog/',
 };
 export const tbmqPeSidebarTabLinks: SidebarTabLinks = {
-	'Getting started': '/docs/mqtt-broker/pe/',
+	'Getting Started': '/docs/mqtt-broker/pe/',
 	'Guides': '/docs/mqtt-broker/pe/guides/',
 	'Installation': '/docs/mqtt-broker/pe/install/installation-options/',
 	'Reference': '/docs/mqtt-broker/pe/reference/',
