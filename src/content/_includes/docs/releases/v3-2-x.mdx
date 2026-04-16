@@ -7,16 +7,16 @@ Minor release with the following improvements and bug fixes:
 * Migration to JDK 11;
 * Rule Engine:
     * Added ["calculate delta"](/docs/reference/rule-engine/nodes/enrichment/calculate-delta/) rule node;
-    * Added "current customer" and "current tenant" dynamic source types to DeviceProfile key filter. See examples [6](/docs/user-guide/device-profiles/#alarm-rules) and [7](/docs/user-guide/device-profiles/#alarm-rules);
-    * Added kafka consumer-groups statistics. See rule engine [troubleshooting](/docs/user-guide/rule-engine/#monitoring) for more info;
-    * Attributes cache. See [Performance enhancement](/docs/user-guide/digital-twins/attributes/);
+    * Added "current customer" and "current tenant" dynamic source types to DeviceProfile key filter. See examples [6](/docs/user-guide/device-profiles/#example-6-advanced-thresholds) and [7](/docs/user-guide/device-profiles/#example-7-dynamic-thresholds-based-on-the-tenant-or-customer-attributes);
+    * Added kafka consumer-groups statistics. See rule engine [troubleshooting](docs/user-guide/rule-engine/#monitoring) for more info;
+    * Attributes cache. See [Performance enhancement](/docs/user-guide/digital-twins/attributes/#performance);
 * UI:
     * Added ["Entity Count"](/docs/user-guide/widgets/#datasource-types) datasource for widgets;
     * Added "Entity Type" alias. See usage in the ["Entity count data source" example](/docs/user-guide/widgets/#datasource-types);
     * Added support of common intervals and time zones to the [time window](/docs/user-guide/dashboards/#time-window) selector;
     * Ability to set up a home dashboard for users instead of default "Home" view;
     * Improved ["add widget"](/docs/user-guide/dashboards/#add-a-new-widget) dialog. Added description and preview images for widgets and widget bundles;
-    * Added column visibility and [row style](/docs/user-guide/ui/entity-table-widget/#row-style-function) functions for table widgets;
+    * Added column visibility and [row style](docs/reference/widgets/entity-table-widget/#row-style-function) functions for table widgets;
     * UI: Improved dashboard load performance by optimizing widget header template.
 * Transport:
     * Support of [Protobuf](/docs/user-guide/device-profiles/#transport-configuration) for CoAP transport;
@@ -174,7 +174,7 @@ We have also added features to track tenant API usage.
 
  * [Tenant Profiles](/docs/user-guide/tenant-profiles/) to manage API and Rate Limits;
  * [Device Profiles](/docs/user-guide/device-profiles/) to configure default rule chain and queue, set transport configuration and define [Alarm Rules](/docs/user-guide/device-profiles/#alarm-rules);
- * Added support of custom [MQTT Topics](/docs/user-guide/device-profiles/#transport-configuration) and basic [MQTT credentials](/docs/user-guide/basic-mqtt/) as alternative to access token;
+ * Added support of custom [MQTT Topics](/docs/user-guide/device-profiles/#transport-configuration) and basic [MQTT credentials](/docs/reference/mqtt-api/getting-connected/#mqtt-basic) as alternative to access token;
  * Added support of custom device payload schema using [protocol buffers](/docs/user-guide/device-profiles/#transport-configuration) for MQTT transport;
  * [Provisioning](/docs/user-guide/provisioning/) is now available via device profiles;
  * [SMS Provider](/docs/user-guide/ui/sms-provider-settings/) and [Send SMS](/docs/reference/rule-engine/nodes/external/send-sms/) rule node;
