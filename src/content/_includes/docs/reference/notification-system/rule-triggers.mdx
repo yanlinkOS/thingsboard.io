@@ -2,7 +2,7 @@ import DocLink from '@components/DocLink.astro';
 import { Aside } from '@astrojs/starlight/components';
 import { Products } from '~/models/site.models';
 
-Each notification rule has a **trigger** that determines when the rule fires. The trigger type must match the template type — for example, an **Alarm** trigger can only use an **Alarm** template. For an overview of rules and how to create them, see <DocLink product={props.product} path="user-guide/notifications">Notification center</DocLink>.
+Each notification rule has a **trigger** that determines when the rule fires. The trigger type must match the template type — for example, an **Alarm** trigger can only use an **Alarm** template. For an overview of rules and how to create them, see <DocLink product={props.product === Products.EDGE_PE ? Products.PE : props.product === Products.EDGE ? Products.CE : props.product} path="user-guide/notifications">Notification center</DocLink>.
 
 ## Alarm
 
@@ -26,7 +26,7 @@ Each notification rule has a **trigger** that determines when the rule fires. Th
 
 ## Device activity
 
-**When it fires:** A device becomes active or inactive based on the <DocLink product={props.product} path="user-guide/connectivity-status">connectivity status</DocLink> inactivity timeout.
+**When it fires:** A device becomes active or inactive based on the <DocLink product={props.product === Products.EDGE_PE ? Products.PE : props.product === Products.EDGE ? Products.CE : props.product} path="user-guide/connectivity-status">connectivity status</DocLink> inactivity timeout.
 
 **Filter settings:**
 

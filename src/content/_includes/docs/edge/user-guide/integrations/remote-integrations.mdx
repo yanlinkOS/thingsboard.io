@@ -3,6 +3,7 @@
 import { Steps, Aside, Code } from '@astrojs/starlight/components';
 import ImageGallery from '@components/ImageGallery.astro';
 import DocLink from '@components/DocLink.astro';
+import { Products } from '~/models/site.models';
 import { PE_FULL_VER } from '~/data/versions';
 import Tabs from '@components/Tabs.astro';
 import TabItem from '@components/TabItem.astro';
@@ -758,12 +759,12 @@ sudo rpm -Uvh tb-coap-integration-${PE_FULL_VER}.rpm`} />
 
 Configuration is done entirely through the ThingsBoard interface — no special steps are required on the remote service side beyond the connection parameters. For integration-specific configuration, see:
 
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/http" target="_blank">HTTP Integration</DocLink>
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/mqtt" target="_blank">MQTT Integration</DocLink>
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/opc-ua" target="_blank">OPC-UA Integration</DocLink>
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/tcp" target="_blank">TCP Integration</DocLink>
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/udp" target="_blank">UDP Integration</DocLink>
-- <DocLink product={props.product} path="edge/pe/user-guide/integrations/coap" target="_blank">CoAP Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/http" target="_blank">HTTP Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/mqtt" target="_blank">MQTT Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/opc-ua" target="_blank">OPC-UA Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/tcp" target="_blank">TCP Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/udp" target="_blank">UDP Integration</DocLink>
+- <DocLink product={Products.EDGE_PE} path="user-guide/integrations/coap" target="_blank">CoAP Integration</DocLink>
 
 ## Troubleshooting
 
