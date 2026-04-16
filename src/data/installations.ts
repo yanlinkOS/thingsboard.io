@@ -100,7 +100,7 @@ export const products: ProductData[] = [
 				},
 				{
 					title: 'Improved time to market',
-					href: '/docs/getting-started-guides/helloworld-pe/',
+					href: '/docs/pe/getting-started/',
 					description: 'Save time on maintenance of the platform or configuration of the features.',
 				},
 				{
@@ -112,13 +112,13 @@ export const products: ProductData[] = [
 			[
 				{
 					title: 'High availability',
-					href: '/docs/reference/msa/',
+					href: '/docs/reference/architecture/microservices/',
 					description:
 						'ThingsBoard Cloud uses microservices architecture and is deployed in multiple availability zones.',
 				},
 				{
 					title: 'Data durability',
-					href: '/docs/reference/msa/',
+					href: '/docs/reference/architecture/microservices/',
 					description:
 						'Platform uses data replication and backup procedures to make sure you don\'t lose the data.',
 				},
@@ -137,7 +137,7 @@ export const products: ProductData[] = [
 			{
 				id: 'TryItNow_CE_Install',
 				label: 'Install',
-				href: '/docs/user-guide/install/installation-options/',
+				href: '/docs/installation/',
 			},
 		],
 		heroImages: [
@@ -156,13 +156,13 @@ export const products: ProductData[] = [
 			[
 				{
 					title: 'Rule Engine',
-					href: '/docs/user-guide/rule-engine-2-0/re-getting-started/',
+					href: '/docs/user-guide/rule-engine/',
 					description:
 						'Define data processing rules and trigger reactions using powerful rule engine components.',
 				},
 				{
 					title: 'Microservices',
-					href: '/docs/reference/msa/',
+					href: '/docs/reference/architecture/microservices/',
 					description:
 						'Construct your ThingsBoard cluster and get maximum scalability and fault-tolerance with new microservices architecture.',
 				},
@@ -170,12 +170,12 @@ export const products: ProductData[] = [
 			[
 				{
 					title: 'Data collection & Visualization',
-					href: '/docs/user-guide/visualization/',
+					href: '/iot-data-visualization/',
 					description: 'Collect and store telemetry data. Visualize your data with flexible dashboards.',
 				},
 				{
 					title: 'Devices & Assets management',
-					href: '/docs/user-guide/entities-and-relations/',
+					href: '/docs/user-guide/digital-twins/entities/',
 					description: 'Provision, monitor and control your IoT entities.',
 				},
 			],
@@ -188,49 +188,49 @@ export const products: ProductData[] = [
 						logo: install('ubuntu.svg'),
 						logoAlt: 'Ubuntu',
 						title: 'Ubuntu Server',
-						href: '/docs/user-guide/install/ubuntu/',
+						href: '/docs/installation/ubuntu/',
 					},
 					{
 						logo: install('cenos-rhel.svg'),
 						logoAlt: 'CentOS/RHEL',
 						title: 'CentOS/RHEL Server',
-						href: '/docs/user-guide/install/rhel/',
+						href: '/docs/installation/rhel/',
 					},
 					{
 						logo: install('windows.svg'),
 						logoAlt: 'Windows',
 						title: 'Windows',
-						href: '/docs/user-guide/install/windows/',
+						href: '/docs/installation/docker-windows/',
 					},
 					{
 						logo: install('raspberry-pi.svg'),
 						logoAlt: 'Raspberry Pi',
 						title: 'Raspberry Pi',
-						href: '/docs/user-guide/install/rpi/',
+						href: '/docs/installation/rpi/',
 					},
 					{
 						logo: install('docker-windows.svg'),
 						logoAlt: 'Docker (Windows)',
 						title: 'Docker (Windows)',
-						href: '/docs/user-guide/install/docker-windows/',
+						href: '/docs/installation/docker-windows/',
 					},
 					{
 						logo: install('docker-linux-mac.svg'),
 						logoAlt: 'Docker (Linux or Mac OS)',
 						title: 'Docker (Linux or Mac OS)',
-						href: '/docs/user-guide/install/docker/',
+						href: '/docs/installation/docker/',
 					},
 					{
 						logo: install('sources.svg'),
 						logoAlt: 'Building from source',
 						title: 'Building from source',
-						href: '/docs/user-guide/install/building-from-source/',
+						href: '/docs/installation/building-from-source/',
 					},
 					{
 						logo: install('kubernetes.svg'),
 						logoAlt: 'Cluster setup',
 						title: 'Cluster setup',
-						href: '/docs/user-guide/install/cluster-setup/',
+						href: '/docs/installation/',
 					},
 				],
 			},
@@ -241,19 +241,19 @@ export const products: ProductData[] = [
 						logo: install('aws.svg'),
 						logoAlt: 'AWS',
 						title: 'AWS',
-						href: '/docs/user-guide/install/aws/',
+						href: '/docs/installation/aws/',
 					},
 					{
 						logo: install('digital-ocean.svg'),
 						logoAlt: 'DigitalOcean',
 						title: 'DigitalOcean',
-						href: '/docs/user-guide/install/digital-ocean/',
+						href: '/docs/installation/digital-ocean/',
 					},
 					{
 						logo: install('gcp.svg'),
 						logoAlt: 'Google Cloud Platform',
 						title: 'Google Cloud Platform',
-						href: '/docs/user-guide/install/gcp/',
+						href: '/docs/installation/gcp/',
 					},
 				],
 			},
@@ -270,7 +270,7 @@ export const products: ProductData[] = [
 			{
 				id: 'TryItNow_PE_Install',
 				label: 'Install',
-				href: '/docs/user-guide/install/pe/installation-options/',
+				href: '/docs/pe/installation/',
 			},
 			{
 				id: 'TryItNow_PE_StartFree',
@@ -306,13 +306,13 @@ export const products: ProductData[] = [
 				},
 				{
 					title: 'Entity Groups',
-					href: '/docs/user-guide/groups/',
+					href: '/docs/pe/user-guide/groups/',
 					description:
 						'Custom entity groups (devices, assets, etc.) with customizable actions and configurable columns.',
 				},
 				{
 					title: 'Advanced RBAC for IoT',
-					href: '/docs/user-guide/rbac/',
+					href: '/docs/user-guide/roles/',
 					description:
 						'Advanced management of user roles and permissions. Manage hierarchy of customers.',
 				},
@@ -345,37 +345,37 @@ export const products: ProductData[] = [
 						logo: install('ubuntu.svg'),
 						logoAlt: 'Ubuntu',
 						title: 'Ubuntu Server',
-						href: '/docs/user-guide/install/pe/ubuntu/',
+						href: '/docs/pe/installation/ubuntu/',
 					},
 					{
 						logo: install('cenos-rhel.svg'),
 						logoAlt: 'CentOS/RHEL',
 						title: 'CentOS/RHEL',
-						href: '/docs/user-guide/install/pe/rhel/',
+						href: '/docs/pe/installation/rhel/',
 					},
 					{
 						logo: install('windows.svg'),
 						logoAlt: 'Windows',
 						title: 'Windows',
-						href: '/docs/user-guide/install/pe/windows/',
+						href: '/docs/pe/installation/docker-windows/',
 					},
 					{
 						logo: install('docker-windows.svg'),
 						logoAlt: 'Docker (Windows)',
 						title: 'Docker (Windows)',
-						href: '/docs/user-guide/install/pe/docker-windows/',
+						href: '/docs/pe/installation/docker-windows/',
 					},
 					{
 						logo: install('docker-linux-mac.svg'),
 						logoAlt: 'Docker (Linux or Mac OS)',
 						title: 'Docker (Linux or Mac OS)',
-						href: '/docs/user-guide/install/pe/docker/',
+						href: '/docs/pe/installation/docker/',
 					},
 					{
 						logo: install('kubernetes.svg'),
 						logoAlt: 'Cluster setup',
 						title: 'Cluster setup',
-						href: '/docs/user-guide/install/pe/cluster-setup/',
+						href: '/docs/pe/installation/',
 					},
 				],
 			},
@@ -386,25 +386,25 @@ export const products: ProductData[] = [
 						logo: install('aws.svg'),
 						logoAlt: 'AWS',
 						title: 'AWS',
-						href: '/docs/user-guide/install/pe/aws/',
+						href: '/docs/pe/installation/aws/',
 					},
 					{
 						logo: install('azure.svg'),
 						logoAlt: 'Microsoft Azure',
 						title: 'Microsoft Azure',
-						href: '/docs/user-guide/install/pe/azure/',
+						href: '/docs/pe/installation/azure/',
 					},
 					{
 						logo: install('digital-ocean.svg'),
 						logoAlt: 'DigitalOcean',
 						title: 'DigitalOcean',
-						href: '/docs/user-guide/install/pe/digital-ocean/',
+						href: '/docs/pe/installation/digital-ocean/',
 					},
 					{
 						logo: install('gcp.svg'),
 						logoAlt: 'Google Cloud Platform',
 						title: 'Google Cloud Platform',
-						href: '/docs/user-guide/install/pe/gcp/',
+						href: '/docs/pe/installation/gcp/',
 					},
 				],
 			},
@@ -421,12 +421,12 @@ export const products: ProductData[] = [
 			{
 				id: 'TryItNow_Edge_Install_Edge_CE',
 				label: 'Install Edge CE',
-				href: '/docs/user-guide/install/edge/installation-options/',
+				href: '/docs/edge/installation/',
 			},
 			{
 				id: 'TryItNow_Edge_Install_Edge_PE',
 				label: 'Install Edge PE',
-				href: '/docs/user-guide/install/pe/edge/installation-options/',
+				href: '/docs/edge/pe/installation/',
 				secondary: true,
 			},
 			{
@@ -452,13 +452,13 @@ export const products: ProductData[] = [
 			[
 				{
 					title: 'Local deployment and storage',
-					href: '/docs/edge/getting-started-guides/what-is-edge/',
+					href: '/docs/edge/why-thingsboard-edge/',
 					description:
 						'Process and store data from edge (local) devices without connection to the cloud. Push updates to the cloud once connection restored.',
 				},
 				{
 					title: 'Traffic filtering',
-					href: '/docs/edge/getting-started-guides/what-is-edge/',
+					href: '/docs/edge/why-thingsboard-edge/',
 					description:
 						'Filter data from edge (local) devices on the ThingsBoard Edge service and push to cloud only subset of the data for further processing or storage.',
 				},
@@ -466,12 +466,12 @@ export const products: ProductData[] = [
 			[
 				{
 					title: 'Local alarms',
-					href: '/docs/edge/getting-started-guides/what-is-edge/',
+					href: '/docs/edge/why-thingsboard-edge/',
 					description: 'React instantly to critical situations on site without connectivity to cloud.',
 				},
 				{
 					title: 'Batch update and visualization',
-					href: '/docs/edge/getting-started-guides/what-is-edge/',
+					href: '/docs/edge/why-thingsboard-edge/',
 					description:
 						'Update thousands of edge configurations in a single click. Monitor local events and timeseries data with a real-time dashboard.',
 				},
@@ -484,43 +484,43 @@ export const products: ProductData[] = [
 						logo: install('ubuntu.svg'),
 						logoAlt: 'Ubuntu',
 						title: 'Ubuntu Server',
-						href: '/docs/user-guide/install/edge/deb-installation/',
+						href: '/docs/edge/installation/ubuntu/',
 					},
 					{
 						logo: install('cenos-rhel.svg'),
 						logoAlt: 'CentOS/RHEL',
 						title: 'CentOS/RHEL Server',
-						href: '/docs/user-guide/install/edge/rhel/',
+						href: '/docs/edge/installation/rhel/',
 					},
 					{
 						logo: install('windows.svg'),
 						logoAlt: 'Windows',
 						title: 'Windows',
-						href: '/docs/user-guide/install/edge/windows/',
+						href: '/docs/edge/installation/windows/',
 					},
 					{
 						logo: install('docker-windows.svg'),
 						logoAlt: 'Docker (Windows)',
 						title: 'Docker (Windows)',
-						href: '/docs/user-guide/install/edge/docker-windows/',
+						href: '/docs/edge/installation/docker-windows/',
 					},
 					{
 						logo: install('docker-linux-mac.svg'),
 						logoAlt: 'Docker (Linux or Mac OS)',
 						title: 'Docker (Linux or Mac OS)',
-						href: '/docs/user-guide/install/edge/docker/',
+						href: '/docs/edge/installation/docker/',
 					},
 					{
 						logo: install('sources.svg'),
 						logoAlt: 'Building from source',
 						title: 'Building from source',
-						href: '/docs/user-guide/install/edge/building-from-source/',
+						href: '/docs/edge/installation/building-from-source/',
 					},
 					{
 						logo: installations('docker-cluster.svg'),
 						logoAlt: 'Edge Cluster Setup',
 						title: 'Edge Cluster Setup',
-						href: '/docs/edge/config/edge-cluster-setup/',
+						href: '/docs/edge/installation/docker-compose-setup/',
 					},
 				],
 			},
@@ -655,7 +655,7 @@ export const products: ProductData[] = [
 			{
 				id: 'TryItNow_TBMQ_Install_PE',
 				label: 'Start PE Trial',
-				href: '/docs/pe/mqtt-broker/install/installation-options/',
+				href: '/docs/mqtt-broker/pe/install/installation-options/',
 				target: '_blank',
 				secondary: true,
 			},
@@ -778,7 +778,7 @@ export const products: ProductData[] = [
 						logo: install('helm.svg'),
 						logoAlt: 'Cluster setup using Helm',
 						title: 'Cluster setup using Helm',
-						href: '/docs/mqtt-broker/install/cluster/helm-cluster-setup-options/',
+						href: '/docs/mqtt-broker/install/installation-options/',
 						target: '_blank',
 					},
 				],
