@@ -1,4 +1,4 @@
-var mqtt = 	require('mqtt');
+var mqtt = require('mqtt');
 var client = mqtt.connect('mqtt://localhost', {
     username: process.env.TOKEN
 });
