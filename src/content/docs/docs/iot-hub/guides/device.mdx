@@ -1,25 +1,19 @@
 ---
-title: Device Library Contribution Guide
+title: IoT Hub Device Contribution Guide
 description: Build a ThingsBoard IoT Hub device package that end users install in one click.
+head:
+  - tag: title
+    content: Device Contribution Guide | Docs | IoT Hub
 ---
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-Welcome to the **ThingsBoard Device Library**. This guide walks you through building a device package that end users can install on their ThingsBoard instance in a single click.
+Welcome to **ThingsBoard IoT Hub**. This guide walks you through building a device package that end users can install on their ThingsBoard instance in a single click.
 
-A device package is a ZIP file that bundles everything the installation wizard needs: configuration forms, setup instructions, ThingsBoard entity templates (device profiles, dashboards, rule chains), and images. When a user selects your device in the library, the wizard runs through your package step-by-step to provision the device, create a dashboard, and show the user how to connect the hardware.
-
-## Quick Start
-
-1. Pick an install method (e.g. `DIRECT_MQTT` for an MQTT-connected device).
-2. Create a `device-info.json` that lists your device's metadata and install steps.
-3. Write the supporting files: a prerequisites markdown, a configuration form, a device profile JSON, a device JSON, a dashboard JSON, and a post-install markdown.
-4. Add a device photo under `images/` and reference it from `device-info.json`.
-5. Zip the folder contents (not the folder itself) and upload via **IoT Hub → Add Item → Device**.
-
-If your device has **one** way of connecting, put everything at the ZIP root. If it has **multiple** connectivity options (e.g. ChirpStack, TTN, and LORIOT), organize files into per-method subfolders plus a shared `common/` folder — see [Package Structure](#package-structure).
+A device package is a ZIP file that bundles everything the installation wizard needs: configuration forms, setup instructions, ThingsBoard entity templates (device profiles, dashboards, rule chains), and images. When a user selects your device in IoT Hub, the wizard runs through your package step-by-step to provision the device, create a dashboard, and show the user how to connect the hardware.
 
 ## How Users Install Your Device
 
-When a user clicks **Install** on your device in the IoT Hub marketplace, the installation wizard performs these actions in order:
+When a user clicks **Install** on your device in IoT Hub, the installation wizard performs these actions in order:
 
 1. **Displays instructions** from your markdown files (prerequisites, wiring, firmware setup).
 2. **Collects user input** via forms you define (device name, Wi-Fi credentials, Device EUI, etc.).
@@ -28,6 +22,40 @@ When a user clicks **Install** on your device in the IoT Hub marketplace, the in
 5. **Shows post-install instructions** with resolved variables (firmware code, verification steps, links to the created dashboard).
 
 Your job as a creator is to describe all of this declaratively in `device-info.json`.
+
+## Quick Start
+
+The fastest way to start is to grab a sample package, edit a few fields, and upload. Pick the one whose connectivity matches your device:
+
+<CardGrid>
+  <LinkCard
+    title="Direct MQTT connection"
+    description="Wi-Fi device publishing telemetry directly to ThingsBoard over MQTT. Single install method, files at the ZIP root."
+    href="/docs/iot-hub/guides/device/examples/direct-mqtt.zip"
+  />
+  <LinkCard
+    title="Modbus via IoT Gateway"
+    description="Modbus TCP sensor connected through the ThingsBoard IoT Gateway with a custom docker-compose template."
+    href="/docs/iot-hub/guides/device/examples/gateway-modbus.zip"
+  />
+  <LinkCard
+    title="LoRaWAN with multiple integrations"
+    description="LoRaWAN device supporting ChirpStack, TTN, and LORIOT — uses the common/ folder and per-network subfolders."
+    href="/docs/iot-hub/guides/device/examples/lorawan-multi-integration.zip"
+  />
+</CardGrid>
+
+Then:
+
+1. Edit `device-info.json` — set your device's `name`, `vendor`, `description`, `hardwareType`, `connectivity`, and `useCases`.
+2. Replace the entity templates (`device-profile.json`, `device.json`, `dashboard.json`) with exports from your own ThingsBoard instance. Keep the `${variable}` placeholders.
+3. Rewrite `prerequisites.md` and `post-install.md` for your hardware.
+4. Swap in your device photo under `images/`.
+5. Re-zip the contents (not the folder itself) and upload via **IoT Hub → Add Item → Device**.
+
+See [Package Structure](#package-structure) if your device supports multiple connectivity options.
+
+The sections below are a complete reference for every part of a device package.
 
 ## Package Structure
 
@@ -221,39 +249,6 @@ Choose one or more methods that describe how the device connects to ThingsBoard.
 | `INTEGRATION_TTN` | The Things Stack / The Things Network (PE) | no | yes |
 | `INTEGRATION_LORIOT` | LORIOT LoRaWAN network server (PE) | no | yes |
 
-## `overview.md` — The Long Description
-
-`overview.md` is an optional file at the ZIP root that provides the full description for your device's detail page on IoT Hub. It complements the short `description` in `device-info.json`:
-
-- **`description`** in `device-info.json` → shown on browse cards (short, max 512 chars).
-- **`overview.md`** → shown on the device detail page; pre-fills the "Readme" step in the Add Item dialog.
-
-Use it to describe hardware specifications, features, and any context a user needs before deciding to install. Standard Markdown is supported, including tables and images.
-
-```markdown
-## ESP32 Dev Kit C V4
-
-The ESP32 Dev Kit C V4 is a compact development board built on the ESP-WROOM-32U module,
-featuring a dual-core processor with Wi-Fi and Bluetooth connectivity.
-
-### Features
-
-- Dual-core Xtensa LX6 processor (240 MHz)
-- 520 KB SRAM, 4 MB Flash
-- Wi-Fi 802.11 b/g/n + Bluetooth 4.2 + BLE
-- 34 programmable GPIO pins
-- Multiple interfaces: SPI, I2C, UART, ADC, DAC, PWM
-
-### Specifications
-
-| Parameter | Value |
-|-----------|-------|
-| Operating Voltage | 3.3V |
-| Input Voltage | 5V (USB) |
-| Clock Speed | 80–240 MHz |
-| Flash | 4 MB |
-```
-
 ## Install Steps Reference
 
 Steps are executed top-to-bottom. The wizard shows an instruction or form to the user, creates a ThingsBoard entity, or both. Output from earlier steps (form values, created entity IDs) becomes available as `${variable}` placeholders in later steps.
@@ -301,135 +296,6 @@ Each entity step takes a `template` (a JSON file that matches the ThingsBoard RE
 | `sharedAttributes` | All entity types | Path to a JSON file with key-value pairs saved as shared attributes |
 | `credentials` | `DEVICE`, `GATEWAY` | Path to a JSON file with device credentials (see [Device Credentials](#device-credentials)) |
 | `dockerCompose` | `GATEWAY` | Path to a YAML template for a custom docker-compose file (see [Gateway Docker-Compose Templates](#gateway-docker-compose-templates)) |
-
-## Writing Markdown Instructions
-
-Instruction files use standard Markdown with two extensions: `${variable}` placeholders and image-gallery helpers.
-
-### Headings, Lists, and Notes
-
-```markdown
-## Prerequisites
-
-Before you begin, make sure you have:
-
-- **ESP32 Dev Kit** board
-- **USB cable** (micro-USB)
-- **Arduino IDE** installed
-
-### Step 1: Connect the Board
-
-Connect the board to your computer via USB as shown:
-
-![Wiring Diagram](images/wiring-diagram.png)
-
-> **Note:** Make sure the USB cable supports data transfer, not just charging.
-```
-
-### Using Variables in Markdown
-
-Variables are resolved before rendering. Use them to show user-provided values, created resource names, and platform settings:
-
-```markdown
-## Setup Complete
-
-Your device **${deviceName}** is ready!
-
-Use this token in your firmware:
-
-    ${device.token}
-
-Open the [${dashboard.name}](${dashboard.url}) dashboard to see telemetry.
-
-The device is connected to **${mqtt.host}:${mqtt.port}** via MQTT.
-```
-
-See the full [Variable Reference](#variable-reference) for all available variables.
-
-### Variables Inside Code Blocks
-
-Variables are resolved inside fenced code blocks, which is especially useful for firmware snippets:
-
-````markdown
-```cpp
-#define WIFI_SSID     "${wifiSsid}"
-#define WIFI_PASSWORD "${wifiPassword}"
-#define TOKEN         "${device.token}"
-#define TB_SERVER     "${mqtt.host}"
-#define TB_PORT       ${mqtt.port}
-```
-````
-
-```bash
-curl -o docker-compose.yml "${gateway.dockerComposeUrl}"
-docker compose up -d
-```
-
-## Images
-
-### Adding Images to the ZIP
-
-Place images anywhere in the ZIP — the `images/` folder is recommended.
-
-```
-my-device.zip
-├── images/
-│   ├── device-photo.jpg
-│   ├── wiring-diagram.png
-│   └── serial-output.png
-├── prerequisites.md
-└── post-install.md
-```
-
-Supported formats: `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`.
-
-### Referencing Images in Markdown
-
-Use standard Markdown with paths relative to the ZIP root:
-
-```markdown
-![Wiring Diagram](images/wiring-diagram.png)
-```
-
-The wizard resolves these paths to inline base64 data URIs from the ZIP — no external hosting needed.
-
-### Image Gallery
-
-Display multiple images side-by-side as clickable thumbnails using the gallery helper:
-
-```markdown
-${images.gallery(images/step1-tools.png, images/step2-upload.png, images/step3-verify.png)}
-```
-
-- Paths are comma-separated, relative to the ZIP root.
-- Images render as a horizontal row of thumbnails.
-- Clicking a thumbnail expands it full-size; clicking again collapses.
-- Useful for multi-step visual instructions (e.g. IDE menu navigation screenshots).
-
-### Images as Form Field Help
-
-Form fields can show a help image alongside the help text:
-
-```json
-{
-  "key": "devEui",
-  "label": "Device EUI",
-  "type": "STRING",
-  "required": true,
-  "helpText": "16 hex characters from the device label",
-  "helpImage": "images/device-label-eui.png"
-}
-```
-
-The user clicks a help icon next to the field to expand the image.
-
-### Image Best Practices
-
-- Keep images under **500 KB** each — the whole ZIP is stored as a single file.
-- **PNG** for screenshots and diagrams; **JPG** for device photos.
-- Crop tightly to the relevant area.
-- Annotate with arrows or highlights to point out important UI elements.
-- Use descriptive filenames: `chirpstack-api-key.png`, not `screenshot1.png`.
 
 ## Form Definitions
 
@@ -742,6 +608,168 @@ docker compose up -d
 
 The gateway will connect to **${mqtt.host}:${mqtt.port}**.
 ````
+
+## Writing Markdown Instructions
+
+Instruction files use standard Markdown with two extensions: `${variable}` placeholders and image-gallery helpers.
+
+### Headings, Lists, and Notes
+
+```markdown
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- **ESP32 Dev Kit** board
+- **USB cable** (micro-USB)
+- **Arduino IDE** installed
+
+### Step 1: Connect the Board
+
+Connect the board to your computer via USB as shown:
+
+![Wiring Diagram](images/wiring-diagram.png)
+
+> **Note:** Make sure the USB cable supports data transfer, not just charging.
+```
+
+### Using Variables in Markdown
+
+Variables are resolved before rendering. Use them to show user-provided values, created resource names, and platform settings:
+
+```markdown
+## Setup Complete
+
+Your device **${deviceName}** is ready!
+
+Use this token in your firmware:
+
+    ${device.token}
+
+Open the [${dashboard.name}](${dashboard.url}) dashboard to see telemetry.
+
+The device is connected to **${mqtt.host}:${mqtt.port}** via MQTT.
+```
+
+See the full [Variable Reference](#variable-reference) for all available variables.
+
+### Variables Inside Code Blocks
+
+Variables are resolved inside fenced code blocks, which is especially useful for firmware snippets:
+
+````markdown
+```cpp
+#define WIFI_SSID     "${wifiSsid}"
+#define WIFI_PASSWORD "${wifiPassword}"
+#define TOKEN         "${device.token}"
+#define TB_SERVER     "${mqtt.host}"
+#define TB_PORT       ${mqtt.port}
+```
+````
+
+```bash
+curl -o docker-compose.yml "${gateway.dockerComposeUrl}"
+docker compose up -d
+```
+
+## Images
+
+### Adding Images to the ZIP
+
+Place images anywhere in the ZIP — the `images/` folder is recommended.
+
+```
+my-device.zip
+├── images/
+│   ├── device-photo.jpg
+│   ├── wiring-diagram.png
+│   └── serial-output.png
+├── prerequisites.md
+└── post-install.md
+```
+
+Supported formats: `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`.
+
+### Referencing Images in Markdown
+
+Use standard Markdown with paths relative to the ZIP root:
+
+```markdown
+![Wiring Diagram](images/wiring-diagram.png)
+```
+
+The wizard resolves these paths to inline base64 data URIs from the ZIP — no external hosting needed.
+
+### Image Gallery
+
+Display multiple images side-by-side as clickable thumbnails using the gallery helper:
+
+```markdown
+${images.gallery(images/step1-tools.png, images/step2-upload.png, images/step3-verify.png)}
+```
+
+- Paths are comma-separated, relative to the ZIP root.
+- Images render as a horizontal row of thumbnails.
+- Clicking a thumbnail expands it full-size; clicking again collapses.
+- Useful for multi-step visual instructions (e.g. IDE menu navigation screenshots).
+
+### Images as Form Field Help
+
+Form fields can show a help image alongside the help text:
+
+```json
+{
+  "key": "devEui",
+  "label": "Device EUI",
+  "type": "STRING",
+  "required": true,
+  "helpText": "16 hex characters from the device label",
+  "helpImage": "images/device-label-eui.png"
+}
+```
+
+The user clicks a help icon next to the field to expand the image.
+
+### Image Best Practices
+
+- Keep images under **500 KB** each — the whole ZIP is stored as a single file.
+- **PNG** for screenshots and diagrams; **JPG** for device photos.
+- Crop tightly to the relevant area.
+- Annotate with arrows or highlights to point out important UI elements.
+- Use descriptive filenames: `chirpstack-api-key.png`, not `screenshot1.png`.
+
+## `overview.md` — The Long Description
+
+`overview.md` is an optional file at the ZIP root that provides the full description for your device's detail page on IoT Hub. It complements the short `description` in `device-info.json`:
+
+- **`description`** in `device-info.json` → shown on browse cards (short, max 512 chars).
+- **`overview.md`** → shown on the device detail page; pre-fills the "Readme" step in the Add Item dialog.
+
+Use it to describe hardware specifications, features, and any context a user needs before deciding to install. Standard Markdown is supported, including tables and images.
+
+```markdown
+## ESP32 Dev Kit C V4
+
+The ESP32 Dev Kit C V4 is a compact development board built on the ESP-WROOM-32U module,
+featuring a dual-core processor with Wi-Fi and Bluetooth connectivity.
+
+### Features
+
+- Dual-core Xtensa LX6 processor (240 MHz)
+- 520 KB SRAM, 4 MB Flash
+- Wi-Fi 802.11 b/g/n + Bluetooth 4.2 + BLE
+- 34 programmable GPIO pins
+- Multiple interfaces: SPI, I2C, UART, ADC, DAC, PWM
+
+### Specifications
+
+| Parameter | Value |
+|-----------|-------|
+| Operating Voltage | 3.3V |
+| Input Voltage | 5V (USB) |
+| Clock Speed | 80–240 MHz |
+| Flash | 4 MB |
+```
 
 ## Variable Reference
 
