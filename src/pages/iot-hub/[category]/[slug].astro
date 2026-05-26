@@ -1,0 +1,128 @@
+---
+import type { GetStaticPaths } from 'astro';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection } from 'astro:content';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import {
+	IOT_HUB_API_URL,
+	IOT_HUB_CATEGORIES,
+	fetchWithRetry,
+	listingDetailSchema,
+	resolveImage,
+	type ListingDetail,
+} from '~/config/iot-hub';
+import DetailHero from '~/components/IotHub/DetailHero.astro';
+import DetailMeta from '~/components/IotHub/DetailMeta.astro';
+import DetailGallery from '~/components/IotHub/DetailGallery.astro';
+
+export const getStaticPaths = (async () => {
+	const all = await getCollection('iotHubListings');
+	return IOT_HUB_CATEGORIES.flatMap((cat) =>
+		all
+			.filter((e) => e.data.itemType === cat.itemType && !/^\d+$/.test(e.data.slug))
+			.map((entry) => ({
+				params: { category: cat.slug, slug: entry.data.slug },
+				props: { entry, categoryLabel: cat.label },
+			}))
+	);
+}) satisfies GetStaticPaths;
+
+const { entry, categoryLabel } = Astro.props;
+const { category } = Astro.params;
+
+async function loadDetail(slug: string): Promise<ListingDetail | null> {
+	try {
+		const res = await fetchWithRetry(
+			`${IOT_HUB_API_URL}/api/listings/public/by-slug/${slug}`
+		);
+		const body = await res.json();
+		return listingDetailSchema.parse(body);
+	} catch (e) {
+		if (import.meta.env.DEV) {
+			const msg = e instanceof Error ? e.message : String(e);
+			console.warn(`[iot-hub] detail fetch failed in dev for ${slug}: ${msg}`);
+			return null;
+		}
+		throw e;
+	}
+}
+
+const detail = await loadDetail(entry.data.slug);
+
+// Render readmeContent → HTML using Astro's own markdown processor.
+let readmeHtml: string | null = null;
+if (detail?.readmeContent) {
+	const processor = await createMarkdownProcessor();
+	const result = await processor.render(detail.readmeContent);
+	readmeHtml = result.code;
+}
+
+const title = detail?.seoTitle ?? detail?.name ?? entry.data.name;
+const description =
+	detail?.seoMetaDescription ?? detail?.description ?? entry.data.description ?? '';
+const ogImageUrl =
+	resolveImage(detail?.ogImage ?? null) ??
+	resolveImage(detail?.image ?? entry.data.image) ??
+	undefined;
+---
+
+<StarlightPage
+	frontmatter={{
+		title,
+		description,
+		template: 'doc',
+		pagefind: false,
+		head: ogImageUrl
+			? [{ tag: 'meta', attrs: { property: 'og:image', content: ogImageUrl } }]
+			: [],
+	}}
+>
+	{
+		detail ? (
+			<>
+				<nav class="iot-hub-detail-crumbs" aria-label="Breadcrumb">
+					<a href="/iot-hub/">IoT Hub</a>
+					<span aria-hidden="true">/</span>
+					<a href={`/iot-hub/${category}/`}>{categoryLabel}</a>
+				</nav>
+				<DetailHero detail={detail} />
+				<DetailMeta detail={detail} />
+				<DetailGallery screenshots={detail.screenshots} listingName={detail.name} />
+				{readmeHtml ? (
+					<section class="iot-hub-detail-readme">
+						<h2>About</h2>
+						<div set:html={readmeHtml} />
+					</section>
+				) : null}
+			</>
+		) : (
+			<p>Listing details are temporarily unavailable.</p>
+		)
+	}
+</StarlightPage>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-detail-crumbs {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--color-text-muted, #6b7280);
+		margin-bottom: 0.5rem;
+
+		a {
+			color: var(--color-accent, #305680);
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.iot-hub-detail-readme {
+		margin-top: 2rem;
+	}
+</style>

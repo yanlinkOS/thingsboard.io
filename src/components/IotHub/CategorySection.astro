@@ -1,0 +1,69 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ListingCard from './ListingCard.astro';
+import ListingGrid from './ListingGrid.astro';
+
+interface Props {
+	categorySlug: string;
+	categoryLabel: string;
+	entries: Array<CollectionEntry<'iotHubListings'>>;
+}
+
+const { categorySlug, categoryLabel, entries } = Astro.props;
+const indexHref = `/iot-hub/${categorySlug}/`;
+---
+
+<section class="iot-hub-section">
+	<header class="iot-hub-section__header">
+		<h2 class="iot-hub-section__title">{categoryLabel}</h2>
+		<a class="iot-hub-section__view-all" href={indexHref}>View all <span aria-hidden="true">→</span></a>
+	</header>
+	{
+		entries.length > 0 ? (
+			<ListingGrid>
+				{entries.map((entry) => (
+					<ListingCard entry={entry} categorySlug={categorySlug} />
+				))}
+			</ListingGrid>
+		) : (
+			<p class="iot-hub-section__empty">No items available yet.</p>
+		)
+	}
+</section>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-section {
+		margin: 3rem 0;
+	}
+
+	.iot-hub-section__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-bottom: 1.25rem;
+		gap: 1rem;
+	}
+
+	.iot-hub-section__title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin: 0;
+	}
+
+	.iot-hub-section__view-all {
+		font-size: 0.875rem;
+		text-decoration: none;
+		color: var(--color-accent, #305680);
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	.iot-hub-section__empty {
+		color: var(--color-text-muted, #6b7280);
+		font-size: 0.95rem;
+	}
+</style>

@@ -1,0 +1,86 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { resolveImage } from '~/config/iot-hub';
+
+interface Props {
+	entry: CollectionEntry<'iotHubListings'>;
+	categorySlug: string;
+}
+
+const { entry, categorySlug } = Astro.props;
+const { name, description, image, color } = entry.data;
+const imageUrl = resolveImage(image);
+const href = `/iot-hub/${categorySlug}/${entry.data.slug}/`;
+const placeholderBg = color ?? '#e5e7eb';
+---
+
+<a class="iot-hub-card" href={href}>
+	<div class="iot-hub-card__image" style={`background-color: ${placeholderBg};`}>
+		{imageUrl ? <img src={imageUrl} alt={name} loading="lazy" decoding="async" /> : null}
+	</div>
+	<div class="iot-hub-card__body">
+		<h3 class="iot-hub-card__title">{name}</h3>
+		{description ? <p class="iot-hub-card__desc">{description}</p> : null}
+	</div>
+</a>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-card {
+		display: flex;
+		flex-direction: column;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 12px;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		background: var(--color-surface, #fff);
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+		&:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+		}
+	}
+
+	.iot-hub-card__image {
+		aspect-ratio: 4 / 3;
+		width: 100%;
+		display: grid;
+		place-items: center;
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+	}
+
+	.iot-hub-card__body {
+		padding: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.iot-hub-card__title {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	.iot-hub-card__desc {
+		font-size: 0.875rem;
+		line-height: 1.5;
+		margin: 0;
+		color: var(--color-text-muted, #6b7280);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+</style>

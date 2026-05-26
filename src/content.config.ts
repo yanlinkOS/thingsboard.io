@@ -6,6 +6,13 @@ import { file, glob } from 'astro/loaders';
 import { logoKeys } from './data/logos';
 import { Products } from './models/site.models';
 import { PLATFORM_VALUES, type DevicePlatform } from './util/device-platform';
+import {
+	IOT_HUB_API_URL,
+	IOT_HUB_CATEGORIES,
+	API_FETCH_PAGE_SIZE,
+	fetchWithRetry,
+	listingViewSchema,
+} from '~/config/iot-hub';
 
 export { PLATFORM_VALUES };
 export type { DevicePlatform };
@@ -323,5 +330,41 @@ export const collections = {
 			generateId: ({ entry }) => entry.replace(/\.mdx$/, ''),
 		}),
 		schema: deviceSchema,
+	}),
+	iotHubListings: defineCollection({
+		loader: async () => {
+			try {
+				const all: Array<Record<string, unknown> & { id: string }> = [];
+				for (const { itemType } of IOT_HUB_CATEGORIES) {
+					let page = 0;
+					while (true) {
+						const url =
+							`${IOT_HUB_API_URL}/api/listings/published` +
+							`?pageSize=${API_FETCH_PAGE_SIZE}&page=${page}` +
+							`&type=${itemType}` +
+							`&sortProperty=installCount&sortOrder=DESC`;
+						const res = await fetchWithRetry(url);
+						const body = (await res.json()) as {
+							data: Array<Record<string, unknown> & { id: string }>;
+							hasNext: boolean;
+						};
+						for (const item of body.data) {
+							all.push({ ...item, id: item.slug as string });
+						}
+						if (!body.hasNext) break;
+						page++;
+					}
+				}
+				return all;
+			} catch (e) {
+				if (import.meta.env.DEV) {
+					const msg = e instanceof Error ? e.message : String(e);
+					console.warn(`[iot-hub] loader failed in dev, using empty collection: ${msg}`);
+					return [];
+				}
+				throw e;
+			}
+		},
+		schema: listingViewSchema,
 	}),
 };

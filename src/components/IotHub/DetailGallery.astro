@@ -1,0 +1,64 @@
+---
+import { IOT_HUB_API_URL } from '~/config/iot-hub';
+
+interface Props {
+	screenshots: Array<{ id: string }>;
+	listingName: string;
+}
+
+const { screenshots, listingName } = Astro.props;
+---
+
+{
+	screenshots.length > 0 ? (
+		<section class="iot-hub-gallery">
+			<h2 class="iot-hub-gallery__title">Screenshots</h2>
+			<div class="iot-hub-gallery__grid">
+				{screenshots.map((s, i) => (
+					<div class="iot-hub-gallery__item">
+						<img
+							src={`${IOT_HUB_API_URL}/api/resources/${s.id}`}
+							alt={`${listingName} screenshot ${i + 1}`}
+							loading="lazy"
+							decoding="async"
+						/>
+					</div>
+				))}
+			</div>
+		</section>
+	) : null
+}
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-gallery {
+		margin: 2rem 0;
+	}
+
+	.iot-hub-gallery__title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin: 0 0 1rem;
+	}
+
+	.iot-hub-gallery__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+
+	.iot-hub-gallery__item {
+		aspect-ratio: 16 / 9;
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--color-border, #e5e7eb);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+	}
+</style>

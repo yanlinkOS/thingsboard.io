@@ -1,0 +1,34 @@
+---
+// Simple hero for /iot-hub/ home page. No props for v1.
+---
+
+<header class="iot-hub-hero">
+	<h1 class="iot-hub-hero__title">IoT Hub</h1>
+	<p class="iot-hub-hero__intro">
+		Discover devices, solution templates, widgets, and more — published by the ThingsBoard
+		community and partners.
+	</p>
+</header>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-hero {
+		padding: 3rem 0 2rem;
+		text-align: center;
+	}
+
+	.iot-hub-hero__title {
+		font-size: 2.5rem;
+		font-weight: 700;
+		margin: 0 0 0.75rem;
+	}
+
+	.iot-hub-hero__intro {
+		font-size: 1.125rem;
+		line-height: 1.5;
+		max-width: 640px;
+		margin: 0 auto;
+		color: var(--color-text-muted, #6b7280);
+	}
+</style>

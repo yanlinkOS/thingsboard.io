@@ -1,0 +1,103 @@
+---
+import type { ListingDetail } from '~/config/iot-hub';
+
+interface Props {
+	detail: ListingDetail;
+}
+
+const { detail } = Astro.props;
+
+// Group displayed metadata. Each row is { label, values } and is only rendered if values is non-empty.
+type Row = { label: string; values: string[] };
+const rows: Row[] = [
+	{ label: 'Vendor', values: detail.vendor ? [detail.vendor] : [] },
+	{ label: 'Hardware Type', values: detail.hardwareType ? [detail.hardwareType] : [] },
+	{ label: 'Widget Type', values: detail.widgetType ? [detail.widgetType] : [] },
+	{ label: 'Calc Field Type', values: detail.cfType ? [detail.cfType] : [] },
+	{ label: 'Rule Chain Type', values: detail.ruleChainType ? [detail.ruleChainType] : [] },
+	{ label: 'Connectivity', values: detail.connectivity },
+	{ label: 'Categories', values: detail.categories },
+	{ label: 'Use Cases', values: detail.useCases },
+	{ label: 'Tags', values: detail.tags },
+];
+const visibleRows = rows.filter((r) => r.values.length > 0);
+---
+
+{
+	visibleRows.length > 0 ? (
+		<aside class="iot-hub-detail-meta">
+			<dl>
+				{visibleRows.map((row) => (
+					<div class="iot-hub-detail-meta__row">
+						<dt>{row.label}</dt>
+						<dd>
+							<ul>
+								{row.values.map((v) => (
+									<li class="iot-hub-detail-meta__pill">{v}</li>
+								))}
+							</ul>
+						</dd>
+					</div>
+				))}
+			</dl>
+		</aside>
+	) : null
+}
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-detail-meta {
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 12px;
+		padding: 1.25rem 1.5rem;
+		margin: 1.5rem 0;
+
+		dl {
+			display: grid;
+			gap: 1rem;
+			margin: 0;
+		}
+	}
+
+	.iot-hub-detail-meta__row {
+		display: grid;
+		grid-template-columns: 160px 1fr;
+		gap: 1rem;
+		align-items: start;
+
+		@media (max-width: 640px) {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+
+		dt {
+			font-weight: 600;
+			color: var(--color-text-muted, #6b7280);
+			font-size: 0.875rem;
+		}
+
+		dd {
+			margin: 0;
+		}
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+	}
+
+	.iot-hub-detail-meta__pill {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		background: var(--color-surface-muted, #f3f4f6);
+		font-size: 0.8125rem;
+		color: var(--color-text, #111827);
+	}
+</style>

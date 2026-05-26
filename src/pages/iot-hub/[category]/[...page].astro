@@ -1,0 +1,74 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import CategoryHeader from '~/components/IotHub/CategoryHeader.astro';
+import ListingCard from '~/components/IotHub/ListingCard.astro';
+import ListingGrid from '~/components/IotHub/ListingGrid.astro';
+import PaginationLink from '~/components/IotHub/PaginationLink.astro';
+import { getCollection } from 'astro:content';
+import { IOT_HUB_CATEGORIES, PAGE_SIZE } from '~/config/iot-hub';
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const all = await getCollection('iotHubListings');
+	return IOT_HUB_CATEGORIES.flatMap((cat) =>
+		paginate(
+			all.filter((e) => e.data.itemType === cat.itemType),
+			{
+				params: { category: cat.slug },
+				props: { categoryLabel: cat.label },
+				pageSize: PAGE_SIZE,
+			}
+		)
+	);
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const { categoryLabel } = Astro.props as { categoryLabel: string };
+const { category } = Astro.params;
+const basePath = `/iot-hub/${category}/`;
+
+const title = `${categoryLabel} | IoT Hub | ThingsBoard`;
+const description = `Browse ${categoryLabel.toLowerCase()} published to the ThingsBoard IoT Hub.`;
+---
+
+<BaseLayout title={title} description={description}>
+	<main class="iot-hub-index">
+		<CategoryHeader categoryLabel={categoryLabel} totalCount={page.total} />
+		{
+			page.data.length > 0 ? (
+				<>
+					<ListingGrid>
+						{page.data.map((entry) => (
+							<ListingCard entry={entry} categorySlug={category!} />
+						))}
+					</ListingGrid>
+					{page.lastPage > 1 ? (
+						<PaginationLink
+							currentPage={page.currentPage}
+							totalPages={page.lastPage}
+							basePath={basePath}
+						/>
+					) : null}
+				</>
+			) : (
+				<p class="iot-hub-index__empty">No items available yet.</p>
+			)
+		}
+	</main>
+</BaseLayout>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-index {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 1.5rem 4rem;
+	}
+
+	.iot-hub-index__empty {
+		text-align: center;
+		color: var(--color-text-muted, #6b7280);
+		padding: 4rem 0;
+	}
+</style>

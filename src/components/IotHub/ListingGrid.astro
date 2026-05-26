@@ -1,0 +1,17 @@
+---
+// Responsive CSS grid container for ListingCards. No interactivity.
+---
+
+<div class="iot-hub-grid">
+	<slot />
+</div>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 1.5rem;
+	}
+</style>
