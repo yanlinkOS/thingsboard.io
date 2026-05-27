@@ -3,16 +3,17 @@ import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 import { defineCollection, type CollectionEntry } from 'astro:content';
 import { z } from 'astro/zod';
 import { file, glob } from 'astro/loaders';
-import { logoKeys } from './data/logos';
-import { Products } from './models/site.models';
-import { PLATFORM_VALUES, type DevicePlatform } from './util/device-platform';
+import { logoKeys } from '@data/logos';
+import { Products } from '@models/site.models';
+import { PLATFORM_VALUES, type DevicePlatform } from '@util/device-platform';
 import {
 	IOT_HUB_API_URL,
 	IOT_HUB_CATEGORIES,
 	API_FETCH_PAGE_SIZE,
-	fetchWithRetry,
 	listingViewSchema,
-} from '~/config/iot-hub';
+	type ListingView,
+} from '@models/iot-hub';
+import { fetchWithRetry } from '@util/fetch-utils';
 
 export { PLATFORM_VALUES };
 export type { DevicePlatform };
@@ -330,12 +331,11 @@ export const collections = {
 			generateId: ({ entry }) => entry.replace(/\.mdx$/, ''),
 		}),
 		schema: deviceSchema,
-	}),
+	}),  
 	iotHubListings: defineCollection({
 		loader: async () => {
-			type RawItem = Record<string, unknown> & { slug: string };
-			const fetchCategory = async (itemType: string): Promise<RawItem[]> => {
-				const items: RawItem[] = [];
+			const fetchCategory = async (itemType: string): Promise<ListingView[]> => {
+				const items: ListingView[] = [];
 				let page = 0;
 				while (true) {
 					const url =
@@ -344,7 +344,7 @@ export const collections = {
 						`&type=${itemType}` +
 						`&sortProperty=installCount&sortOrder=DESC`;
 					const res = await fetchWithRetry(url);
-					const body = (await res.json()) as { data: RawItem[]; hasNext: boolean };
+					const body = (await res.json()) as { data: ListingView[]; hasNext: boolean };
 					items.push(...body.data);
 					if (!body.hasNext) break;
 					page++;

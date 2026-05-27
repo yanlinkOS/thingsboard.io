@@ -2,21 +2,21 @@
 import { getCollection } from 'astro:content';
 import fs from 'node:fs';
 import path from 'node:path';
-import { allPages } from '~/content';
+import { allPages } from '@root/content';
 import {
 	formatBlogDate,
 	getSectionLabel,
 	isAllowlistedMarketingPath,
 	truncate,
-} from '~/util/ogContext';
-import { getLanguageFromSlug } from '~/util/path-utils';
-import type { CardProps } from './Card';
-import { getDocsProductMeta } from './product-meta';
-import { getMarketingOverride, getMarketingSection } from './marketing-meta';
-import { BLOG_AUTHORS } from '~/data/blog/authors';
-import { CATEGORY_LABELS } from '~/data/blog/categories';
-import { HARDWARE_PARTNERS } from '~/data/partners/hardware-partners';
-import { jobs } from '~/data/careers/jobs';
+} from '@util/ogContext';
+import { getLanguageFromSlug } from '@util/path-utils';
+import type { CardProps } from '@root/pages/open-graph/_shared/Card';
+import { getDocsProductMeta } from '@root/pages/open-graph/_shared/product-meta';
+import { getMarketingOverride, getMarketingSection } from '@root/pages/open-graph/_shared/marketing-meta';
+import { BLOG_AUTHORS } from '@data/blog/authors';
+import { CATEGORY_LABELS } from '@data/blog/categories';
+import { HARDWARE_PARTNERS } from '@data/partners/hardware-partners';
+import { jobs } from '@data/careers/jobs';
 
 export interface CardInput {
 	/** URL-shaped slug used as the path parameter in the endpoint */

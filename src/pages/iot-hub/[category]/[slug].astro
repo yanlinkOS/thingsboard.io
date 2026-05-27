@@ -1,19 +1,18 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getCollection } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import {
 	IOT_HUB_API_URL,
 	IOT_HUB_CATEGORIES,
-	fetchWithRetry,
-	listingDetailSchema,
 	resolveImage,
 	type ListingDetail,
-} from '~/config/iot-hub';
-import DetailHero from '~/components/IotHub/DetailHero.astro';
-import DetailMeta from '~/components/IotHub/DetailMeta.astro';
-import DetailGallery from '~/components/IotHub/DetailGallery.astro';
+} from '@models/iot-hub';
+import DetailHero from '@components/IotHub/DetailHero.astro';
+import DetailMeta from '@components/IotHub/DetailMeta.astro';
+import DetailGallery from '@components/IotHub/DetailGallery.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { fetchWithRetry } from '@util/fetch-utils';
 
 // Pure-numeric slugs are excluded to avoid colliding with pagination URLs
 // (`/iot-hub/{cat}/2/`, `/3/`, …) produced by the sibling `[...page]` route.
@@ -41,8 +40,7 @@ async function loadDetail(slug: string): Promise<ListingDetail | null> {
 		const res = await fetchWithRetry(
 			`${IOT_HUB_API_URL}/api/listings/public/by-slug/${slug}`
 		);
-		const body = await res.json();
-		return listingDetailSchema.parse(body);
+		return await res.json() as ListingDetail;
 	} catch (e) {
 		if (import.meta.env.DEV) {
 			const msg = e instanceof Error ? e.message : String(e);
@@ -71,17 +69,7 @@ const ogImageUrl =
 	undefined;
 ---
 
-<StarlightPage
-	frontmatter={{
-		title,
-		description,
-		template: 'doc',
-		pagefind: false,
-		head: ogImageUrl
-			? [{ tag: 'meta', attrs: { property: 'og:image', content: ogImageUrl } }]
-			: [],
-	}}
->
+<BaseLayout title={title} description={description} ogImage={ogImageUrl}>
 	{
 		detail ? (
 			<>
@@ -104,7 +92,7 @@ const ogImageUrl =
 			<p>Listing details are temporarily unavailable.</p>
 		)
 	}
-</StarlightPage>
+</BaseLayout>
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;

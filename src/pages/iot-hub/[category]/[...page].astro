@@ -1,13 +1,13 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import CategoryHeader from '~/components/IotHub/CategoryHeader.astro';
-import ListingCard from '~/components/IotHub/ListingCard.astro';
-import ListingCardSmall from '~/components/IotHub/ListingCardSmall.astro';
-import ListingGrid from '~/components/IotHub/ListingGrid.astro';
-import PaginationLink from '~/components/IotHub/PaginationLink.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CategoryHeader from '@components/IotHub/CategoryHeader.astro';
+import ListingCard from '@components/IotHub/ListingCard.astro';
+import ListingCardSmall from '@components/IotHub/ListingCardSmall.astro';
+import ListingGrid from '@components/IotHub/ListingGrid.astro';
+import PaginationLink from '@components/IotHub/PaginationLink.astro';
 import { getCollection } from 'astro:content';
-import { IOT_HUB_CATEGORIES, PAGE_SIZE, getCardVariant } from '~/config/iot-hub';
+import { IOT_HUB_CATEGORIES, PAGE_SIZE, getCardVariant } from '@models/iot-hub.ts';
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const all = await getCollection('iotHubListings');

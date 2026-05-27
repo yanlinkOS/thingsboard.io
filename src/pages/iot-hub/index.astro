@@ -1,11 +1,11 @@
 ---
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import IotHubHero from '~/components/IotHub/IotHubHero.astro';
-import CategoryTilesGrid from '~/components/IotHub/CategoryTilesGrid.astro';
-import CategorySection from '~/components/IotHub/CategorySection.astro';
-import CreatorCTA from '~/components/IotHub/CreatorCTA.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import IotHubHero from '@components/IotHub/IotHubHero.astro';
+import CategoryTilesGrid from '@components/IotHub/CategoryTilesGrid.astro';
+import CategorySection from '@components/IotHub/CategorySection.astro';
+import CreatorCTA from '@components/IotHub/CreatorCTA.astro';
 import { getCollection } from 'astro:content';
-import { IOT_HUB_CATEGORIES, HOME_PER_CATEGORY } from '~/config/iot-hub';
+import { IOT_HUB_CATEGORIES, HOME_PER_CATEGORY } from '@models/iot-hub';
 
 const all = await getCollection('iotHubListings');
 

@@ -50,7 +50,24 @@ All documentation lives in `src/content/docs/{lang}/` as `.mdx` files with YAML 
 
 ### Path Alias
 
-`~/*` maps to `./src/*` (configured in tsconfig.json).
+**Always use the `@`-prefixed path aliases for local imports** — never relative paths (`../../`) and never the legacy `~/*` alias for new code. Aliases are configured in `tsconfig.json`:
+
+| Alias | Maps to |
+|-------|---------|
+| `@models/*` | `src/models/*` |
+| `@components/*` | `src/components/*` |
+| `@layouts/*` | `src/layouts/*` |
+| `@styles/*` | `src/styles/*` |
+| `@data/*` | `src/data/*` |
+| `@util/*` | `src/util/*` |
+| `@includes/*` | `src/content/_includes/*` |
+| `@root/*` | `src/*` (catch-all for paths without a dedicated alias, e.g. `@root/consts`, `@root/pages/...`) |
+
+Prefer the most specific alias whenever one matches the target folder; fall back to `@root/*` only for `src/` paths no other alias covers.
+
+Example: `import { foo } from '@util/fetch-utils';` (not `~/util/fetch-utils` or `../../util/fetch-utils`).
+
+`~/*` (maps to `./src/*`) still exists for legacy code, but always prefer an `@` alias. SCSS `@use`/`@import` are resolved by sass, not these aliases — leave SCSS paths as-is.
 
 ### Starlight Customization
 

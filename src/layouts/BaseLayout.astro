@@ -1,16 +1,16 @@
 ---
-import Header from '../components/Landing/Header.astro';
-import Footer from '../components/Landing/Footer.astro';
-import CookieBanner from '../components/CookieBanner.astro';
-import UtmTracker from '../components/UtmTracker.astro';
-import GtmNoscript from '../components/GtmNoscript.astro';
-import ThirdPartyScripts from '../components/ThirdPartyScripts.astro';
-import SeoMeta from '../components/SeoMeta.astro';
+import Header from '@components/Landing/Header.astro';
+import Footer from '@components/Landing/Footer.astro';
+import CookieBanner from '@components/CookieBanner.astro';
+import UtmTracker from '@components/UtmTracker.astro';
+import GtmNoscript from '@components/GtmNoscript.astro';
+import ThirdPartyScripts from '@components/ThirdPartyScripts.astro';
+import SeoMeta from '@components/SeoMeta.astro';
 import ThemeProvider from '@astrojs/starlight/components/ThemeProvider.astro';
-import { formatMarketingTitle } from '~/consts';
-import { getSectionFromPath } from '~/util/path-utils';
-import { getOgImageUrl } from '~/util/getOgImageUrl';
-import '../styles/global.scss';
+import { formatMarketingTitle } from '@root/consts.ts';
+import { getSectionFromPath } from '@util/path-utils';
+import { getOgImageUrl } from '@util/getOgImageUrl';
+import '@styles/global.scss';
 import 'node_modules/@astrojs/starlight/style/props.css';
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
 	githubLabel?: string;
 	platformQuery?: string;
 	noCanonical?: boolean;
-	gitHubPlatform?: import('../models/site.models').Products;
+	gitHubPlatform?: import('@models/site.models').Products;
 	forceLightTheme?: boolean;
 	ogImage?: string;
 	ogType?: string;

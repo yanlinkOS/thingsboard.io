@@ -1,6 +1,6 @@
 // Language system
 import { Products } from '@models/site.models.ts';
-import { SECTION_LABELS, SITE_NAME } from '~/consts';
+import { SECTION_LABELS, SITE_NAME } from '@root/consts';
 
 export type SupportedLanguage = 'en' | 'uk';
 

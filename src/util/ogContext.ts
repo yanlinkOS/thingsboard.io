@@ -1,4 +1,4 @@
-import { getProductTitleName, getVersionFromSlug } from '~/util/path-utils';
+import { getProductTitleName, getVersionFromSlug } from '@util/path-utils';
 
 /**
  * SEO product label used in the eyebrow line.

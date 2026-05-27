@@ -4,10 +4,10 @@
 // name. Used for blog, marketing landings, case studies, use cases, device library.
 
 import { html } from 'satori-html';
-import { TB_STACKED_LOGO } from '../_assets/icons';
-import { Background } from './Background';
-import { Slab } from './Slab';
-import { pickTitleSize } from './text-block';
+import { TB_STACKED_LOGO } from '@root/pages/open-graph/_assets/icons';
+import { Background } from '@root/pages/open-graph/_shared/Background';
+import { Slab } from '@root/pages/open-graph/_shared/Slab';
+import { pickTitleSize } from '@root/pages/open-graph/_shared/text-block';
 
 const TEXT_COLOR = '#ffffff';
 const URL_COLOR = 'rgba(255,255,255,0.62)';
