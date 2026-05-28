@@ -689,11 +689,11 @@ const paasReferenceItems = (prefix: string): SidebarConfig => {
 					label: 'Analogue Gauges',
 					collapsed: true,
 					items: [
-						`${prefix}/widgets/analogue-gauges/temperature-radial-gauge`,
-						`${prefix}/widgets/analogue-gauges/thermometer-scale`,
-						`${prefix}/widgets/analogue-gauges/speed-gauge`,
-						`${prefix}/widgets/analogue-gauges/radial-gauge`,
 						`${prefix}/widgets/analogue-gauges/compass`,
+						`${prefix}/widgets/analogue-gauges/radial-gauge`,
+						`${prefix}/widgets/analogue-gauges/speed-gauge`,
+						`${prefix}/widgets/analogue-gauges/thermometer-scale`,
+						`${prefix}/widgets/analogue-gauges/temperature-radial-gauge`,
 					],
 				},
 				{
@@ -725,8 +725,11 @@ const paasReferenceItems = (prefix: string): SidebarConfig => {
 					label: 'Cards',
 					collapsed: true,
 					items: [
+						`${prefix}/widgets/cards/attributes-card`,
+						`${prefix}/widgets/cards/html-card`,
 						`${prefix}/widgets/cards/html-value-card`,
 						`${prefix}/widgets/cards/markdown-html-card`,
+						`${prefix}/widgets/cards/progress-bar`,
 						`${prefix}/widgets/cards/value-card`,
 					],
 				},
@@ -751,11 +754,20 @@ const paasReferenceItems = (prefix: string): SidebarConfig => {
 					],
 				},
 				{
+					label: 'Files',
+					collapsed: true,
+					items: [
+						`${prefix}/widgets/files/files`,
+						`${prefix}/widgets/files/dashboard-reports`,
+					],
+				},
+				{
 					label: 'HTML Widgets',
 					collapsed: true,
 					items: [
-						`${prefix}/widgets/html-widgets/markdown-html-card`,
+						`${prefix}/widgets/html-widgets/html-card`,
 						`${prefix}/widgets/html-widgets/html-value-card`,
+						`${prefix}/widgets/html-widgets/markdown-html-card`,
 					],
 				},
 				{
@@ -996,6 +1008,16 @@ const paasReferenceItems = (prefix: string): SidebarConfig => {
 					],
 				},
 				{
+					label: 'Status Indicators',
+					collapsed: true,
+					items: [
+						`${prefix}/widgets/status-indicators/battery-level`,
+						`${prefix}/widgets/status-indicators/progress-bar`,
+						`${prefix}/widgets/status-indicators/signal-strength`,
+						`${prefix}/widgets/status-indicators/status-widget`,
+					],
+				},
+				{
 					label: 'Tables',
 					collapsed: true,
 					items: [
@@ -1003,6 +1025,14 @@ const paasReferenceItems = (prefix: string): SidebarConfig => {
 						`${prefix}/widgets/tables/entities-table`,
 						`${prefix}/widgets/tables/timeseries-table`,
 						`${prefix}/widgets/tables/persistent-table`,
+					],
+				},
+				{
+					label: 'Scheduling',
+					collapsed: true,
+					items: [
+						`${prefix}/widgets/scheduling/scheduler-events`,
+						`${prefix}/widgets/scheduling/reports-schedule`,
 					],
 				},
 				{
@@ -1244,11 +1274,11 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 					label: 'Analogue Gauges',
 					collapsed: true,
 					items: [
-						`${prefix}/widgets/analogue-gauges/temperature-radial-gauge`,
-						`${prefix}/widgets/analogue-gauges/thermometer-scale`,
-						`${prefix}/widgets/analogue-gauges/speed-gauge`,
-						`${prefix}/widgets/analogue-gauges/radial-gauge`,
 						`${prefix}/widgets/analogue-gauges/compass`,
+						`${prefix}/widgets/analogue-gauges/radial-gauge`,
+						`${prefix}/widgets/analogue-gauges/speed-gauge`,
+						`${prefix}/widgets/analogue-gauges/thermometer-scale`,
+						`${prefix}/widgets/analogue-gauges/temperature-radial-gauge`,
 					],
 				},
 				{
@@ -1280,8 +1310,11 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 					label: 'Cards',
 					collapsed: true,
 					items: [
-						`${prefix}/widgets/cards/markdown-html-card`,
+						`${prefix}/widgets/cards/attributes-card`,
+						`${prefix}/widgets/cards/html-card`,
 						`${prefix}/widgets/cards/html-value-card`,
+						`${prefix}/widgets/cards/markdown-html-card`,
+						`${prefix}/widgets/cards/progress-bar`,
 						`${prefix}/widgets/cards/value-card`,
 					],
 				},
@@ -1305,12 +1338,23 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 						`${prefix}/widgets/count-widgets/entity-count`,
 					],
 				},
+				...(prefix.includes('/pe/') ? [
+					{
+						label: 'Files',
+						collapsed: true,
+						items: [
+							`${prefix}/widgets/files/files`,
+							`${prefix}/widgets/files/dashboard-reports`,
+						],
+					},
+				] : []),
 				{
 					label: 'HTML Widgets',
 					collapsed: true,
 					items: [
-						`${prefix}/widgets/html-widgets/markdown-html-card`,
+						`${prefix}/widgets/html-widgets/html-card`,
 						`${prefix}/widgets/html-widgets/html-value-card`,
+						`${prefix}/widgets/html-widgets/markdown-html-card`,
 					],
 				},
 				{
@@ -1551,6 +1595,16 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 					],
 				},
 				{
+					label: 'Status Indicators',
+					collapsed: true,
+					items: [
+						`${prefix}/widgets/status-indicators/battery-level`,
+						`${prefix}/widgets/status-indicators/progress-bar`,
+						`${prefix}/widgets/status-indicators/signal-strength`,
+						`${prefix}/widgets/status-indicators/status-widget`,
+					],
+				},
+				{
 					label: 'Tables',
 					collapsed: true,
 					items: [
@@ -1560,6 +1614,16 @@ const referenceItems = (prefix: string, extraConfigItems: SidebarConfig = []) =>
 						`${prefix}/widgets/tables/persistent-table`,
 					],
 				},
+				...(prefix.includes('/pe/') ? [
+					{
+						label: 'Scheduling',
+						collapsed: true,
+						items: [
+							`${prefix}/widgets/scheduling/scheduler-events`,
+							`${prefix}/widgets/scheduling/reports-schedule`,
+						],
+					},
+				] : []),
 				{
 					label: 'Video Streaming',
 					collapsed: true,
