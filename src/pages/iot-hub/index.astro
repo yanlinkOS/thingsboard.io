@@ -29,35 +29,75 @@ const description =
 				<span class="iot-hub-home__blob iot-hub-home__blob--left"></span>
 				<span class="iot-hub-home__blob iot-hub-home__blob--right"></span>
 			</div>
-			<div class="iot-hub-home__top-inner">
-				<IotHubHero />
-				<CategoryTilesGrid />
-			</div>
+			<div class="iot-hub-home__center_wrapper">
+				<div class="iot-hub-home__container iot-hub-home__top-inner">
+					<IotHubHero />
+					<CategoryTilesGrid />
+				</div>
+			</div>	
 		</section>
 		<div class="iot-hub-home__divider"></div>
-		<div class="iot-hub-home__container">
-			<div class="iot-hub-home__items">
-				<h2 class="iot-hub-home__heading">Most popular in IoT Hub</h2>
-				{
-					grouped.map(({ cat, items }) => (
-						<CategorySection
-							categorySlug={cat.slug}
-							categoryLabel={cat.label}
-							items={items}
-						/>
-					))
-				}
+		<div class="iot-hub-home__center_wrapper">
+			<div class="iot-hub-home__container">
+				<div class="iot-hub-home__items">
+					<h2 class="iot-hub-home__heading">Most popular in IoT Hub</h2>
+					{
+						grouped.map(({ cat, items }) => (
+							<CategorySection
+								categorySlug={cat.slug}
+								categoryLabel={cat.label}
+								items={items}
+								home={true}
+							/>
+						))
+					}
+				</div>
 			</div>
-		</div>
+		</div>	
 		<div class="iot-hub-home__divider"></div>
-		<div class="iot-hub-home__container">
-			<CreatorCTA />
-		</div>
+		<div class="iot-hub-home__center_wrapper">
+			<div class="iot-hub-home__container">
+				<CreatorCTA />
+			</div>
+		</div>	
 	</main>
 </BaseLayout>
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-home {
+		// Hairline token used by the side borders and dividers below.
+		// Light theme falls back to #edeef3, dark theme to #23262f (Figma).
+		// `:global()` is required because `data-theme` lives on <html>, which
+		// is outside this component's Astro scope.
+		--iot-hub-hairline: var(--hairline---sl-color-hairline, #edeef3);
+
+		:global([data-theme='dark']) & {
+			--iot-hub-hairline: var(--hairline---sl-color-hairline, #23262f);
+		}
+	}
+
+	.iot-hub-home__center_wrapper {
+		margin: 0 auto;
+		max-width: calc(#{$container-max-width} + 32px);
+
+		@include media-down(sm) {
+			max-width: calc(#{$container-max-width} + 16px);
+		}
+	}
+
+	.iot-hub-home__container {
+		max-width: $container-max-width;
+		margin: 0 16px;
+		// Hairline side borders flanking the 1080px content column (Figma).
+		border-right: 1px solid var(--iot-hub-hairline);
+		border-left: 1px solid var(--iot-hub-hairline);
+		
+		@include media-down(sm) {
+			margin: 0 8px;
+		}
+	}
 
 	.iot-hub-home__top {
 		position: relative;
@@ -71,13 +111,12 @@ const description =
 
 	.iot-hub-home__top-inner {
 		position: relative;
-		max-width: 1080px;
-		margin: 0 auto;
 		// Figma: 80px gap from the category tiles to the divider that follows.
 		padding-bottom: 80px;
-		// Hairline side borders flanking the 1080px content column (Figma).
-		border-right: 1px solid var(--hairline---sl-color-hairline, #edeef3);
-		border-left: 1px solid var(--hairline---sl-color-hairline, #edeef3);
+
+		@include media-down(xl) {
+			padding-bottom: 40px;
+		}
 	}
 
 	.iot-hub-home__bg {
@@ -132,19 +171,11 @@ const description =
 		}
 	}
 
-	.iot-hub-home__container {
-		max-width: 1080px;
-		margin: 0 auto;
-		// Hairline side borders flanking the 1080px content column (Figma).
-		border-right: 1px solid var(--hairline---sl-color-hairline, #edeef3);
-		border-left: 1px solid var(--hairline---sl-color-hairline, #edeef3);
-	}
-
 	.iot-hub-home__divider {
 		height: 1px;
-		// Hairline token from Figma; falls back to the literal #EDEEF3 if the
-		// CSS variable isn't defined in the active theme.
-		background: var(--hairline---sl-color-hairline, #edeef3);
+		// Hairline token from Figma; light = #edeef3, dark = #23262f
+		// (resolved by `--iot-hub-hairline` on .iot-hub-home above).
+		background: var(--iot-hub-hairline);
 	}
 
 	.iot-hub-home__items {
@@ -155,6 +186,12 @@ const description =
 		// collapse through this wrapper — combined gap to the divider below
 		// is then 64px + 16px = 80px (Figma).
 		padding-bottom: 16px;
+
+		@include media-down(xl) {
+			padding-top: 40px;
+			padding-bottom: 0;
+			margin-bottom: -8px;
+		}
 	}
 
 	.iot-hub-home__heading {
@@ -169,6 +206,10 @@ const description =
 		@include media-down(md) {
 			font-size: 24px;
 			line-height: 32px;
+		}
+
+		@include media-down(sm) {
+			margin: 0 0.75rem;
 		}
 	}
 </style>

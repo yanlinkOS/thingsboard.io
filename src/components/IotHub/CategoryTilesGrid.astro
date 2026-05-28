@@ -11,6 +11,7 @@ import CategoryTile from './CategoryTile.astro';
 					slug={cat.slug}
 					label={cat.tileLabel}
 					color={cat.tileColor}
+					colorDark={cat.tileColorDark}
 					itemType={cat.itemType}
 				/>
 			))
@@ -30,6 +31,10 @@ import CategoryTile from './CategoryTile.astro';
 		// Page-load entrance: tiles fade in and settle up
 		// (port of tb-iot-hub-home's categories animation).
 		animation: iot-hub-fade-slide-up 1s cubic-bezier(0.19, 1, 0.22, 1) 0.2s both;
+
+		@include media-down(sm) {
+			padding: 0 0.75rem;
+		}
 	}
 
 	.iot-hub-tiles__grid {

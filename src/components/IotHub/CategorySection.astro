@@ -7,9 +7,10 @@ interface Props {
 	categorySlug: string;
 	categoryLabel: string;
 	items: ListingView[];
+	home?: boolean;
 }
 
-const { categorySlug, categoryLabel, items } = Astro.props;
+const { categorySlug, categoryLabel, items, home = false } = Astro.props;
 const indexHref = `/iot-hub/${categorySlug}/`;
 const variant = getCardVariant(items[0]?.itemType ?? '');
 ---
@@ -38,7 +39,7 @@ const variant = getCardVariant(items[0]?.itemType ?? '');
 	</a>
 	{
 		items.length > 0 ? (
-			<ListingGrid variant={variant}>
+			<ListingGrid variant={variant} home={home}>
 				{items.map((item) => (
 					<ListingCard item={item} categorySlug={categorySlug} />
 				))}
@@ -60,6 +61,10 @@ const variant = getCardVariant(items[0]?.itemType ?? '');
 		// sits flush with the container's left edge while only the grid's
 		// cards are inset (16px padding on .iot-hub-grid).
 		margin: 4rem 0;
+
+		@include media-down(xl) {
+			margin: 3rem 0;
+		}
 	}
 
 	.iot-hub-section__header {
@@ -69,6 +74,10 @@ const variant = getCardVariant(items[0]?.itemType ?? '');
 		margin-bottom: 1rem;
 		text-decoration: none;
 		color: inherit;
+
+		@include media-down(sm) {
+			gap: 10px;
+		}
 
 		&:hover {
 			text-decoration: none;

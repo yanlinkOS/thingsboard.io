@@ -34,10 +34,10 @@ const submitUrl = `${IOT_HUB_API_URL}/signup`;
 	@use '~/styles/_variables.scss' as *;
 
 	.iot-hub-cta-wrap {
-		padding: 5rem 1rem;
+		padding: 80px 1rem;
 
-		@include media-down(md) {
-			padding: 3rem 1rem;
+		@include media-down(lg) {
+			padding-top: 40px;
 		}
 	}
 
@@ -121,6 +121,14 @@ const submitUrl = `${IOT_HUB_API_URL}/signup`;
 
 		svg {
 			display: block;
+		}
+
+		// Dark theme inverts the CTA: lighter blue surface with dark text per
+		// Figma node 1240:40372. `:global()` is required because `data-theme`
+		// lives on <html>, outside this component's Astro scope.
+		:global([data-theme='dark']) & {
+			background: #b3c7ff;
+			color: #17181c;
 		}
 	}
 </style>

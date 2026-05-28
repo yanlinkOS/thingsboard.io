@@ -13,10 +13,11 @@ interface Props {
 	slug: string;
 	label: string;
 	color: string;
+	colorDark: string;
 	itemType: string;
 }
 
-const { slug, label, color, itemType } = Astro.props;
+const { slug, label, color, colorDark, itemType } = Astro.props;
 
 const imageByType: Record<string, ImageMetadata> = {
 	DEVICE: deviceImg,
@@ -31,7 +32,12 @@ const image = imageByType[itemType] ?? deviceImg;
 const href = `/iot-hub/${slug}/`;
 ---
 
-<a class="iot-hub-tile" href={href} style={`--tile-bg:${color};`} data-category={slug}>
+<a
+	class="iot-hub-tile"
+	href={href}
+	style={`--tile-bg:${color};--tile-bg-dark:${colorDark};`}
+	data-category={slug}
+>
 	<span class="iot-hub-tile__title">
 		<span class="iot-hub-tile__title-text">{label}</span>
 		<svg
@@ -89,9 +95,14 @@ const href = `/iot-hub/${slug}/`;
 			}
 		}
 
-		[data-theme='dark'] & {
-			color: #17181c;
-			border-color: rgba(0, 0, 0, 0.12);
+		// `:global()` is required because `data-theme` lives on <html>, which
+		// is outside this component's Astro scope. In dark mode the tile uses
+		// the saturated brand hue (Figma node 1240:40385) with white text and
+		// no visible border.
+		:global([data-theme='dark']) & {
+			background: var(--tile-bg-dark);
+			color: white;
+			border-color: transparent;
 		}
 	}
 

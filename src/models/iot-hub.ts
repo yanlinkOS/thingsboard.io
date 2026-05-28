@@ -10,7 +10,10 @@ export const IOT_HUB_CATEGORIES = [
 		label: 'Devices',
 		tileLabel: 'Device Library',
 		card: 'big',
+		// Light = Figma `iot-hub/--device-library-card-bg` (light theme),
+		// Dark = same token in dark theme (saturated brand hue).
 		tileColor: '#ccd5ff',
+		tileColorDark: '#4c63cc',
 	},
 	{
 		slug: 'solution-templates',
@@ -19,6 +22,7 @@ export const IOT_HUB_CATEGORIES = [
 		tileLabel: 'Solution Templates',
 		card: 'big',
 		tileColor: '#b8d9ff',
+		tileColorDark: '#2c6cb4',
 	},
 	{
 		slug: 'widgets',
@@ -27,6 +31,7 @@ export const IOT_HUB_CATEGORIES = [
 		tileLabel: 'Widgets',
 		card: 'big',
 		tileColor: '#a3ffc3',
+		tileColorDark: '#2c9755',
 	},
 	{
 		slug: 'calculated-fields',
@@ -35,6 +40,7 @@ export const IOT_HUB_CATEGORIES = [
 		tileLabel: 'Calculated Fields',
 		card: 'small',
 		tileColor: '#bdedff',
+		tileColorDark: '#3db5e0',
 	},
 	{
 		slug: 'alarm-rules',
@@ -43,6 +49,7 @@ export const IOT_HUB_CATEGORIES = [
 		tileLabel: 'Alarm Rules',
 		card: 'small',
 		tileColor: '#ffe6cc',
+		tileColorDark: '#d7702f',
 	},
 	{
 		slug: 'rule-chains',
@@ -51,6 +58,7 @@ export const IOT_HUB_CATEGORIES = [
 		tileLabel: 'Rule Chains',
 		card: 'small',
 		tileColor: '#ecd1ff',
+		tileColorDark: '#bb7ce9',
 	},
 ] as const;
 

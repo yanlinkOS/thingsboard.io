@@ -98,8 +98,8 @@ const highlights = [
 		padding: calc(#{$header-height} + 180px) 1rem 80px;
 		text-align: center;
 
-		@include media-down(md) {
-			padding: calc(#{$header-height} + 96px) 1rem 2rem;
+		@include media-down(sm) {
+			padding: calc(#{$header-height} + 140px) 0.75rem 40px;
 		}
 	}
 
@@ -109,13 +109,17 @@ const highlights = [
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 2.5rem;
+		gap: 1.5rem;
 		// Sit above the cluster overlays.
 		position: relative;
 		z-index: 1;
 		// Page-load entrance: title/subtitle/search fade in and settle down
 		// (port of tb-iot-hub-home's hero animation).
 		animation: iot-hub-fade-slide-down 1s cubic-bezier(0.19, 1, 0.22, 1) 0.2s both;
+
+		@include media-down(sm) {
+			gap: 0.75rem;
+		}
 	}
 
 	@keyframes iot-hub-fade-slide-down {
@@ -169,12 +173,21 @@ const highlights = [
 		display: block;
 		pointer-events: none;
 
+		@include media-down(lg) {
+			top: calc(#{$header-height} + 80px);
+		}
+		
 		@include media-down(md) {
 			// Mobile uses a single top for all clusters (Figma node is
 			// desktop-only); the per-cluster var is intentionally overridden.
-			top: calc(#{$header-height} + 16px);
+			top: calc(#{$header-height} + 90px);
 			width: calc(100% - 32px);
 		}
+
+		@include media-down(sm) {
+			top: calc(#{$header-height} + 50px);
+		}
+
 	}
 
 	.iot-hub-hero__title {
@@ -185,8 +198,13 @@ const highlights = [
 		color: var(--color-text);
 
 		@include media-down(md) {
+			font-size: 48px;
+		}
+
+		@include media-down(sm) {
 			font-size: 40px;
 		}
+
 	}
 
 	.iot-hub-hero__subtitle {
@@ -197,6 +215,10 @@ const highlights = [
 		color: var(--color-text-secondary);
 		text-align: center;
 		word-spacing: 0.1rem;
+
+		@include media-down(sm) {
+			font-size: 16px;
+		}
 	}
 
 	.iot-hub-hero__subtitle-lead {
@@ -229,15 +251,34 @@ const highlights = [
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 0.5rem 0.5rem 1rem;
+		margin-top: 1rem;
 		min-height: 56px;
 		background: var(--color-bg-surface);
-		border: 1px solid var(--color-border);
+		// Border + shadow per Figma node 1169:2786. Border uses the gray-4
+		// token (#888c96 light / #555962 dark — see dark override below).
+		border: 1px solid var(--neutral---sl-color-gray-4, #888c96);
 		border-radius: 8px;
-		box-shadow: 0 7px 8px rgba(0, 0, 0, 0.04), 0 29px 14.5px rgba(0, 0, 0, 0.03);
+		box-shadow:
+			0 178px 25px rgba(0, 0, 0, 0),
+			0 114px 23px rgba(0, 0, 0, 0.01),
+			0 64px 19px rgba(0, 0, 0, 0.02),
+			0 29px 14.5px rgba(0, 0, 0, 0.03),
+			0 7px 8px rgba(0, 0, 0, 0.04);
 		transition: border-color $transition-fast;
 
 		&:focus-within {
 			border-color: var(--color-primary);
+		}
+
+		// `:global()` so the data-theme attribute on <html> (outside this
+		// component's scope) is matched. Border swaps to the dark gray-4
+		// token in dark theme.
+		:global([data-theme='dark']) & {
+			border-color: var(--neutral---sl-color-gray-4, #555962);
+		}
+
+		@include media-down(sm) {
+			margin-top: 0.75rem;
 		}
 	}
 
