@@ -7,13 +7,13 @@ import CreatorCTA from '@components/IotHub/CreatorCTA.astro';
 import { getCollection } from 'astro:content';
 import { IOT_HUB_CATEGORIES, HOME_PER_CATEGORY } from '@models/iot-hub';
 
-const all = await getCollection('iotHubListings');
+const categories = await getCollection('iotHubCategories');
+const byId = new Map(categories.map((c) => [c.id, c.data]));
 
-// The loader fetches each category from the API already sorted by `installCount`
-// (DESC) so we just slice the first N per category.
+// `items` inside each category is already in API order (installCount DESC).
 const grouped = IOT_HUB_CATEGORIES.map((cat) => ({
 	cat,
-	entries: all.filter((e) => e.data.itemType === cat.itemType).slice(0, HOME_PER_CATEGORY),
+	items: byId.get(cat.slug)?.items.slice(0, HOME_PER_CATEGORY) ?? [],
 }));
 
 const title = 'IoT Hub | ThingsBoard';
@@ -39,11 +39,11 @@ const description =
 			<div class="iot-hub-home__items">
 				<h2 class="iot-hub-home__heading">Most popular in IoT Hub</h2>
 				{
-					grouped.map(({ cat, entries }) => (
+					grouped.map(({ cat, items }) => (
 						<CategorySection
 							categorySlug={cat.slug}
 							categoryLabel={cat.label}
-							entries={entries}
+							items={items}
 						/>
 					))
 				}

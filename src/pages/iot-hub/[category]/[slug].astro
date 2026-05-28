@@ -4,7 +4,6 @@ import { getCollection } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import {
 	IOT_HUB_API_URL,
-	IOT_HUB_CATEGORIES,
 	resolveImage,
 	type ListingDetail,
 } from '@models/iot-hub';
@@ -17,18 +16,18 @@ import { fetchWithRetry } from '@util/fetch-utils';
 // Pure-numeric slugs are excluded to avoid colliding with pagination URLs
 // (`/iot-hub/{cat}/2/`, `/3/`, …) produced by the sibling `[...page]` route.
 export const getStaticPaths = (async () => {
-	const all = await getCollection('iotHubListings');
-	return IOT_HUB_CATEGORIES.flatMap((cat) =>
-		all
-			.filter((e) => e.data.itemType === cat.itemType && !/^\d+$/.test(e.data.slug))
-			.map((entry) => ({
-				params: { category: cat.slug, slug: entry.data.slug },
-				props: { entry, categoryLabel: cat.label },
+	const categories = await getCollection('iotHubCategories');
+	return categories.flatMap((catEntry) =>
+		catEntry.data.items
+			.filter((item) => !/^\d+$/.test(item.slug))
+			.map((item) => ({
+				params: { category: catEntry.id, slug: item.slug },
+				props: { item, categoryLabel: catEntry.data.label },
 			}))
 	);
 }) satisfies GetStaticPaths;
 
-const { entry, categoryLabel } = Astro.props;
+const { item, categoryLabel } = Astro.props;
 const { category } = Astro.params;
 
 // Module-scoped processor so the unified/remark/rehype pipeline is created
@@ -51,7 +50,7 @@ async function loadDetail(slug: string): Promise<ListingDetail | null> {
 	}
 }
 
-const detail = await loadDetail(entry.data.slug);
+const detail = await loadDetail(item.slug);
 
 // Render readmeContent → HTML using Astro's own markdown processor.
 let readmeHtml: string | null = null;
@@ -60,12 +59,12 @@ if (detail?.readmeContent) {
 	readmeHtml = result.code;
 }
 
-const title = detail?.seoTitle ?? detail?.name ?? entry.data.name;
+const title = detail?.seoTitle ?? detail?.name ?? item.name;
 const description =
-	detail?.seoMetaDescription ?? detail?.description ?? entry.data.description ?? '';
+	detail?.seoMetaDescription ?? detail?.description ?? item.description ?? '';
 const ogImageUrl =
 	resolveImage(detail?.ogImage ?? null) ??
-	resolveImage(detail?.image ?? entry.data.image) ??
+	resolveImage(detail?.image ?? item.image) ??
 	undefined;
 ---
 

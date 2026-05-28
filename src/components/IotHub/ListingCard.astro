@@ -1,91 +1,102 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import { resolveImage } from '~/models/iot-hub';
+import {
+	IOT_HUB_API_URL,
+	getCardVariant,
+	getPlaceholderIcon,
+	resolveImage,
+	type ListingView,
+} from '@models/iot-hub';
+// Self-hosted Material Icons font — used for `verified`, `person`, `download`
+// and Material-name placeholders on compact tiles.
+import '@fontsource/material-icons';
 
 interface Props {
-	entry: CollectionEntry<'iotHubListings'>;
+	item: ListingView;
 	categorySlug: string;
 }
 
-const { entry, categorySlug } = Astro.props;
-const { name, image, creatorDisplayName, creatorVerified, installCount, itemType } = entry.data;
-const imageUrl = resolveImage(image);
-const href = `/iot-hub/${categorySlug}/${entry.data.slug}/`;
-const cta = itemType === 'DEVICE' ? 'Connect' : 'Install';
+const { item, categorySlug } = Astro.props;
+const { name, image, color, creatorDisplayName, creatorVerified, installCount, itemType, slug } =
+	item;
+const href = `/iot-hub/${categorySlug}/${slug}/`;
 const author = creatorDisplayName ?? 'ThingsBoard';
+const cta = itemType === 'DEVICE' ? 'Connect' : 'Install';
+const isCompact = getCardVariant(itemType) === 'small';
+
+const imageUrl = isCompact ? null : resolveImage(image);
+
+// `mdi:foo` icons are served from the iot-hub `/assets/mdi/` directory; bare
+// names (e.g. `widgets`) are Material Icons font glyphs.
+const tileColor = color ?? '#4caf50';
+const placeholderIcon = getPlaceholderIcon(item);
+const mdiName = placeholderIcon.startsWith('mdi:') ? placeholderIcon.slice(4) : null;
 ---
 
-<a class="iot-hub-card" href={href}>
-	<div class="iot-hub-card__image">
-		{
-			imageUrl ? (
-				<img src={imageUrl} alt={name} loading="lazy" decoding="async" />
-			) : (
-				<div class="iot-hub-card__image-fallback" aria-hidden="true" />
-			)
-		}
-	</div>
+<a
+	class:list={[
+		'iot-hub-card',
+		isCompact ? 'iot-hub-card--compact' : 'iot-hub-card--big',
+		itemType === 'DEVICE' && 'iot-hub-card--device',
+	]}
+	href={href}
+>
+	{
+		isCompact ? (
+			<div class="iot-hub-card__icon" style={`background:${tileColor};`} aria-hidden="true">
+				{mdiName ? (
+					<img
+						class="iot-hub-card__icon-glyph iot-hub-card__icon-glyph--mdi"
+						src={`${IOT_HUB_API_URL}/assets/mdi/${mdiName}.svg`}
+						alt=""
+						width="32"
+						height="32"
+						loading="lazy"
+						decoding="async"
+					/>
+				) : (
+					<span class="iot-hub-card__icon-glyph material-icons">{placeholderIcon}</span>
+				)}
+			</div>
+		) : (
+			<div class="iot-hub-card__preview">
+				{imageUrl ? (
+					<img
+						src={imageUrl}
+						alt={name}
+						width="305"
+						height="172"
+						loading="lazy"
+						decoding="async"
+					/>
+				) : (
+					<div class="iot-hub-card__preview-fallback" aria-hidden="true" />
+				)}
+			</div>
+		)
+	}
 	<div class="iot-hub-card__body">
 		<h3 class="iot-hub-card__title">{name}</h3>
-		<div class="iot-hub-card__meta">
+		<div class="iot-hub-card__footer">
 			<div class="iot-hub-card__author">
-				{
-					creatorVerified ? (
-						<svg
-							class="iot-hub-card__author-icon iot-hub-card__author-icon--verified"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							aria-hidden="true"
-						>
-							<path
-								d="m8 1.333 2.04 1.5 2.527-.234.234 2.527 1.5 2.04-1.5 2.041-.234 2.527-2.527.234L8 13.467l-2.04-1.5-2.527-.234-.234-2.527-1.5-2.041 1.5-2.04.234-2.527 2.527.234L8 1.333Z"
-								fill="var(--color-primary)"
-							/>
-							<path
-								d="m5.667 8 1.666 1.667L10.667 6.333"
-								stroke="#fff"
-								stroke-width="1.4"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					) : (
-						<svg
-							class="iot-hub-card__author-icon"
-							width="16"
-							height="16"
-							viewBox="0 0 16 16"
-							fill="none"
-							aria-hidden="true"
-						>
-							<path
-								d="M8 8.667a2.667 2.667 0 1 0 0-5.334 2.667 2.667 0 0 0 0 5.334ZM3.333 13.333a4.667 4.667 0 0 1 9.334 0"
-								stroke="currentColor"
-								stroke-width="1.3"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					)
-				}
+				<span
+					class:list={[
+						'material-icons',
+						'iot-hub-card__author-icon',
+						creatorVerified && 'iot-hub-card__author-icon--verified',
+					]}
+					aria-hidden="true"
+				>
+					{creatorVerified ? 'verified' : 'person'}
+				</span>
 				<span class="iot-hub-card__author-name">{author}</span>
 			</div>
 			<span class="iot-hub-card__dot" aria-hidden="true"></span>
 			<div class="iot-hub-card__installs" title={`${installCount} installs`}>
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-					<path
-						d="M8 2v8.667M4.667 7.333 8 10.667l3.333-3.334M2.667 13.333h10.666"
-						stroke="currentColor"
-						stroke-width="1.3"
-						stroke-linecap="round"
-						stroke-linejoin="round"></path>
-				</svg>
+				<span class="material-icons iot-hub-card__install-icon" aria-hidden="true">download</span>
 				<span>{installCount}</span>
 			</div>
+			<button type="button" class="iot-hub-card__cta">{cta}</button>
 		</div>
-		<span class="iot-hub-card__cta">{cta}</span>
 	</div>
 </a>
 
@@ -93,14 +104,9 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 	@use '~/styles/_variables.scss' as *;
 
 	.iot-hub-card {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		padding-bottom: 1rem;
 		background: var(--color-bg-surface);
 		border: 1px solid var(--color-border);
 		border-radius: 8px;
-		overflow: hidden;
 		text-decoration: none;
 		color: inherit;
 		transition: transform $transition-fast, box-shadow $transition-fast, border-color $transition-fast;
@@ -109,7 +115,6 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 			transform: translateY(-2px);
 			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 			border-color: var(--color-border-light);
-			text-decoration: none;
 		}
 
 		[data-theme='dark'] &:hover {
@@ -117,7 +122,17 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 		}
 	}
 
-	.iot-hub-card__image {
+	// --- Big layout (preview image on top) ---------------------------------
+
+	.iot-hub-card--big {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding-bottom: 1rem;
+		overflow: hidden;
+	}
+
+	.iot-hub-card__preview {
 		position: relative;
 		aspect-ratio: 305 / 172;
 		width: 100%;
@@ -129,17 +144,21 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 		border-bottom: 1px solid var(--color-border);
 		overflow: hidden;
 
+		.iot-hub-card--device & {
+			background: #fff;
+		}
+
 		img {
 			max-width: 100%;
 			max-height: 100%;
-			width: 100%;
-			height: 100%;
+			width: auto;
+			height: auto;
 			object-fit: contain;
 			display: block;
 		}
 	}
 
-	.iot-hub-card__image-fallback {
+	.iot-hub-card__preview-fallback {
 		width: 100%;
 		height: 100%;
 		background: linear-gradient(
@@ -149,32 +168,106 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 		);
 	}
 
+	.iot-hub-card--big .iot-hub-card__body {
+		padding: 0 1rem;
+	}
+
+	// --- Compact layout (colored tile on the left) -------------------------
+
+	.iot-hub-card--compact {
+		display: flex;
+		align-items: stretch;
+		gap: 1rem;
+		padding: 1rem;
+		min-height: 104px;
+
+		&:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+		}
+
+		[data-theme='dark'] &:hover {
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+		}
+	}
+
+	.iot-hub-card__icon {
+		flex-shrink: 0;
+		width: 72px;
+		height: 72px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+	}
+
+	.iot-hub-card__icon-glyph {
+		width: 32px;
+		height: 32px;
+		font-size: 32px;
+		line-height: 1;
+	}
+
+	// MDI icons are `<img>` SVGs and don't inherit `color` — invert them to
+	// white so they read on the coloured tile (Material font glyphs already
+	// inherit `color: #fff` from `.iot-hub-card__icon`).
+	.iot-hub-card__icon-glyph--mdi {
+		filter: brightness(0) invert(1);
+		object-fit: contain;
+	}
+
+	// Material Icons font ships glyphs via `liga` substitution — the element's
+	// text content (e.g. "widgets") is rendered as the icon. `@font-face` is
+	// registered by the `@fontsource/material-icons` import at the top.
+	.material-icons {
+		font-family: 'Material Icons';
+		font-weight: normal;
+		font-style: normal;
+		letter-spacing: normal;
+		text-transform: none;
+		display: inline-block;
+		white-space: nowrap;
+		word-wrap: normal;
+		direction: ltr;
+		font-feature-settings: 'liga';
+		-webkit-font-smoothing: antialiased;
+	}
+
+	.iot-hub-card--compact .iot-hub-card__body {
+		flex: 1;
+		min-width: 0;
+		justify-content: center;
+	}
+
+	// --- Body / shared -----------------------------------------------------
+
 	.iot-hub-card__body {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		padding: 0 1rem;
-		position: relative;
+		min-width: 0;
 	}
 
 	.iot-hub-card__title {
 		font-size: 16px;
 		font-weight: $font-weight-semibold;
-		line-height: 28px;
+		line-height: 24px;
 		margin: 0;
+		color: var(--color-text);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		color: var(--color-text);
 	}
 
-	.iot-hub-card__meta {
+	.iot-hub-card__footer {
 		display: flex;
 		align-items: center;
 		gap: 6px;
 		font-size: 12px;
 		line-height: 16px;
 		color: var(--color-text-muted);
+		min-width: 0;
 	}
 
 	.iot-hub-card__author {
@@ -184,9 +277,18 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 		min-width: 0;
 	}
 
+	.iot-hub-card__author-icon,
+	.iot-hub-card__install-icon {
+		font-size: 16px;
+	}
+
 	.iot-hub-card__author-icon {
 		flex-shrink: 0;
 		color: var(--color-text-muted);
+	}
+
+	.iot-hub-card__author-icon--verified {
+		color: var(--color-primary);
 	}
 
 	.iot-hub-card__author-name {
@@ -211,22 +313,23 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 	}
 
 	.iot-hub-card__cta {
-		position: absolute;
-		right: 1rem;
-		bottom: 0;
+		margin-left: auto;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		padding: 4px 8px;
+		font-family: inherit;
 		font-size: 14px;
-		font-weight: $font-weight-semibold;
+		font-weight: $font-weight-medium;
 		line-height: 24px;
 		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		color: var(--color-primary);
 		background: transparent;
+		flex-shrink: 0;
+		cursor: pointer;
 
-		.iot-hub-card:hover & {
+		&:hover {
 			border-color: var(--color-primary);
 		}
 	}

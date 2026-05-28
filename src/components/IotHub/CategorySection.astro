@@ -1,19 +1,17 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import { getCardVariant } from '~/models/iot-hub';
+import { getCardVariant, type ListingView } from '@models/iot-hub';
 import ListingCard from './ListingCard.astro';
-import ListingCardSmall from './ListingCardSmall.astro';
 import ListingGrid from './ListingGrid.astro';
 
 interface Props {
 	categorySlug: string;
 	categoryLabel: string;
-	entries: Array<CollectionEntry<'iotHubListings'>>;
+	items: ListingView[];
 }
 
-const { categorySlug, categoryLabel, entries } = Astro.props;
+const { categorySlug, categoryLabel, items } = Astro.props;
 const indexHref = `/iot-hub/${categorySlug}/`;
-const variant = getCardVariant(entries[0]?.data.itemType ?? '');
+const variant = getCardVariant(items[0]?.itemType ?? '');
 ---
 
 <section class="iot-hub-section">
@@ -39,15 +37,11 @@ const variant = getCardVariant(entries[0]?.data.itemType ?? '');
 		</h2>
 	</a>
 	{
-		entries.length > 0 ? (
+		items.length > 0 ? (
 			<ListingGrid variant={variant}>
-				{entries.map((entry) =>
-					variant === 'small' ? (
-						<ListingCardSmall entry={entry} categorySlug={categorySlug} />
-					) : (
-						<ListingCard entry={entry} categorySlug={categorySlug} />
-					)
-				)}
+				{items.map((item) => (
+					<ListingCard item={item} categorySlug={categorySlug} />
+				))}
 			</ListingGrid>
 		) : (
 			<p class="iot-hub-section__empty">No items available yet.</p>

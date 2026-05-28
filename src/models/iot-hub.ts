@@ -63,6 +63,41 @@ export const getCardVariant = (itemType: string): IotHubCardVariant => {
 	return cat?.card ?? 'big';
 };
 
+// Default `cfType` → Material icon name.
+const CF_TYPE_ICONS: Record<string, string> = {
+	SIMPLE: 'calculate',
+	SCRIPT: 'code',
+	GEOFENCING: 'share_location',
+	ALARM: 'notification_important',
+	PROPAGATION: 'account_tree',
+	RELATED_ENTITIES_AGGREGATION: 'hub',
+	ENTITY_AGGREGATION: 'functions',
+};
+
+// Placeholder icon for a compact tile — either a Material Icons font name or
+// a `mdi:xxx` identifier (handled by the card renderer).
+type IconableListing = Pick<ListingView, 'itemType' | 'icon' | 'cfType' | 'ruleChainType'>;
+export const getPlaceholderIcon = (item: IconableListing): string => {
+	switch (item.itemType) {
+		case 'WIDGET':
+			return 'widgets';
+		case 'DASHBOARD':
+			return 'dashboard';
+		case 'SOLUTION_TEMPLATE':
+			return 'integration_instructions';
+		case 'CALCULATED_FIELD':
+			return item.icon || (item.cfType && CF_TYPE_ICONS[item.cfType]) || 'functions';
+		case 'ALARM_RULE':
+			return item.icon || 'notification_important';
+		case 'RULE_CHAIN':
+			return item.icon || (item.ruleChainType === 'EDGE' ? 'router' : 'device_hub');
+		case 'DEVICE':
+			return 'memory';
+		default:
+			return 'extension';
+	}
+};
+
 export const PAGE_SIZE = 12;
 export const HOME_PER_CATEGORY = 4;
 export const API_FETCH_PAGE_SIZE = 100;
@@ -95,8 +130,6 @@ const cssColorSchema = z
 	.catch(null);
 
 export const listingViewSchema = z.object({
-	// Astro keys entries by the outer `id` (set to slug by the loader).
-	// We don't model the API's UUID here — use `slug` everywhere instead.
 	slug: z.string(),
 	itemType: itemTypeEnum,
 	name: z.string(),
@@ -127,5 +160,15 @@ export const listingDetailSchema = listingViewSchema.extend({
 	readmeContent: z.string().nullable(),
 });
 
+// One collection entry per category. `items` preserves the API order
+// (installCount DESC) because it's stored as an array inside a single entry —
+// `getCollection()` only re-sorts entries by id, not the data within them.
+export const iotHubCategorySchema = z.object({
+	itemType: itemTypeEnum,
+	label: z.string(),
+	items: z.array(listingViewSchema),
+});
+
 export type ListingView = z.infer<typeof listingViewSchema>;
 export type ListingDetail = z.infer<typeof listingDetailSchema>;
+export type IotHubCategoryData = z.infer<typeof iotHubCategorySchema>;

@@ -10,7 +10,7 @@ import {
 	IOT_HUB_API_URL,
 	IOT_HUB_CATEGORIES,
 	API_FETCH_PAGE_SIZE,
-	listingViewSchema,
+	iotHubCategorySchema,
 	type ListingView,
 } from '@models/iot-hub';
 import { fetchWithRetry } from '@util/fetch-utils';
@@ -332,7 +332,7 @@ export const collections = {
 		}),
 		schema: deviceSchema,
 	}),  
-	iotHubListings: defineCollection({
+	iotHubCategories: defineCollection({
 		loader: async () => {
 			const fetchCategory = async (itemType: string): Promise<ListingView[]> => {
 				const items: ListingView[] = [];
@@ -352,13 +352,16 @@ export const collections = {
 				return items;
 			};
 			try {
-				// Fetch all categories in parallel; each category still paginates serially
-				// because `hasNext` is only known after the prior page lands.
+				// One entry per category, keyed by slug. See `iotHubCategorySchema`.
 				const perCategory = await Promise.all(
 					IOT_HUB_CATEGORIES.map((cat) => fetchCategory(cat.itemType))
 				);
-				// Astro keys entries by the outer `id`; we want collection lookups by slug.
-				return perCategory.flat().map((item) => ({ ...item, id: item.slug }));
+				return IOT_HUB_CATEGORIES.map((cat, i) => ({
+					id: cat.slug,
+					itemType: cat.itemType,
+					label: cat.label,
+					items: perCategory[i],
+				}));
 			} catch (e) {
 				if (import.meta.env.DEV) {
 					const msg = e instanceof Error ? e.message : String(e);
@@ -368,6 +371,6 @@ export const collections = {
 				throw e;
 			}
 		},
-		schema: listingViewSchema,
+		schema: iotHubCategorySchema,
 	}),
 };

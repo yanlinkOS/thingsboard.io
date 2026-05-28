@@ -3,24 +3,21 @@ import type { GetStaticPaths } from 'astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import CategoryHeader from '@components/IotHub/CategoryHeader.astro';
 import ListingCard from '@components/IotHub/ListingCard.astro';
-import ListingCardSmall from '@components/IotHub/ListingCardSmall.astro';
 import ListingGrid from '@components/IotHub/ListingGrid.astro';
 import PaginationLink from '@components/IotHub/PaginationLink.astro';
 import { getCollection } from 'astro:content';
-import { IOT_HUB_CATEGORIES, PAGE_SIZE, getCardVariant } from '@models/iot-hub.ts';
+import { PAGE_SIZE, getCardVariant } from '@models/iot-hub';
 
 export const getStaticPaths = (async ({ paginate }) => {
-	const all = await getCollection('iotHubListings');
-	return IOT_HUB_CATEGORIES.flatMap((cat) =>
+	const categories = await getCollection('iotHubCategories');
+	return categories.flatMap((catEntry) =>
+		// Exclude pure-numeric slugs — the detail route filters them out, so listing
+		// them here would produce cards whose hrefs resolve to pagination pages.
 		paginate(
-			// Exclude pure-numeric slugs — the detail route filters them out, so listing them
-			// here would produce cards with hrefs that resolve to pagination pages instead.
-			all.filter(
-				(e) => e.data.itemType === cat.itemType && !/^\d+$/.test(e.data.slug)
-			),
+			catEntry.data.items.filter((item) => !/^\d+$/.test(item.slug)),
 			{
-				params: { category: cat.slug },
-				props: { categoryLabel: cat.label },
+				params: { category: catEntry.id },
+				props: { categoryLabel: catEntry.data.label },
 				pageSize: PAGE_SIZE,
 			}
 		)
@@ -31,7 +28,7 @@ const { page } = Astro.props;
 const { categoryLabel } = Astro.props as { categoryLabel: string };
 const { category } = Astro.params;
 const basePath = `/iot-hub/${category}/`;
-const variant = getCardVariant(page.data[0]?.data.itemType ?? '');
+const variant = getCardVariant(page.data[0]?.itemType ?? '');
 
 const title = `${categoryLabel} | IoT Hub | ThingsBoard`;
 const description = `Browse ${categoryLabel.toLowerCase()} published to the ThingsBoard IoT Hub.`;
@@ -44,13 +41,9 @@ const description = `Browse ${categoryLabel.toLowerCase()} published to the Thin
 			page.data.length > 0 ? (
 				<>
 					<ListingGrid variant={variant}>
-						{page.data.map((entry) =>
-							variant === 'small' ? (
-								<ListingCardSmall entry={entry} categorySlug={category!} />
-							) : (
-								<ListingCard entry={entry} categorySlug={category!} />
-							)
-						)}
+						{page.data.map((item) => (
+							<ListingCard item={item} categorySlug={category!} />
+						))}
 					</ListingGrid>
 					{page.lastPage > 1 ? (
 						<PaginationLink

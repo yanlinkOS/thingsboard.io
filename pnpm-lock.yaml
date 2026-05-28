@@ -26,6 +26,9 @@ importers:
       '@expressive-code/plugin-collapsible-sections':
         specifier: ^0.41.7
         version: 0.41.7
+      '@fontsource/material-icons':
+        specifier: ^5.2.7
+        version: 5.2.7
       '@lunariajs/core':
         specifier: ^0.1.1
         version: 0.1.1
@@ -512,6 +515,9 @@ packages:
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
+
+  '@fontsource/material-icons@5.2.7':
+    resolution: {integrity: sha512-crPmK0L34lPGmS5GSGLasKpRGQzl95SxMsLM+QhBHPgR9uxSsyI5CUTb0cgoMpjtR+Bf1bC9QOe6pavoybbBwg==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3717,6 +3723,8 @@ snapshots:
       '@expressive-code/core': 0.42.0
 
   '@fastify/busboy@2.1.1': {}
+
+  '@fontsource/material-icons@5.2.7': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
