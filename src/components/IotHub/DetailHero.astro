@@ -1,102 +1,509 @@
 ---
-import type { ListingDetail } from '~/models/iot-hub';
-import { resolveImage } from '~/models/iot-hub';
+import {
+	IOT_HUB_API_URL,
+	IOT_HUB_CATEGORIES,
+	getCardVariant,
+	getPlaceholderIcon,
+	resolveImage,
+	type ListingDetail,
+} from '@models/iot-hub';
+import IotHubChevron from './IotHubChevron.astro';
+import DetailGallery from './DetailGallery.astro';
+import '@fontsource/material-icons';
 
 interface Props {
 	detail: ListingDetail;
+	categorySlug: string;
 }
 
-const { detail } = Astro.props;
-const heroImg = resolveImage(detail.image);
-const placeholderBg = detail.color ?? '#e5e7eb';
+const { detail, categorySlug } = Astro.props;
+
+// Use `tileLabel` (same source as CategoryHero's breadcrumb) so the parent
+// crumb on the detail page matches what users see one level up — e.g.
+// "Device Library" rather than the API's plural "Devices".
+const categoryLabel =
+	IOT_HUB_CATEGORIES.find((c) => c.slug === categorySlug)?.tileLabel ??
+	categorySlug;
+const isCompact = getCardVariant(detail.itemType) === 'small';
+
+// SOLUTION_TEMPLATE listings ship multiple screenshots — render the gallery
+// in the preview slot instead of a single image (DEVICE / WIDGET fall back
+// to `detail.image`).
+const showGallery =
+	!isCompact &&
+	detail.itemType === 'SOLUTION_TEMPLATE' &&
+	detail.screenshots.length > 0;
+const heroImg = !isCompact && !showGallery ? resolveImage(detail.image) : null;
+// Compact variants render a colored icon tile next to the title (same as
+// the compact ListingCard renderer, but at 80x80 to match Figma 1286:31864).
+const tileColor = detail.color ?? '#4caf50';
+const placeholderIcon = isCompact ? getPlaceholderIcon(detail) : null;
+const mdiName =
+	placeholderIcon && placeholderIcon.startsWith('mdi:')
+		? placeholderIcon.slice(4)
+		: null;
+
+const installUrl = `${IOT_HUB_API_URL}/listings/${detail.slug}`;
+
+// Sub-title meta row — only render entries we actually have data for.
+const subTypeLabel = (() => {
+	switch (detail.itemType) {
+		case 'DEVICE':
+			return detail.hardwareType || 'Device';
+		case 'WIDGET':
+			return detail.widgetType || 'Widget';
+		case 'SOLUTION_TEMPLATE':
+			return 'Solution Template';
+		case 'CALCULATED_FIELD':
+			return detail.cfType || 'Calculated Field';
+		case 'ALARM_RULE':
+			return 'Alarm Rule';
+		case 'RULE_CHAIN':
+			return detail.ruleChainType || 'Rule Chain';
+		default:
+			return detail.itemType.toLowerCase().replace(/_/g, ' ');
+	}
+})();
+
+const subTypeIcon = (() => {
+	switch (detail.itemType) {
+		case 'DEVICE':
+			return 'memory';
+		case 'WIDGET':
+			return 'widgets';
+		case 'SOLUTION_TEMPLATE':
+			return 'integration_instructions';
+		case 'CALCULATED_FIELD':
+			return 'functions';
+		case 'ALARM_RULE':
+			return 'notification_important';
+		case 'RULE_CHAIN':
+			return 'account_tree';
+		default:
+			return 'category';
+	}
+})();
+
+const publishedDate =
+	detail.publishedTime != null
+		? new Date(detail.publishedTime).toLocaleDateString('en-US', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+			})
+		: null;
 ---
 
 <header class="iot-hub-detail-hero">
-	<div class="iot-hub-detail-hero__image" style={`background-color: ${placeholderBg};`}>
-		{heroImg ? <img src={heroImg} alt={detail.name} decoding="async" /> : null}
-	</div>
-	<div class="iot-hub-detail-hero__meta">
-		<p class="iot-hub-detail-hero__title">{detail.name}</p>
-		{detail.description ? <p class="iot-hub-detail-hero__desc">{detail.description}</p> : null}
-		<dl class="iot-hub-detail-hero__stats">
-			{
-				detail.creatorDisplayName ? (
-					<>
-						<dt>By</dt>
-						<dd>
-							{detail.creatorDisplayName}
-							{detail.creatorVerified ? <span aria-label="Verified creator">✓</span> : null}
-						</dd>
-					</>
-				) : null
-			}
-			<dt>Installs</dt>
-			<dd>{detail.installCount.toLocaleString('en-US')}</dd>
-		</dl>
-	</div>
+	<nav class="iot-hub-detail-hero__crumbs" aria-label="Breadcrumb">
+		<a class="iot-hub-detail-hero__crumbs-link" href="/iot-hub/">IoT Hub</a>
+		<IotHubChevron direction="right" class="iot-hub-detail-hero__crumbs-sep" />
+		<a class="iot-hub-detail-hero__crumbs-link" href={`/iot-hub/${categorySlug}/`}>
+			{categoryLabel}
+		</a>
+		<IotHubChevron direction="right" class="iot-hub-detail-hero__crumbs-sep" />
+		<span class="iot-hub-detail-hero__crumbs-current" aria-current="page">{detail.name}</span>
+	</nav>
+
+	{
+		isCompact ? (
+			<div class="iot-hub-detail-hero__compact">
+				<div class="iot-hub-detail-hero__icon-row">
+					<div
+						class="iot-hub-detail-hero__icon"
+						style={`background:${tileColor};`}
+						aria-hidden="true"
+					>
+						{mdiName ? (
+							<img
+								class="iot-hub-detail-hero__icon-glyph iot-hub-detail-hero__icon-glyph--mdi"
+								src={`${IOT_HUB_API_URL}/assets/mdi/${mdiName}.svg`}
+								alt=""
+								width="45"
+								height="45"
+								loading="eager"
+								decoding="async"
+							/>
+						) : (
+							<span class="iot-hub-detail-hero__icon-glyph material-icons">
+								{placeholderIcon}
+							</span>
+						)}
+					</div>
+					<div class="iot-hub-detail-hero__titles">
+						<h1 class="iot-hub-detail-hero__title">{detail.name}</h1>
+						<ul class="iot-hub-detail-hero__meta" role="list">
+							<li class="iot-hub-detail-hero__meta-item">
+								<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+									{subTypeIcon}
+								</span>
+								<span>{subTypeLabel}</span>
+							</li>
+							<li class="iot-hub-detail-hero__meta-dot" aria-hidden="true" />
+							<li class="iot-hub-detail-hero__meta-item">
+								<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+									download
+								</span>
+								<span>{detail.installCount.toLocaleString('en-US')}</span>
+							</li>
+							{publishedDate && (
+								<>
+									<li class="iot-hub-detail-hero__meta-dot" aria-hidden="true" />
+									<li class="iot-hub-detail-hero__meta-item">
+										<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+											event
+										</span>
+										<span>{publishedDate}</span>
+									</li>
+								</>
+							)}
+						</ul>
+					</div>
+				</div>
+				{detail.description && (
+					<p class="iot-hub-detail-hero__desc">{detail.description}</p>
+				)}
+				<a
+					class="iot-hub-detail-hero__cta"
+					href={installUrl}
+					target="_blank"
+					rel="noopener"
+				>
+					<span>Install</span>
+					<IotHubChevron direction="right" />
+				</a>
+			</div>
+		) : (
+			<>
+				<div class="iot-hub-detail-hero__titles">
+					<h1 class="iot-hub-detail-hero__title">{detail.name}</h1>
+					<ul class="iot-hub-detail-hero__meta" role="list">
+						<li class="iot-hub-detail-hero__meta-item">
+							<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+								{subTypeIcon}
+							</span>
+							<span>{subTypeLabel}</span>
+						</li>
+						<li class="iot-hub-detail-hero__meta-dot" aria-hidden="true" />
+						<li class="iot-hub-detail-hero__meta-item">
+							<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+								download
+							</span>
+							<span>{detail.installCount.toLocaleString('en-US')}</span>
+						</li>
+						{publishedDate && (
+							<>
+								<li class="iot-hub-detail-hero__meta-dot" aria-hidden="true" />
+								<li class="iot-hub-detail-hero__meta-item">
+									<span class="material-icons iot-hub-detail-hero__meta-icon" aria-hidden="true">
+										event
+									</span>
+									<span>{publishedDate}</span>
+								</li>
+							</>
+						)}
+					</ul>
+				</div>
+				<div class="iot-hub-detail-hero__big">
+					<div
+						class:list={[
+							'iot-hub-detail-hero__preview',
+							showGallery && 'iot-hub-detail-hero__preview--gallery',
+							detail.itemType === 'DEVICE' &&
+								'iot-hub-detail-hero__preview--device',
+						]}
+					>
+						{showGallery ? (
+							<DetailGallery
+								screenshots={detail.screenshots}
+								listingName={detail.name}
+							/>
+						) : heroImg ? (
+							<img src={heroImg} alt={detail.name} loading="eager" decoding="async" />
+						) : (
+							<div
+								class="iot-hub-detail-hero__preview-fallback"
+								style={`background:${tileColor};`}
+								aria-hidden="true"
+							/>
+						)}
+					</div>
+					<div class="iot-hub-detail-hero__big-text">
+						{detail.description && (
+							<p class="iot-hub-detail-hero__desc">{detail.description}</p>
+						)}
+						<a
+							class="iot-hub-detail-hero__cta"
+							href={installUrl}
+							target="_blank"
+							rel="noopener"
+						>
+							<span>{detail.itemType === 'DEVICE' ? 'Connect' : 'Install'}</span>
+							<IotHubChevron direction="right" />
+						</a>
+					</div>
+				</div>
+			</>
+		)
+	}
 </header>
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
 
 	.iot-hub-detail-hero {
-		display: grid;
-		grid-template-columns: minmax(0, 360px) 1fr;
-		gap: 2rem;
-		margin: 2rem 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 32px;
+		padding: calc(#{$header-height} + 40px) 16px 24px;
+		border-bottom: 1px solid var(--iot-hub-hairline);
 
-		@media (max-width: 640px) {
-			grid-template-columns: 1fr;
+		@include media-down(sm) {
+			padding: calc(#{$header-height} + 40px) 12px 24px;
 		}
 	}
 
-	.iot-hub-detail-hero__image {
-		aspect-ratio: 4 / 3;
-		border-radius: 12px;
-		overflow: hidden;
-		display: grid;
-		place-items: center;
+	// --- Breadcrumbs ---------------------------------------------------------
 
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			display: block;
+	.iot-hub-detail-hero__crumbs {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 16px;
+		line-height: 28px;
+		color: var(--color-text-secondary);
+		flex-wrap: wrap;
+	}
+
+	.iot-hub-detail-hero__crumbs-link {
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: color $transition-fast;
+
+		&:hover,
+		&:focus-visible {
+			text-decoration: underline;
+		}
+
+		:global([data-theme='dark']) & {
+			color: #b3c7ff;
+		}
+	}
+
+	.iot-hub-detail-hero__crumbs-sep {
+		color: var(--color-text-muted);
+		flex-shrink: 0;
+	}
+
+	.iot-hub-detail-hero__crumbs-current {
+		color: var(--color-text-secondary);
+		font-weight: $font-weight-normal;
+	}
+
+	// --- Title + sub-title (shared by both variants) -------------------------
+
+	.iot-hub-detail-hero__titles {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.iot-hub-detail-hero__title {
+		font-size: 32px;
+		font-weight: $font-weight-semibold;
+		line-height: 40px;
+		margin: 0;
+		color: var(--color-text);
+
+		@include media-down(md) {
+			font-size: 24px;
+			line-height: 32px;
 		}
 	}
 
 	.iot-hub-detail-hero__meta {
+		list-style: none;
+		padding: 0;
+		margin: 0;
 		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 8px;
+		font-size: 16px;
+		line-height: 24px;
+		color: var(--color-text-secondary);
 	}
 
-	.iot-hub-detail-hero__title {
-		font-size: 2rem;
-		font-weight: $font-weight-bold;
-		margin: 0;
+	.iot-hub-detail-hero__meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
 	}
+
+	.iot-hub-detail-hero__meta-icon {
+		font-size: 20px;
+		color: var(--color-text-muted);
+	}
+
+	.iot-hub-detail-hero__meta-dot {
+		flex-shrink: 0;
+		width: 3px;
+		height: 3px;
+		border-radius: 50%;
+		background: var(--sl-color-gray-5);
+	}
+
+	// --- Description + CTA (shared) ------------------------------------------
 
 	.iot-hub-detail-hero__desc {
-		font-size: 1rem;
-		line-height: 1.6;
-		color: var(--color-text-muted, #6b7280);
+		font-size: 16px;
+		line-height: 24px;
 		margin: 0;
+		color: var(--color-text-secondary);
 	}
 
-	.iot-hub-detail-hero__stats {
+	.iot-hub-detail-hero__cta {
+		@include button-primary;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		align-self: flex-start;
+		padding: 14px 16px;
+		font-size: 16px;
+		font-weight: $font-weight-semibold;
+		line-height: 28px;
+		border-radius: 8px;
+		text-decoration: none;
+
+		svg {
+			display: block;
+		}
+	}
+
+	// --- Variant A: big preview -------------------------------------------
+
+	.iot-hub-detail-hero__big {
 		display: grid;
-		grid-template-columns: auto 1fr;
-		gap: 0.25rem 0.75rem;
-		font-size: 0.875rem;
-		margin: 0.5rem 0 0;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px;
 
-		dt {
-			color: var(--color-text-muted, #6b7280);
+		@include media-down(md) {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.iot-hub-detail-hero__preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 257px;
+		padding: 16px;
+		background: var(--color-bg-light);
+		border-radius: 8px;
+		overflow: hidden;
+
+		img {
+			max-width: 100%;
+			max-height: 257px;
+			height: auto;
+			object-fit: contain;
+			display: block;
 		}
 
-		dd {
-			margin: 0;
+		// Device variant — neutral white frame with a hairline border so the
+		// product image reads cleanly regardless of theme (Figma 1281:28209).
+		&--device {
+			background: #fff;
+			border: 1px solid var(--hairline---sl-color-hairline, #edeef3);
 		}
+
+		// Gallery variant — DetailGallery brings its own framed thumbnails,
+		// so drop the column's padding/background/border so the screenshots
+		// sit flush to the column edges.
+		&--gallery {
+			padding: 0;
+			background: transparent;
+			border: 0;
+			border-radius: 0;
+			align-items: stretch;
+			min-height: 0;
+		}
+	}
+
+	.iot-hub-detail-hero__preview-fallback {
+		width: 100%;
+		height: 100%;
+		min-height: 257px;
+		border-radius: 8px;
+		opacity: 0.25;
+	}
+
+	.iot-hub-detail-hero__big-text {
+		display: flex;
+		flex-direction: column;
+		gap: 32px;
+		padding-top: 16px;
+	}
+
+	// --- Variant B: compact icon -------------------------------------------
+
+	.iot-hub-detail-hero__compact {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		margin-top: 32px;
+	}
+
+	.iot-hub-detail-hero__icon-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 24px;
+
+		@include media-down(sm) {
+			gap: 16px;
+		}
+	}
+
+	.iot-hub-detail-hero__icon {
+		flex-shrink: 0;
+		width: 80px;
+		height: 80px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+	}
+
+	.iot-hub-detail-hero__icon-glyph {
+		width: 45px;
+		height: 45px;
+		font-size: 45px;
+		line-height: 1;
+	}
+
+	// MDI icons are <img> SVGs — invert to white so they read on the coloured
+	// tile, matching the ListingCard renderer.
+	.iot-hub-detail-hero__icon-glyph--mdi {
+		filter: brightness(0) invert(1);
+		object-fit: contain;
+	}
+
+	// Material Icons font ships glyphs via `liga` substitution — the element's
+	// text content (e.g. "memory") is rendered as the icon.
+	.material-icons {
+		font-family: 'Material Icons';
+		font-weight: normal;
+		font-style: normal;
+		letter-spacing: normal;
+		text-transform: none;
+		display: inline-block;
+		white-space: nowrap;
+		word-wrap: normal;
+		direction: ltr;
+		font-feature-settings: 'liga';
+		-webkit-font-smoothing: antialiased;
 	}
 </style>

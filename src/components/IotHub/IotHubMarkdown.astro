@@ -1,0 +1,215 @@
+---
+import { resolveImage } from '@models/iot-hub';
+import { getMarkdownProcessor } from '@util/markdown-processor';
+
+// Renders IoT Hub listing readme markdown with the typography from the Figma
+// detail page (nodes 1279:52084 and 1286:29918) — lead paragraph, h2 section
+// headings, body lists, and the `Specifications` table style.
+//
+// Accepts the RAW markdown string and processes it to HTML internally via
+// Astro's createMarkdownProcessor (cached at module level in
+// @util/markdown-processor so the unified pipeline is built once per worker).
+
+interface Props {
+	markdown: string | null | undefined;
+	/**
+	 * If true, the first paragraph is rendered as a larger lead paragraph
+	 * (matches the "summary" line above the first section in the design).
+	 */
+	leadFirstParagraph?: boolean;
+}
+
+const { markdown, leadFirstParagraph = true } = Astro.props;
+
+// Rewrite relative `/api/resources/…` paths (used by the IoT Hub API for
+// images uploaded with the listing) into absolute URLs before passing the
+// markdown to the processor. The lookbehind `(?<![:\w])` skips paths that
+// are already part of an absolute URL like `https://host/api/resources/…`.
+const RESOURCE_PATH_RE = /(?<![:\w])(\/api\/resources\/[^\s)"'>]+)/g;
+function rewriteResourceUrls(src: string): string {
+	return src.replace(RESOURCE_PATH_RE, (_match, path: string) => {
+		return resolveImage(path) ?? path;
+	});
+}
+
+let html: string | null = null;
+if (markdown && markdown.trim().length > 0) {
+	const processor = await getMarkdownProcessor();
+	const result = await processor.render(rewriteResourceUrls(markdown));
+	html = result.code;
+}
+---
+
+{
+	html && (
+		<div
+			class:list={['iot-hub-md', { 'iot-hub-md--lead': leadFirstParagraph }]}
+			set:html={html}
+		/>
+	)
+}
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	// :global() is required throughout because the markdown HTML is injected
+	// via set:html so its elements don't carry this component's Astro scope.
+	.iot-hub-md {
+		color: var(--color-text);
+		font-size: 16px;
+		line-height: 28px;
+
+		// First paragraph reads as the lead summary line (Figma: 18px / 24px,
+		// content/body-l-bold-adjacent). The size matches the readme intro on
+		// both detail variants.
+		&.iot-hub-md--lead > :global(p):first-of-type {
+			font-size: 18px;
+			line-height: 24px;
+			margin: 0 0 1.5rem;
+			color: var(--color-text);
+		}
+
+		:global(h1) {
+			font-size: 32px;
+			font-weight: $font-weight-semibold;
+			line-height: 40px;
+			margin: 2.5rem 0 1rem;
+			color: var(--color-text);
+		}
+
+		:global(h2) {
+			font-size: 24px;
+			font-weight: $font-weight-semibold;
+			line-height: 32px;
+			margin: 2.5rem 0 1rem;
+			color: var(--color-text);
+		}
+
+		:global(h3) {
+			font-size: 20px;
+			font-weight: $font-weight-semibold;
+			line-height: 28px;
+			margin: 2rem 0 0.75rem;
+			color: var(--color-text);
+		}
+
+		:global(h4),
+		:global(h5),
+		:global(h6) {
+			font-size: 16px;
+			font-weight: $font-weight-semibold;
+			line-height: 24px;
+			margin: 1.5rem 0 0.5rem;
+			color: var(--color-text);
+		}
+
+		:global(p) {
+			margin: 0 0 1rem;
+		}
+
+		:global(ul),
+		:global(ol) {
+			margin: 0 0 1rem;
+			padding-left: 1.5rem;
+		}
+
+		:global(li) {
+			margin: 0.25rem 0;
+			line-height: 24px;
+		}
+
+		:global(li > p) {
+			margin: 0;
+		}
+
+		:global(strong) {
+			font-weight: $font-weight-semibold;
+		}
+
+		:global(a) {
+			color: var(--color-primary);
+			text-decoration: underline;
+			text-underline-offset: 2px;
+
+			&:hover {
+				text-decoration: none;
+			}
+		}
+
+		// Specifications table — two-column key/value rows with thin row
+		// dividers (Figma: table-header rows with a 1px border).
+		:global(table) {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 0.5rem 0 1.5rem;
+			font-size: 16px;
+			line-height: 24px;
+		}
+
+		:global(thead th) {
+			text-align: left;
+			font-weight: $font-weight-semibold;
+			padding: 12px 16px;
+			border-bottom: 1px solid var(--iot-hub-hairline, #edeef3);
+			color: var(--color-text);
+		}
+
+		:global(tbody td) {
+			padding: 12px 16px;
+			border-bottom: 1px solid var(--iot-hub-hairline, #edeef3);
+			vertical-align: top;
+		}
+
+		:global(tbody tr:last-child td) {
+			border-bottom: 0;
+		}
+
+		// First column reads as the label, second as the value.
+		:global(tbody td:first-child) {
+			color: var(--color-text-secondary);
+			width: 50%;
+		}
+
+		:global(code) {
+			background: var(--color-bg-light);
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-size: 0.875em;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		}
+
+		:global(pre) {
+			background: var(--color-bg-light);
+			padding: 1rem;
+			border-radius: 8px;
+			overflow-x: auto;
+			margin: 0 0 1.5rem;
+			line-height: 1.5;
+
+			code {
+				background: none;
+				padding: 0;
+			}
+		}
+
+		:global(img) {
+			max-width: 100%;
+			height: auto;
+			border-radius: 8px;
+			margin: 0.5rem 0;
+		}
+
+		:global(blockquote) {
+			border-left: 3px solid var(--color-primary);
+			padding: 0 0 0 1rem;
+			margin: 0 0 1rem;
+			color: var(--color-text-secondary);
+		}
+
+		:global(hr) {
+			border: 0;
+			border-top: 1px solid var(--iot-hub-hairline, #edeef3);
+			margin: 1.5rem 0;
+		}
+	}
+</style>

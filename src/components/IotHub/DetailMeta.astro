@@ -1,5 +1,14 @@
 ---
-import type { ListingDetail } from '~/models/iot-hub';
+import type { ListingDetail } from '@models/iot-hub';
+import '@fontsource/material-icons';
+
+// Renders the 4-column "tags" row beneath the detail hero. Figma nodes
+// 1281:28214 (variant A: DEVICE/WIDGET/SOLUTION_TEMPLATE) and 1286:31895
+// (variant B: CALCULATED_FIELD/RULE_CHAIN/ALARM_RULE). Layout is the same in
+// both variants — only the second/third column labels differ by item type.
+// Chip color tint follows the design: type/secondary→blue, third→purple,
+// use cases→green (via Starlight's `--sl-color-{blue,purple,green}-{low,high}`
+// tokens, which auto-invert between light/dark themes).
 
 interface Props {
 	detail: ListingDetail;
@@ -7,97 +16,299 @@ interface Props {
 
 const { detail } = Astro.props;
 
-// Group displayed metadata. Each row is { label, values } and is only rendered if values is non-empty.
-type Row = { label: string; values: string[] };
-const rows: Row[] = [
-	{ label: 'Vendor', values: detail.vendor ? [detail.vendor] : [] },
-	{ label: 'Hardware Type', values: detail.hardwareType ? [detail.hardwareType] : [] },
-	{ label: 'Widget Type', values: detail.widgetType ? [detail.widgetType] : [] },
-	{ label: 'Calc Field Type', values: detail.cfType ? [detail.cfType] : [] },
-	{ label: 'Rule Chain Type', values: detail.ruleChainType ? [detail.ruleChainType] : [] },
-	{ label: 'Connectivity', values: detail.connectivity },
-	{ label: 'Categories', values: detail.categories },
-	{ label: 'Use Cases', values: detail.useCases },
-	{ label: 'Tags', values: detail.tags },
-];
-const visibleRows = rows.filter((r) => r.values.length > 0);
+type Column = { label: string; values: string[]; tint: 'blue' | 'purple' | 'green' };
+
+// Column 2 — secondary type (Hardware Type / Widget Type / Type).
+const secondColumn: Column | null = (() => {
+	switch (detail.itemType) {
+		case 'DEVICE':
+			return detail.hardwareType
+				? { label: 'Hardware Type', values: [detail.hardwareType], tint: 'blue' }
+				: null;
+		case 'WIDGET':
+			return detail.widgetType
+				? { label: 'Widget Type', values: [detail.widgetType], tint: 'blue' }
+				: null;
+		case 'CALCULATED_FIELD':
+			return detail.cfType
+				? { label: 'Type', values: [detail.cfType], tint: 'blue' }
+				: null;
+		case 'RULE_CHAIN':
+			return detail.ruleChainType
+				? { label: 'Type', values: [detail.ruleChainType], tint: 'blue' }
+				: null;
+		case 'SOLUTION_TEMPLATE':
+		case 'ALARM_RULE':
+		default:
+			return detail.vendor
+				? { label: 'Vendor', values: [detail.vendor], tint: 'blue' }
+				: null;
+	}
+})();
+
+// Column 3 — Connectivity (variant A: DEVICE/WIDGET/etc.) or Category (variant B).
+const thirdColumn: Column | null = (() => {
+	if (detail.connectivity.length > 0)
+		return { label: 'Connectivity', values: detail.connectivity, tint: 'purple' };
+	if (detail.categories.length > 0)
+		return { label: 'Category', values: detail.categories, tint: 'purple' };
+	return null;
+})();
+
+// Column 4 — Use Cases, with a "+N" overflow chip when more than 3 entries
+// (matches the design's `+1` chip shown after 3 visible items).
+const USE_CASES_VISIBLE = 3;
+const useCasesAll = detail.useCases;
+const useCasesVisible = useCasesAll.slice(0, USE_CASES_VISIBLE);
+const useCasesOverflow = useCasesAll.length - useCasesVisible.length;
+const useCasesColumn: Column | null =
+	useCasesAll.length > 0
+		? { label: 'Use Cases', values: useCasesVisible, tint: 'green' }
+		: null;
+
+const creator = detail.creatorDisplayName || null;
+const verified = detail.creatorVerified;
+
+// Initials for the avatar circle (we don't have photo URLs on the model).
+const initials = creator
+	? creator
+			.split(/\s+/)
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((w) => w[0]?.toUpperCase() ?? '')
+			.join('')
+	: '';
+
+const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 ---
 
 {
-	visibleRows.length > 0 ? (
-		<aside class="iot-hub-detail-meta">
-			<dl>
-				{visibleRows.map((row) => (
-					<div class="iot-hub-detail-meta__row">
-						<dt>{row.label}</dt>
-						<dd>
-							<ul>
-								{row.values.map((v) => (
-									<li class="iot-hub-detail-meta__pill">{v}</li>
-								))}
-							</ul>
-						</dd>
+	hasAnyColumn && (
+		<section class="iot-hub-detail-meta" aria-label="Listing details">
+			{creator && (
+				<div class="iot-hub-detail-meta__group">
+					<span class="iot-hub-detail-meta__label">Creator</span>
+					<div class="iot-hub-detail-meta__author">
+						<span class="iot-hub-detail-meta__avatar" aria-hidden="true">
+							<span class="iot-hub-detail-meta__avatar-initials">{initials || '?'}</span>
+							{verified && (
+								<span
+									class="material-icons iot-hub-detail-meta__avatar-verified"
+									aria-hidden="true"
+								>
+									verified
+								</span>
+							)}
+						</span>
+						<span class="iot-hub-detail-meta__author-name">{creator}</span>
 					</div>
-				))}
-			</dl>
-		</aside>
-	) : null
+				</div>
+			)}
+			{secondColumn && (
+				<div class="iot-hub-detail-meta__group">
+					<span class="iot-hub-detail-meta__label">{secondColumn.label}</span>
+					<ul class="iot-hub-detail-meta__chips" role="list">
+						{secondColumn.values.map((v) => (
+							<li class:list={['iot-hub-detail-meta__chip', `iot-hub-detail-meta__chip--${secondColumn.tint}`]}>
+								{v}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{thirdColumn && (
+				<div class="iot-hub-detail-meta__group">
+					<span class="iot-hub-detail-meta__label">{thirdColumn.label}</span>
+					<ul class="iot-hub-detail-meta__chips" role="list">
+						{thirdColumn.values.map((v) => (
+							<li class:list={['iot-hub-detail-meta__chip', `iot-hub-detail-meta__chip--${thirdColumn.tint}`]}>
+								{v}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{useCasesColumn && (
+				<div class="iot-hub-detail-meta__group iot-hub-detail-meta__group--wide">
+					<span class="iot-hub-detail-meta__label">{useCasesColumn.label}</span>
+					<ul class="iot-hub-detail-meta__chips" role="list">
+						{useCasesColumn.values.map((v) => (
+							<li class:list={['iot-hub-detail-meta__chip', `iot-hub-detail-meta__chip--${useCasesColumn.tint}`]}>
+								{v}
+							</li>
+						))}
+						{useCasesOverflow > 0 && (
+							<li
+								class:list={[
+									'iot-hub-detail-meta__chip',
+									`iot-hub-detail-meta__chip--${useCasesColumn.tint}`,
+								]}
+								title={useCasesAll.slice(USE_CASES_VISIBLE).join(', ')}
+							>
+								+{useCasesOverflow}
+							</li>
+						)}
+					</ul>
+				</div>
+			)}
+		</section>
+	)
 }
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
 
+	// Horizontal row of columns (Figma 1281:28215 / 1286:31896): all columns
+	// inline, vertically centred, fixed-content sized except for Use Cases
+	// which absorbs the remaining width. On narrow screens we fall back to a
+	// wrapped/stacked layout to keep the chips legible.
 	.iot-hub-detail-meta {
-		border: 1px solid var(--color-border, #e5e7eb);
-		border-radius: 12px;
-		padding: 1.25rem 1.5rem;
-		margin: 1.5rem 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 20px;
+		padding: 20px 16px 16px 16px;
+		border-bottom: 1px solid var(--iot-hub-hairline);
 
-		dl {
-			display: grid;
-			gap: 1rem;
-			margin: 0;
-		}
-	}
-
-	.iot-hub-detail-meta__row {
-		display: grid;
-		grid-template-columns: 160px 1fr;
-		gap: 1rem;
-		align-items: start;
-
-		@media (max-width: 640px) {
-			grid-template-columns: 1fr;
-			gap: 0.25rem;
+		@include media-down(sm) {
+			padding: 20px 12px 16px 12px;
 		}
 
-		dt {
-			font-weight: $font-weight-semibold;
-			color: var(--color-text-muted, #6b7280);
-			font-size: 0.875rem;
-		}
-
-		dd {
-			margin: 0;
-		}
-
-		ul {
-			list-style: none;
-			padding: 0;
-			margin: 0;
-			display: flex;
+		@include media-down(md) {
 			flex-wrap: wrap;
-			gap: 0.5rem;
+			align-items: flex-start;
 		}
 	}
 
-	.iot-hub-detail-meta__pill {
+	.iot-hub-detail-meta__group {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+		// Non-wide columns hold their content width (Figma's `shrink-0`) and
+		// don't compete with Use Cases for the remaining row space.
+		flex-shrink: 0;
+
+		// Use Cases stretches to fill the remainder of the row (matches the
+		// Figma use-cases column being flex: 1 0 0).
+		&--wide {
+			flex: 1 1 0;
+		}
+	}
+
+	.iot-hub-detail-meta__label {
+		font-size: 12px;
+		font-weight: $font-weight-normal;
+		line-height: 16px;
+		color: var(--sl-color-gray-3);
+		white-space: nowrap;
+	}
+
+	// --- Creator -----------------------------------------------------------
+
+	.iot-hub-detail-meta__author {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 999px;
-		background: var(--color-surface-muted, #f3f4f6);
-		font-size: 0.8125rem;
-		color: var(--color-text, #111827);
+		gap: 8px;
+		padding: 4px 0;
+		height: 40px;
+	}
+
+	.iot-hub-detail-meta__avatar {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 9999px;
+		background: var(--sl-color-gray-6);
+		color: var(--sl-color-gray-2);
+		flex-shrink: 0;
+	}
+
+	.iot-hub-detail-meta__avatar-initials {
+		font-size: 12px;
+		font-weight: $font-weight-semibold;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	// Small verified badge overlapping the top-right of the avatar circle
+	// (Figma 1281:28221 — left=18, top=-6, size=20).
+	.iot-hub-detail-meta__avatar-verified {
+		position: absolute;
+		top: -4px;
+		right: -4px;
+		font-size: 16px;
+		color: var(--color-primary);
+		background: var(--color-bg);
+		border-radius: 50%;
+	}
+
+	.iot-hub-detail-meta__author-name {
+		font-size: 13px;
+		font-weight: $font-weight-semibold;
+		line-height: 16px;
+		color: var(--sl-color-gray-2);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	// --- Filter chips ------------------------------------------------------
+
+	.iot-hub-detail-meta__chips {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		// 8px vertical padding around the chip row so it shares the same
+		// 40px column height as the Creator avatar block — matches Figma.
+		padding-block: 8px;
+	}
+
+	.iot-hub-detail-meta__chip {
+		display: inline-flex;
+		align-items: center;
+		padding: 4px 8px;
+		border-radius: 4px;
+		font-size: 13px;
+		font-weight: $font-weight-medium;
+		line-height: 16px;
+		white-space: nowrap;
+
+		// Tints follow Starlight's complementary scale (light theme: low =
+		// pale tint, high = saturated text; dark theme inverts).
+		&--blue {
+			background: var(--sl-color-blue-low);
+			color: var(--sl-color-blue-high);
+		}
+
+		&--purple {
+			background: var(--sl-color-purple-low);
+			color: var(--sl-color-purple-high);
+		}
+
+		&--green {
+			background: var(--sl-color-green-low);
+			color: var(--sl-color-green-high);
+		}
+	}
+
+	.material-icons {
+		font-family: 'Material Icons';
+		font-weight: normal;
+		font-style: normal;
+		letter-spacing: normal;
+		text-transform: none;
+		display: inline-block;
+		white-space: nowrap;
+		word-wrap: normal;
+		direction: ltr;
+		font-feature-settings: 'liga';
+		-webkit-font-smoothing: antialiased;
 	}
 </style>

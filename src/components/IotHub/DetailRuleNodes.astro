@@ -1,0 +1,58 @@
+---
+// Rule-node tag chips row — Figma node 1286:31922 on the
+// CALCULATED_FIELD / ALARM_RULE / RULE_CHAIN detail variant. Renders the
+// listing's `tags` field as a horizontal row of pill-style chips. No-op when
+// the array is empty.
+
+interface Props {
+	tags: string[];
+}
+
+const { tags } = Astro.props;
+---
+
+{
+	tags.length > 0 && (
+		<section class="iot-hub-rule-nodes" aria-label="Rule nodes used">
+			<ul class="iot-hub-rule-nodes__list" role="list">
+				{tags.map((tag) => (
+					<li class="iot-hub-rule-nodes__tag">{tag}</li>
+				))}
+			</ul>
+		</section>
+	)
+}
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.iot-hub-rule-nodes {
+		padding: 16px 16px;
+		border-bottom: 1px solid var(--iot-hub-hairline);
+
+		@include media-down(sm) {
+			padding: 16px 12px;
+		}
+	}
+
+	.iot-hub-rule-nodes__list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.iot-hub-rule-nodes__tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 4px 12px;
+		border-radius: 4px;
+		font-size: 14px;
+		line-height: 24px;
+		color: var(--color-text);
+		background: var(--color-bg-light);
+		border: 1px solid var(--iot-hub-hairline, #edeef3);
+	}
+</style>

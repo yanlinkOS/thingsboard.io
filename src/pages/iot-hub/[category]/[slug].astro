@@ -1,16 +1,18 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import {
 	IOT_HUB_API_URL,
+	getCardVariant,
 	resolveImage,
 	type ListingDetail,
 } from '@models/iot-hub';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CreatorCTA from '@components/IotHub/CreatorCTA.astro';
 import DetailHero from '@components/IotHub/DetailHero.astro';
 import DetailMeta from '@components/IotHub/DetailMeta.astro';
-import DetailGallery from '@components/IotHub/DetailGallery.astro';
-import BaseLayout from '@layouts/BaseLayout.astro';
+import DetailRuleNodes from '@components/IotHub/DetailRuleNodes.astro';
+import IotHubMarkdown from '@components/IotHub/IotHubMarkdown.astro';
 import { fetchWithRetry } from '@util/fetch-utils';
 
 // Pure-numeric slugs are excluded to avoid colliding with pagination URLs
@@ -22,24 +24,20 @@ export const getStaticPaths = (async () => {
 			.filter((item) => !/^\d+$/.test(item.slug))
 			.map((item) => ({
 				params: { category: catEntry.id, slug: item.slug },
-				props: { item, categoryLabel: catEntry.data.label },
+				props: { item },
 			}))
 	);
 }) satisfies GetStaticPaths;
 
-const { item, categoryLabel } = Astro.props;
+const { item } = Astro.props;
 const { category } = Astro.params;
-
-// Module-scoped processor so the unified/remark/rehype pipeline is created
-// once per build worker, not once per detail page.
-const markdownProcessor = await createMarkdownProcessor();
 
 async function loadDetail(slug: string): Promise<ListingDetail | null> {
 	try {
 		const res = await fetchWithRetry(
 			`${IOT_HUB_API_URL}/api/listings/public/by-slug/${slug}`
 		);
-		return await res.json() as ListingDetail;
+		return (await res.json()) as ListingDetail;
 	} catch (e) {
 		if (import.meta.env.DEV) {
 			const msg = e instanceof Error ? e.message : String(e);
@@ -52,13 +50,6 @@ async function loadDetail(slug: string): Promise<ListingDetail | null> {
 
 const detail = await loadDetail(item.slug);
 
-// Render readmeContent → HTML using Astro's own markdown processor.
-let readmeHtml: string | null = null;
-if (detail?.readmeContent) {
-	const result = await markdownProcessor.render(detail.readmeContent);
-	readmeHtml = result.code;
-}
-
 const title = detail?.seoTitle ?? detail?.name ?? item.name;
 const description =
 	detail?.seoMetaDescription ?? detail?.description ?? item.description ?? '';
@@ -66,55 +57,99 @@ const ogImageUrl =
 	resolveImage(detail?.ogImage ?? null) ??
 	resolveImage(detail?.image ?? item.image) ??
 	undefined;
+
+// Variant B (CALCULATED_FIELD / ALARM_RULE / RULE_CHAIN) gets the rule-node
+// tag chip row beneath the meta block (Figma node 1286:31922).
+const showRuleNodes = detail
+	? getCardVariant(detail.itemType) === 'small' && detail.tags.length > 0
+	: false;
 ---
 
 <BaseLayout title={title} description={description} ogImage={ogImageUrl}>
-	{
-		detail ? (
-			<>
-				<nav class="iot-hub-detail-crumbs" aria-label="Breadcrumb">
-					<a href="/iot-hub/">IoT Hub</a>
-					<span aria-hidden="true">/</span>
-					<a href={`/iot-hub/${category}/`}>{categoryLabel}</a>
-				</nav>
-				<DetailHero detail={detail} />
-				<DetailMeta detail={detail} />
-				<DetailGallery screenshots={detail.screenshots} listingName={detail.name} />
-				{readmeHtml ? (
-					<section class="iot-hub-detail-readme">
-						<h2>About</h2>
-						<div set:html={readmeHtml} />
-					</section>
-				) : null}
-			</>
-		) : (
-			<p>Listing details are temporarily unavailable.</p>
-		)
-	}
+	<main class="iot-hub-detail">
+		{
+			detail ? (
+				<>
+					<div class="iot-hub-detail__center">
+						<div class="iot-hub-detail__container">
+							<DetailHero detail={detail} categorySlug={category!} />
+							<DetailMeta detail={detail} />
+							{showRuleNodes && <DetailRuleNodes tags={detail.tags} />}
+							{detail.readmeContent && (
+								<div class="iot-hub-detail__readme">
+									<IotHubMarkdown markdown={detail.readmeContent} />
+								</div>
+							)}
+						</div>
+					</div>
+					<div class="iot-hub-detail__divider" />
+					<div class="iot-hub-detail__center">
+						<div class="iot-hub-detail__container">
+							<CreatorCTA />
+						</div>
+					</div>
+				</>
+			) : (
+				<div class="iot-hub-detail__center">
+					<div class="iot-hub-detail__container">
+						<p class="iot-hub-detail__empty">
+							Listing details are temporarily unavailable.
+						</p>
+					</div>
+				</div>
+			)
+		}
+	</main>
 </BaseLayout>
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
 
-	.iot-hub-detail-crumbs {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.875rem;
-		color: var(--color-text-muted, #6b7280);
-		margin-bottom: 0.5rem;
+	.iot-hub-detail {
+		// Hairline token used by container side borders and the divider —
+		// theme-aware, mirroring the category page.
+		--iot-hub-hairline: var(--hairline---sl-color-hairline, #edeef3);
 
-		a {
-			color: var(--color-accent, #305680);
-			text-decoration: none;
-
-			&:hover {
-				text-decoration: underline;
-			}
+		:global([data-theme='dark']) & {
+			--iot-hub-hairline: var(--hairline---sl-color-hairline, #23262f);
 		}
 	}
 
-	.iot-hub-detail-readme {
-		margin-top: 2rem;
+	.iot-hub-detail__center {
+		margin: 0 auto;
+		max-width: calc(#{$container-max-width} + 32px);
+
+		@include media-down(sm) {
+			max-width: calc(#{$container-max-width} + 16px);
+		}
+	}
+
+	.iot-hub-detail__container {
+		max-width: $container-max-width;
+		margin: 0 16px;
+		border-right: 1px solid var(--iot-hub-hairline);
+		border-left: 1px solid var(--iot-hub-hairline);
+
+		@include media-down(sm) {
+			margin: 0 8px;
+		}
+	}
+
+	.iot-hub-detail__divider {
+		height: 1px;
+		background: var(--iot-hub-hairline);
+	}
+
+	.iot-hub-detail__readme {
+		padding: 16px 16px 40px 16px;
+		@include media-down(sm) {
+			padding: 16px 12px 40px 12px;
+		}
+	}
+
+	.iot-hub-detail__empty {
+		text-align: center;
+		color: var(--color-text-muted);
+		padding: 4rem 1rem;
 	}
 </style>
