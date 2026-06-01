@@ -1,0 +1,201 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import {
+	IOT_HUB_API_URL,
+	IOT_HUB_CATEGORIES,
+	CREATOR_PAGE_SIZE,
+	creatorViewSchema,
+	isNumericSlug,
+	resolveAvatar,
+	type CreatorView,
+	type ListingView,
+} from '@models/iot-hub';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CreatorHero from '@components/IotHub/CreatorHero.astro';
+import CreatorFilterBar from '@components/IotHub/CreatorFilterBar.astro';
+import CategorySection from '@components/IotHub/CategorySection.astro';
+import { fetchWithRetry } from '@util/fetch-utils';
+
+interface CreatorGroup {
+	slug: string;
+	label: string;
+	items: ListingView[];
+}
+
+export const getStaticPaths = (async () => {
+	// Defined inside getStaticPaths: Astro extracts and runs getStaticPaths in
+	// an isolated scope, so it can only reference module imports — NOT other
+	// frontmatter declarations.
+	const loadProfile = async (id: string): Promise<CreatorView | null> => {
+		try {
+			const res = await fetchWithRetry(`${IOT_HUB_API_URL}/api/creators/${id}/profile`);
+			return creatorViewSchema.parse(await res.json());
+		} catch (e) {
+			if (import.meta.env.DEV) {
+				const msg = e instanceof Error ? e.message : String(e);
+				console.warn(`[iot-hub] creator profile fetch failed in dev for ${id}: ${msg}`);
+				return null;
+			}
+			throw e;
+		}
+	};
+
+	const categories = await getCollection('iotHubCategories');
+	const byId = new Map(categories.map((c) => [c.id, c.data]));
+
+	// Per creator, bucket items by category (preserving IOT_HUB_CATEGORIES order,
+	// installCount DESC within each). Pure-numeric slugs excluded to mirror
+	// [slug].astro.
+	const byCreator = new Map<string, Map<string, ListingView[]>>();
+	for (const cat of IOT_HUB_CATEGORIES) {
+		const items = byId.get(cat.slug)?.items ?? [];
+		for (const item of items) {
+			if (isNumericSlug(item.slug)) continue;
+			if (!item.creatorId) continue;
+			let buckets = byCreator.get(item.creatorId);
+			if (!buckets) {
+				buckets = new Map();
+				byCreator.set(item.creatorId, buckets);
+			}
+			const list = buckets.get(cat.slug) ?? [];
+			list.push(item);
+			buckets.set(cat.slug, list);
+		}
+	}
+
+	const ids = [...byCreator.keys()];
+	// One profile fetch per creator, reused across that creator's pages.
+	const profiles = new Map<string, CreatorView | null>();
+	await Promise.all(
+		ids.map(async (id) => {
+			profiles.set(id, await loadProfile(id));
+		})
+	);
+
+	// Pagination is PER CATEGORY: page N shows items [(N-1)*size, N*size) of each
+	// category, sharing one page index. Total pages = the largest category's page
+	// count, so a category with <= size items only appears on page 1.
+	return ids.flatMap((id) => {
+		const buckets = byCreator.get(id)!;
+		const cats: CreatorGroup[] = IOT_HUB_CATEGORIES.filter(
+			(c) => (buckets.get(c.slug)?.length ?? 0) > 0
+		).map((c) => ({ slug: c.slug, label: c.label, items: buckets.get(c.slug)! }));
+		const total = cats.reduce((n, c) => n + c.items.length, 0);
+		const totalPages = Math.max(
+			1,
+			...cats.map((c) => Math.ceil(c.items.length / CREATOR_PAGE_SIZE))
+		);
+		const profile = profiles.get(id) ?? null;
+		return Array.from({ length: totalPages }, (_, i) => {
+			const currentPage = i + 1;
+			const groups: CreatorGroup[] = cats
+				.map((c) => ({
+					slug: c.slug,
+					label: c.label,
+					items: c.items.slice(i * CREATOR_PAGE_SIZE, currentPage * CREATOR_PAGE_SIZE),
+				}))
+				.filter((g) => g.items.length > 0);
+			return {
+				params: { id, page: currentPage === 1 ? undefined : String(currentPage) },
+				props: { profile, groups, currentPage, totalPages, total },
+			};
+		});
+	});
+}) satisfies GetStaticPaths;
+
+interface Props {
+	profile: CreatorView | null;
+	groups: CreatorGroup[];
+	currentPage: number;
+	totalPages: number;
+	total: number;
+}
+
+const { profile, groups, currentPage, totalPages, total } = Astro.props as Props;
+const { id } = Astro.params;
+
+const first = groups[0]?.items[0];
+const name = profile?.displayName ?? first?.creatorDisplayName ?? 'ThingsBoard';
+const avatarUrl = resolveAvatar(profile?.avatarUrl ?? first?.creatorAvatarUrl ?? null);
+const verified = profile?.verified ?? first?.creatorVerified ?? false;
+const count = profile?.publishedCount ?? total;
+const basePath = `/iot-hub/creator/${id}/`;
+
+const title = `${name} | IoT Hub | ThingsBoard`;
+const description =
+	profile?.description ?? `Published items by ${name} on the ThingsBoard IoT Hub.`;
+// No per-page OG card for creator pages — SeoMeta falls back to the global
+// /thingsboard-og.png (creator pages aren't in MARKETING_ALLOWLIST).
+---
+
+<BaseLayout title={title} description={description}>
+	<main class="iot-hub-creator">
+		<div class="iot-hub-creator__center">
+			<div class="iot-hub-creator__container">
+				<CreatorHero
+					name={name}
+					avatarUrl={avatarUrl}
+					verified={verified}
+					bio={profile?.description}
+					website={profile?.website}
+					email={profile?.contactEmail}
+					github={profile?.githubUrl}
+					linkedin={profile?.linkedinUrl}
+					twitter={profile?.twitterUrl}
+				/>
+			</div>
+		</div>
+		<div class="iot-hub-creator__divider"></div>
+		<div class="iot-hub-creator__center">
+			<div class="iot-hub-creator__container">
+				<div class="iot-hub-creator__items">
+					<CreatorFilterBar
+						count={count}
+						totalResults={total}
+						currentPage={currentPage}
+						totalPages={totalPages}
+						basePath={basePath}
+					/>
+					{groups.map((g) => (
+						<CategorySection
+							categorySlug={g.slug}
+							categoryLabel={g.label}
+							items={g.items}
+							showCreator={false}
+						/>
+					))}
+				</div>
+			</div>
+		</div>
+	</main>
+</BaseLayout>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
+
+	.iot-hub-creator {
+		@include iot-hub-hairline-token;
+	}
+
+	.iot-hub-creator__center {
+		@include iot-hub-center;
+	}
+
+	.iot-hub-creator__container {
+		@include iot-hub-container;
+	}
+
+	.iot-hub-creator__divider {
+		@include iot-hub-divider;
+	}
+
+	.iot-hub-creator__items {
+		// Plain block (NOT flex) so each CategorySection's `margin: 4rem 0`
+		// collapses with its neighbour to a 64px section gap. A flex column would
+		// suppress collapsing and double the gap to 128px. The 16px bottom padding
+		// keeps the last section's margin from collapsing through to the divider.
+		padding-bottom: 16px;
+	}
+</style>

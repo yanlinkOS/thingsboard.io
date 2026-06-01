@@ -159,6 +159,20 @@ export const IOT_HUB_STRINGS = {
 		cancel: 'Cancel',
 		invalidUrl: 'Enter a valid URL, e.g. http://localhost:8080',
 	},
+	creatorPage: {
+		breadcrumbRoot: 'IoT Hub',
+		publishedItems: 'Published Items',
+		searchPlaceholder: 'Search published items...',
+		sortLabel: 'Most Installed',
+		resultSingular: 'result',
+		resultPlural: 'results',
+		verifiedLabel: 'Verified creator',
+		websiteLabel: 'Website',
+		emailLabel: 'Email',
+		githubLabel: 'GitHub',
+		linkedinLabel: 'LinkedIn',
+		twitterLabel: 'X',
+	},
 } as const;
 
 // Maps raw subtype keys from the API (`timeseries`, `SIMPLE`, `CORE`, …)
@@ -200,6 +214,8 @@ export interface IotHubNodeInfo {
 }
 
 export const PAGE_SIZE = 12;
+// Creator profile page paginates each category's items at 16/page.
+export const CREATOR_PAGE_SIZE = 16;
 export const HOME_PER_CATEGORY = 4;
 export const API_FETCH_PAGE_SIZE = 100;
 
@@ -252,6 +268,7 @@ export const listingViewSchema = z.object({
 	slug: z.string(),
 	itemType: itemTypeEnum,
 	name: z.string(),
+	creatorId: z.string().nullable().default(null),
 	description: z.string().nullable(),
 	image: z.string().nullable(),
 	icon: z.string().nullable(),
@@ -299,6 +316,61 @@ export const listingDetailSchema = listingViewSchema.extend({
 	minTbVersion: z.number().int().default(0),
 	maxTbVersion: z.number().int().nullable(),
 });
+
+// Public creator profile — `GET /api/creators/{id}/profile`
+// (CreatorController.findCreatorProfile, @PreAuthorize("permitAll()")).
+// `youtubeUrl` is returned by the API but intentionally NOT surfaced in the UI
+// (the upstream iot-hub-creator-profile component omits it).
+export const creatorViewSchema = z.object({
+	id: z.string(),
+	displayName: z.string(),
+	contactEmail: z.string().nullable().default(null),
+	website: z.string().nullable().default(null),
+	description: z.string().nullable().default(null),
+	avatarUrl: z.string().nullable().default(null),
+	githubUrl: z.string().nullable().default(null),
+	linkedinUrl: z.string().nullable().default(null),
+	twitterUrl: z.string().nullable().default(null),
+	youtubeUrl: z.string().nullable().default(null),
+	affiliateId: z.string().nullable().default(null),
+	verified: z.boolean().default(false),
+	publishedCount: z.number().default(0),
+});
+
+export type CreatorView = z.infer<typeof creatorViewSchema>;
+
+// `/iot-hub/creator/{id}/` — used by the creator page route and by the creator
+// links on listing cards + the item detail meta block.
+export const getCreatorHref = (creatorId: string): string =>
+	`/iot-hub/creator/${creatorId}/`;
+
+// Pure-numeric slugs collide with pagination URLs (`/iot-hub/{cat}/2/`), so they
+// are excluded from listing grids and creator pages. One predicate keeps the
+// rule identical across every route that applies it.
+export const isNumericSlug = (slug: string): boolean => /^\d+$/.test(slug);
+
+// Display label for the website button — strip the protocol only (mirrors the
+// upstream `getWebsiteLabel()`), keeping any `www.` and trailing slash.
+export const getWebsiteLabel = (website: string): string =>
+	website.replace(/^https?:\/\//, '');
+
+// First-letter initials (max 2) for the avatar fallback. Mirrors the inline
+// logic already in DetailMeta.astro.
+export const getInitials = (name: string): string =>
+	name
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((w) => w[0]?.toUpperCase() ?? '')
+		.join('');
+
+// Resolve a creator/listing avatar that may be a relative `/api/resources/...`
+// path or an absolute URL. Returns null when unset.
+export const resolveAvatar = (url: string | null | undefined): string | null => {
+	const raw = url?.trim() || null;
+	if (!raw) return null;
+	return raw.startsWith('/api/resources') ? resolveImage(raw) : raw;
+};
 
 // `/api/item-listing/listingFilterInfo/{itemType}` response shape.
 export const filterParamInfoSchema = z.object({

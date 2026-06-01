@@ -5,15 +5,22 @@ import CategoryTilesGrid from '@components/IotHub/CategoryTilesGrid.astro';
 import CategorySection from '@components/IotHub/CategorySection.astro';
 import CreatorCTA from '@components/IotHub/CreatorCTA.astro';
 import { getCollection } from 'astro:content';
-import { IOT_HUB_CATEGORIES, HOME_PER_CATEGORY } from '@models/iot-hub';
+import { IOT_HUB_CATEGORIES, HOME_PER_CATEGORY, isNumericSlug } from '@models/iot-hub';
 
 const categories = await getCollection('iotHubCategories');
 const byId = new Map(categories.map((c) => [c.id, c.data]));
 
 // `items` inside each category is already in API order (installCount DESC).
+// Pure-numeric slugs are excluded so a card's creator link can't point at a
+// creator page that the `creator/[id]` route never generated (that route
+// applies the same filter).
 const grouped = IOT_HUB_CATEGORIES.map((cat) => ({
 	cat,
-	items: byId.get(cat.slug)?.items.slice(0, HOME_PER_CATEGORY) ?? [],
+	items:
+		byId
+			.get(cat.slug)
+			?.items.filter((item) => !isNumericSlug(item.slug))
+			.slice(0, HOME_PER_CATEGORY) ?? [],
 }));
 
 const title = 'IoT Hub | ThingsBoard';
@@ -65,38 +72,18 @@ const description =
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
 
 	.iot-hub-home {
-		// Hairline token used by the side borders and dividers below.
-		// Light theme falls back to #edeef3, dark theme to #23262f (the design).
-		// `:global()` is required because `data-theme` lives on <html>, which
-		// is outside this component's Astro scope.
-		--iot-hub-hairline: var(--hairline---sl-color-hairline, #edeef3);
-
-		:global([data-theme='dark']) & {
-			--iot-hub-hairline: var(--hairline---sl-color-hairline, #23262f);
-		}
+		@include iot-hub-hairline-token;
 	}
 
 	.iot-hub-home__center_wrapper {
-		margin: 0 auto;
-		max-width: calc(#{$container-max-width} + 32px);
-
-		@include media-down(sm) {
-			max-width: calc(#{$container-max-width} + 16px);
-		}
+		@include iot-hub-center;
 	}
 
 	.iot-hub-home__container {
-		max-width: $container-max-width;
-		margin: 0 16px;
-		// Hairline side borders flanking the 1080px content column (the design).
-		border-right: 1px solid var(--iot-hub-hairline);
-		border-left: 1px solid var(--iot-hub-hairline);
-
-		@include media-down(sm) {
-			margin: 0 8px;
-		}
+		@include iot-hub-container;
 	}
 
 	.iot-hub-home__top {
@@ -172,10 +159,7 @@ const description =
 	}
 
 	.iot-hub-home__divider {
-		height: 1px;
-		// Hairline token from the design; light = #edeef3, dark = #23262f
-		// (resolved by `--iot-hub-hairline` on .iot-hub-home above).
-		background: var(--iot-hub-hairline);
+		@include iot-hub-divider;
 	}
 
 	.iot-hub-home__items {

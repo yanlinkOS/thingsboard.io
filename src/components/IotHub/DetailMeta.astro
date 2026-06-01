@@ -1,7 +1,9 @@
 ---
 import {
 	getSubtypeLabel,
-	resolveImage,
+	getCreatorHref,
+	getInitials,
+	resolveAvatar,
 	type IotHubItemType,
 	type ListingDetail,
 } from '@models/iot-hub';
@@ -94,25 +96,13 @@ const useCasesColumn: Column | null =
 
 const creator = detail.creatorDisplayName || null;
 const verified = detail.creatorVerified;
-
-// Resolve the creator avatar URL — backend may return either an absolute URL
-// or a relative `/api/resources/...` path, which we prepend with the IoT Hub
-// origin via resolveImage. Falls back to initials when no avatar is set.
-const rawAvatar = detail.creatorAvatarUrl?.trim() || null;
-const avatarUrl = rawAvatar
-	? rawAvatar.startsWith('/api/resources')
-		? resolveImage(rawAvatar)
-		: rawAvatar
-	: null;
-
-const initials = creator
-	? creator
-			.split(/\s+/)
-			.filter(Boolean)
-			.slice(0, 2)
-			.map((w) => w[0]?.toUpperCase() ?? '')
-			.join('')
-	: '';
+const creatorHref = detail.creatorId ? getCreatorHref(detail.creatorId) : null;
+// Avatar resolves a relative `/api/resources/...` path or absolute URL; falls
+// back to initials when unset. The creator block is a link to the creator page
+// when we have an id, otherwise a plain container — same markup either way.
+const avatarUrl = resolveAvatar(detail.creatorAvatarUrl);
+const initials = creator ? getInitials(creator) : '';
+const CreatorTag = creatorHref ? 'a' : 'div';
 
 const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 ---
@@ -123,7 +113,13 @@ const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 			{creator && (
 				<div class="iot-hub-detail-meta__group">
 					<span class="iot-hub-detail-meta__label">Creator</span>
-					<div class="iot-hub-detail-meta__author">
+					<CreatorTag
+						class:list={[
+							'iot-hub-detail-meta__author',
+							creatorHref && 'iot-hub-detail-meta__author--link',
+						]}
+						href={creatorHref}
+					>
 						<span class="iot-hub-detail-meta__avatar" aria-hidden="true">
 							{avatarUrl ? (
 								<img
@@ -139,16 +135,13 @@ const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 								<span class="iot-hub-detail-meta__avatar-initials">{initials || '?'}</span>
 							)}
 							{verified && (
-								<span
-									class="material-icons iot-hub-detail-meta__avatar-verified"
-									aria-hidden="true"
-								>
+								<span class="material-icons iot-hub-detail-meta__avatar-verified" aria-hidden="true">
 									verified
 								</span>
 							)}
 						</span>
 						<span class="iot-hub-detail-meta__author-name">{creator}</span>
-					</div>
+					</CreatorTag>
 				</div>
 			)}
 			{secondColumn && (
@@ -204,6 +197,7 @@ const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
 
 	// Horizontal row of columns: all columns
 	// inline, vertically centred, fixed-content sized except for Use Cases
@@ -259,6 +253,23 @@ const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 		gap: 8px;
 		padding: 4px 0;
 		height: 40px;
+	}
+
+	.iot-hub-detail-meta__author--link {
+		text-decoration: none;
+		color: inherit;
+		border-radius: 8px;
+
+		&:hover .iot-hub-detail-meta__author-name,
+		&:focus-visible .iot-hub-detail-meta__author-name {
+			color: var(--color-text);
+			text-decoration: underline;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--color-primary);
+			outline-offset: 2px;
+		}
 	}
 
 	.iot-hub-detail-meta__avatar {
@@ -357,16 +368,7 @@ const hasAnyColumn = creator || secondColumn || thirdColumn || useCasesColumn;
 	}
 
 	.material-icons {
-		font-family: 'Material Icons';
-		font-weight: normal;
-		font-style: normal;
-		letter-spacing: normal;
-		text-transform: none;
+		@include iot-hub-material-icon;
 		display: inline-block;
-		white-space: nowrap;
-		word-wrap: normal;
-		direction: ltr;
-		font-feature-settings: 'liga';
-		-webkit-font-smoothing: antialiased;
 	}
 </style>

@@ -117,38 +117,22 @@ const searchPlaceholder = heroTitle
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
 
 	.iot-hub-cat {
-		--iot-hub-hairline: var(--hairline---sl-color-hairline, #edeef3);
-
-		:global([data-theme='dark']) & {
-			--iot-hub-hairline: var(--hairline---sl-color-hairline, #23262f);
-		}
+		@include iot-hub-hairline-token;
 	}
 
 	.iot-hub-cat__center {
-		margin: 0 auto;
-		max-width: calc(#{$container-max-width} + 32px);
-
-		@include media-down(sm) {
-			max-width: calc(#{$container-max-width} + 16px);
-		}
+		@include iot-hub-center;
 	}
 
 	.iot-hub-cat__container {
-		max-width: $container-max-width;
-		margin: 0 16px;
-		border-right: 1px solid var(--iot-hub-hairline);
-		border-left: 1px solid var(--iot-hub-hairline);
-
-		@include media-down(sm) {
-			margin: 0 8px;
-		}
+		@include iot-hub-container;
 	}
 
 	.iot-hub-cat__divider {
-		height: 1px;
-		background: var(--iot-hub-hairline);
+		@include iot-hub-divider;
 	}
 
 	.iot-hub-cat__listings-wrap {

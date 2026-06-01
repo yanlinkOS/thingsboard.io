@@ -1,0 +1,178 @@
+---
+import { IOT_HUB_STRINGS, CREATOR_PAGE_SIZE } from '@models/iot-hub';
+import IotHubChevron from './IotHubChevron.astro';
+import PaginationLink from './PaginationLink.astro';
+
+const T = IOT_HUB_STRINGS.creatorPage;
+
+interface Props {
+	/** Heading count — creator.publishedCount (or rendered total as fallback). */
+	count: number;
+	/** Number of items across all pages (the "N results" line). */
+	totalResults: number;
+	currentPage: number;
+	totalPages: number;
+	basePath: string;
+}
+
+const { count, totalResults, currentPage, totalPages, basePath } = Astro.props;
+const resultsWord = totalResults === 1 ? T.resultSingular : T.resultPlural;
+---
+
+<div class="creator-bar">
+	<h2 class="creator-bar__heading">{T.publishedItems} ({count})</h2>
+	<div class="creator-bar__filters">
+		<div class="creator-bar__row1">
+			<div class="creator-bar__search">
+				<input
+					class="creator-bar__search-input"
+					type="search"
+					placeholder={T.searchPlaceholder}
+					aria-label={T.searchPlaceholder}
+					disabled
+				/>
+				<span class="creator-bar__search-glyph" aria-hidden="true"></span>
+			</div>
+			<button class="creator-bar__sort" type="button" disabled>
+				<span>{T.sortLabel}</span>
+				<IotHubChevron direction="down" />
+			</button>
+		</div>
+		<div class="creator-bar__row2">
+			<p class="creator-bar__count">{totalResults} {resultsWord}</p>
+			{totalPages > 1 && (
+				<PaginationLink
+					currentPage={currentPage}
+					totalPages={totalPages}
+					basePath={basePath}
+					perPage={CREATOR_PAGE_SIZE}
+				/>
+			)}
+		</div>
+	</div>
+</div>
+
+<style lang="scss">
+	@use '~/styles/_variables.scss' as *;
+
+	.creator-bar {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		padding: 40px 16px 0;
+
+		@include media-down(sm) {
+			padding: 40px 12px 0;
+		}
+	}
+
+	.creator-bar__heading {
+		margin: 0;
+		font-size: 24px;
+		font-weight: $font-weight-semibold;
+		line-height: 28px;
+		color: var(--color-text);
+	}
+
+	// The two filter rows share a 16px gap; the heading sits 24px above them
+	// (the outer .creator-bar gap).
+	.creator-bar__filters {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		width: 100%;
+	}
+
+	.creator-bar__row1 {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+
+		@include media-down(sm) {
+			gap: 8px;
+		}
+	}
+
+	.creator-bar__search {
+		flex: 1 1 0;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 16px;
+		min-height: 56px;
+		background: var(--color-bg-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+
+		:global([data-theme='dark']) & {
+			border-color: #353841;
+		}
+	}
+
+	.creator-bar__search-input {
+		flex: 1 1 0;
+		min-width: 0;
+		border: none;
+		outline: none;
+		background: transparent;
+		font-family: inherit;
+		font-size: 16px;
+		line-height: 28px;
+		color: var(--color-text);
+
+		&::placeholder { color: var(--color-text-muted); }
+		&:disabled { -webkit-text-fill-color: var(--color-text-muted); opacity: 1; cursor: not-allowed; }
+	}
+
+	.creator-bar__search-glyph {
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+		background-color: var(--color-text-secondary);
+		-webkit-mask: url('/icons/iot-hub-search.svg') center / contain no-repeat;
+		mask: url('/icons/iot-hub-search.svg') center / contain no-repeat;
+	}
+
+	.creator-bar__sort {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 8px;
+		font-family: inherit;
+		font-size: 14px;
+		font-weight: $font-weight-semibold;
+		line-height: 24px;
+		color: var(--color-primary);
+		background: transparent;
+		border: none;
+		border-radius: 8px;
+		cursor: not-allowed;
+		flex-shrink: 0;
+
+		svg { display: block; }
+
+		:global([data-theme='dark']) & { color: #b3c7ff; }
+	}
+
+	.creator-bar__row2 {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		min-height: 40px;
+	}
+
+	.creator-bar__count {
+		flex-shrink: 0;
+		margin: 0;
+		font-size: 14px;
+		font-weight: $font-weight-semibold;
+		line-height: 24px;
+		color: var(--color-text);
+	}
+
+	// Let the embedded pagination fill the remaining row width.
+	.creator-bar__row2 :global(.iot-hub-pagination) {
+		flex: 1 1 0;
+	}
+</style>

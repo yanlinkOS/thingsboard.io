@@ -61,6 +61,8 @@ const isSvg = svgMarkup !== null;
 }
 
 <style lang="scss">
+	@use '~/styles/_iot-hub.scss' as *;
+
 	.iot-hub-icon {
 		display: inline-flex;
 		align-items: center;
@@ -84,15 +86,6 @@ const isSvg = svgMarkup !== null;
 	// Material Icons font ships glyphs via `liga` substitution — the element
 	// text content (e.g. "memory") is rendered as the icon.
 	.iot-hub-icon--font {
-		font-family: 'Material Icons';
-		font-weight: normal;
-		font-style: normal;
-		letter-spacing: normal;
-		text-transform: none;
-		white-space: nowrap;
-		word-wrap: normal;
-		direction: ltr;
-		font-feature-settings: 'liga';
-		-webkit-font-smoothing: antialiased;
+		@include iot-hub-material-icon;
 	}
 </style>

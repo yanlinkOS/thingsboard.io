@@ -7,9 +7,11 @@ interface Props {
 	currentPage: number;
 	totalPages: number;
 	basePath: string;
+	/** Items-per-page value shown in the (decorative) selector. */
+	perPage?: number;
 }
 
-const { currentPage, totalPages, basePath } = Astro.props;
+const { currentPage, totalPages, basePath, perPage = PAGE_SIZE } = Astro.props;
 
 const pageUrl = (n: number): string => (n === 1 ? basePath : `${basePath}${n}/`);
 
@@ -72,7 +74,7 @@ const nextHref = currentPage < totalPages ? pageUrl(currentPage + 1) : undefined
 	<div class="iot-hub-pagination__per-page" aria-hidden="true">
 		<span class="iot-hub-pagination__per-page-label">Items per page:</span>
 		<span class="iot-hub-pagination__per-page-value">
-			{PAGE_SIZE}
+			{perPage}
 			<IotHubChevron direction="down" />
 		</span>
 	</div>

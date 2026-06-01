@@ -1,6 +1,7 @@
 ---
 import {
 	getCardVariant,
+	getCreatorHref,
 	getPlaceholderIcon,
 	resolveImage,
 	type ListingView,
@@ -14,13 +15,16 @@ import InstallButton from '@components/IotHub/InstallButton.astro';
 interface Props {
 	item: ListingView;
 	categorySlug: string;
+	/** When false, hide the creator row entirely (used on the creator's own page). */
+	showCreator?: boolean;
 }
 
-const { item, categorySlug } = Astro.props;
-const { name, image, color, creatorDisplayName, creatorVerified, installCount, itemType, slug } =
+const { item, categorySlug, showCreator = true } = Astro.props;
+const { name, image, color, creatorId, creatorDisplayName, creatorVerified, installCount, itemType, slug } =
 	item;
 const href = `/iot-hub/${categorySlug}/${slug}/`;
 const author = creatorDisplayName ?? 'ThingsBoard';
+const creatorHref = creatorId ? getCreatorHref(creatorId) : null;
 const isCompact = getCardVariant(itemType) === 'small';
 
 const imageUrl = isCompact ? null : resolveImage(image);
@@ -68,20 +72,33 @@ const placeholderIcon = getPlaceholderIcon(item);
 	<div class="iot-hub-card__body">
 		<h3 class="iot-hub-card__title">{name}</h3>
 		<div class="iot-hub-card__footer">
-			<div class="iot-hub-card__author">
-				<span
-					class:list={[
-						'material-icons',
-						'iot-hub-card__author-icon',
-						creatorVerified && 'iot-hub-card__author-icon--verified',
-					]}
-					aria-hidden="true"
-				>
-					{creatorVerified ? 'verified' : 'person'}
-				</span>
-				<span class="iot-hub-card__author-name">{author}</span>
-			</div>
-			<span class="iot-hub-card__dot" aria-hidden="true"></span>
+			{showCreator && (
+				<>
+					{/* Card root is an <a>, so the creator can't be a nested anchor —
+					    it's a role="link" span navigated by the script below. Plain
+					    span (no link affordance) when the item has no creatorId. */}
+					<span
+						class:list={['iot-hub-card__author', creatorHref && 'iot-hub-card__author--link']}
+						role={creatorHref ? 'link' : undefined}
+						tabindex={creatorHref ? 0 : undefined}
+						data-creator-href={creatorHref ?? undefined}
+						title={creatorHref ? author : undefined}
+					>
+						<span
+							class:list={[
+								'material-icons',
+								'iot-hub-card__author-icon',
+								creatorVerified && 'iot-hub-card__author-icon--verified',
+							]}
+							aria-hidden="true"
+						>
+							{creatorVerified ? 'verified' : 'person'}
+						</span>
+						<span class="iot-hub-card__author-name">{author}</span>
+					</span>
+					<span class="iot-hub-card__dot" aria-hidden="true" />
+				</>
+			)}
 			<div class="iot-hub-card__installs" title={`${installCount} installs`}>
 				<span class="material-icons iot-hub-card__install-icon" aria-hidden="true">download</span>
 				<span>{installCount}</span>
@@ -110,6 +127,7 @@ const placeholderIcon = getPlaceholderIcon(item);
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
 
 	.iot-hub-card {
 		background: var(--color-bg-surface);
@@ -221,17 +239,8 @@ const placeholderIcon = getPlaceholderIcon(item);
 	// text content (e.g. "widgets") is rendered as the icon. `@font-face` is
 	// registered by the `@fontsource/material-icons` import at the top.
 	.material-icons {
-		font-family: 'Material Icons';
-		font-weight: normal;
-		font-style: normal;
-		letter-spacing: normal;
-		text-transform: none;
+		@include iot-hub-material-icon;
 		display: inline-block;
-		white-space: nowrap;
-		word-wrap: normal;
-		direction: ltr;
-		font-feature-settings: 'liga';
-		-webkit-font-smoothing: antialiased;
 	}
 
 	.iot-hub-card--compact .iot-hub-card__body {
@@ -276,6 +285,22 @@ const placeholderIcon = getPlaceholderIcon(item);
 		min-width: 0;
 	}
 
+	.iot-hub-card__author--link {
+		cursor: pointer;
+		border-radius: 4px;
+
+		&:hover .iot-hub-card__author-name,
+		&:focus-visible .iot-hub-card__author-name {
+			color: var(--color-text);
+			text-decoration: underline;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--color-primary);
+			outline-offset: 2px;
+		}
+	}
+
 	.iot-hub-card__author-icon,
 	.iot-hub-card__install-icon {
 		font-size: 16px;
@@ -314,3 +339,22 @@ const placeholderIcon = getPlaceholderIcon(item);
 	}
 
 </style>
+
+<script>
+	// The card root is an <a>, so the creator element can't be a nested anchor.
+	// Mirror upstream `onCreatorClick`: stop the card link, navigate to the
+	// creator page. Astro dedupes this module script across all cards on a page.
+	document.querySelectorAll<HTMLElement>('[data-creator-href]').forEach((el) => {
+		const href = el.dataset.creatorHref;
+		if (!href) return;
+		const go = (e: Event) => {
+			e.preventDefault();
+			e.stopPropagation();
+			window.location.href = href;
+		};
+		el.addEventListener('click', go);
+		el.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') go(e);
+		});
+	});
+</script>
