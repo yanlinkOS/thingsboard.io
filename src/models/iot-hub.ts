@@ -230,12 +230,30 @@ export const listingViewSchema = z.object({
 	installCount: z.number().default(0),
 	publishedTime: z.number().nullable(),
 	creatorDisplayName: z.string().nullable(),
+	creatorAvatarUrl: z.string().nullable(),
 	creatorVerified: z.boolean().default(false),
 	screenshots: z.array(screenshotResourceSchema).default([]),
 });
 
 export const listingDetailSchema = listingViewSchema.extend({
 	readmeContent: z.string().nullable(),
+	// Lifted from the picked primary variant on the backend
+	// (MpListingServiceImpl.pickPrimaryVariant). Polymorphic JSON object whose
+	// shape depends on the listing's `itemType` — type-specific fields like
+	// `widgetType`, `cfType`, `ruleChainType` are read off this without
+	// walking the variants list. Kept untyped here; narrow at the use site.
+	dataDescriptor: z.unknown().nullable(),
+	// Aggregated edition + supported-TB-version envelope across all variants
+	// (computed by MpListingServiceImpl.findDetailById):
+	//   ceOnly       — true when ALL variants have ceOnly=true
+	//   peOnly       — true when ALL variants have peOnly=true
+	//   minTbVersion — the smallest minTbVersion across variants
+	//   maxTbVersion — the largest maxTbVersion; null means "no upper limit"
+	//                  and any null variant collapses the field to null.
+	ceOnly: z.boolean().default(false),
+	peOnly: z.boolean().default(false),
+	minTbVersion: z.number().int().default(0),
+	maxTbVersion: z.number().int().nullable(),
 });
 
 // `/api/item-listing/listingFilterInfo/{itemType}` response shape.

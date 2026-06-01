@@ -1,0 +1,92 @@
+---
+import '@fontsource/material-icons';
+import { getMdiSvg } from '@util/mdi-icons';
+
+// Renders an IoT Hub icon — same convention as the Angular `<hub-icon>`
+// (/data/git/iot-hub/ui/src/app/shared/components/icon.component.ts):
+//   * names without a prefix ("memory", "widgets", …) → Material Icons font
+//     glyph rendered via ligature substitution
+//   * names prefixed `mdi:` → SVG fetched from
+//     `${IOT_HUB_API_URL}/assets/mdi/{name}.svg` and inlined
+//
+// SVGs are fetched server-side at component render and cached per build
+// worker, so each unique MDI icon is fetched once regardless of how many
+// listings use it.
+
+interface Props {
+	/**
+	 * Icon name. Bare strings render as a Material Icons font glyph; strings
+	 * starting with `mdi:` are fetched and inlined as SVG.
+	 */
+	icon: string;
+	/**
+	 * Rendered icon size as a CSS dimension. Numbers are treated as px.
+	 * @default '1em'
+	 */
+	size?: string | number;
+	class?: string;
+}
+
+const { icon, size = '1em', class: className } = Astro.props;
+const sizeCss = typeof size === 'number' ? `${size}px` : size;
+
+const isMdi = icon.startsWith('mdi:');
+const mdiName = isMdi ? icon.slice(4) : null;
+const svgMarkup = mdiName ? await getMdiSvg(mdiName) : null;
+---
+
+{
+	isMdi ? (
+		<span
+			class:list={['iot-hub-icon', 'iot-hub-icon--svg', className]}
+			style={`width:${sizeCss};height:${sizeCss};`}
+			aria-hidden="true"
+			set:html={svgMarkup ?? ''}
+		/>
+	) : (
+		<span
+			class:list={['iot-hub-icon', 'iot-hub-icon--font', 'material-icons', className]}
+			style={`font-size:${sizeCss};`}
+			aria-hidden="true"
+		>
+			{icon}
+		</span>
+	)
+}
+
+<style lang="scss">
+	.iot-hub-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+		color: inherit;
+		flex-shrink: 0;
+	}
+
+	// Inlined MDI SVG — fill the wrapper span and inherit colour via
+	// currentColor (added on the root <svg> by getMdiSvg's normaliser).
+	.iot-hub-icon--svg {
+		:global(svg) {
+			width: 100%;
+			height: 100%;
+			display: block;
+			fill: currentColor;
+		}
+	}
+
+	// Material Icons font ships glyphs via `liga` substitution — the element
+	// text content (e.g. "memory") is rendered as the icon.
+	.iot-hub-icon--font {
+		font-family: 'Material Icons';
+		font-weight: normal;
+		font-style: normal;
+		letter-spacing: normal;
+		text-transform: none;
+		white-space: nowrap;
+		word-wrap: normal;
+		direction: ltr;
+		font-feature-settings: 'liga';
+		-webkit-font-smoothing: antialiased;
+	}
+</style>

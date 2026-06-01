@@ -1,13 +1,13 @@
 ---
 import {
-	IOT_HUB_API_URL,
 	getCardVariant,
 	getPlaceholderIcon,
 	resolveImage,
 	type ListingView,
 } from '@models/iot-hub';
+import IotHubIcon from './IotHubIcon.astro';
 // Self-hosted Material Icons font — used for `verified`, `person`, `download`
-// and Material-name placeholders on compact tiles.
+// on every card. Compact-card placeholder glyphs are rendered via IotHubIcon.
 import '@fontsource/material-icons';
 
 interface Props {
@@ -25,11 +25,10 @@ const isCompact = getCardVariant(itemType) === 'small';
 
 const imageUrl = isCompact ? null : resolveImage(image);
 
-// `mdi:foo` icons are served from the iot-hub `/assets/mdi/` directory; bare
-// names (e.g. `widgets`) are Material Icons font glyphs.
 const tileColor = color ?? '#4caf50';
+// `mdi:foo` icons are fetched + inlined as SVG by IotHubIcon; bare names
+// (e.g. `widgets`) render as Material Icons font glyphs.
 const placeholderIcon = getPlaceholderIcon(item);
-const mdiName = placeholderIcon.startsWith('mdi:') ? placeholderIcon.slice(4) : null;
 ---
 
 <a
@@ -42,20 +41,12 @@ const mdiName = placeholderIcon.startsWith('mdi:') ? placeholderIcon.slice(4) : 
 >
 	{
 		isCompact ? (
-			<div class="iot-hub-card__icon" style={`background:${tileColor};`} aria-hidden="true">
-				{mdiName ? (
-					<img
-						class="iot-hub-card__icon-glyph iot-hub-card__icon-glyph--mdi"
-						src={`${IOT_HUB_API_URL}/assets/mdi/${mdiName}.svg`}
-						alt=""
-						width="32"
-						height="32"
-						loading="lazy"
-						decoding="async"
-					/>
-				) : (
-					<span class="iot-hub-card__icon-glyph material-icons">{placeholderIcon}</span>
-				)}
+			<div
+				class="iot-hub-card__icon"
+				style={`background:${tileColor};`}
+				aria-hidden="true"
+			>
+				<IotHubIcon icon={placeholderIcon} size={32} class="iot-hub-card__icon-glyph" />
 			</div>
 		) : (
 			<div class="iot-hub-card__preview">
@@ -204,19 +195,10 @@ const mdiName = placeholderIcon.startsWith('mdi:') ? placeholderIcon.slice(4) : 
 		color: #fff;
 	}
 
+	// IotHubIcon controls its own width/height/font-size via the `size` prop;
+	// this class is just a hook for any future per-card overrides.
 	.iot-hub-card__icon-glyph {
-		width: 32px;
-		height: 32px;
-		font-size: 32px;
 		line-height: 1;
-	}
-
-	// MDI icons are `<img>` SVGs and don't inherit `color` — invert them to
-	// white so they read on the coloured tile (Material font glyphs already
-	// inherit `color: #fff` from `.iot-hub-card__icon`).
-	.iot-hub-card__icon-glyph--mdi {
-		filter: brightness(0) invert(1);
-		object-fit: contain;
 	}
 
 	// Material Icons font ships glyphs via `liga` substitution — the element's
