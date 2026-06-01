@@ -372,7 +372,7 @@ const resourceUrl = (id: string) => `${IOT_HUB_API_URL}/api/resources/${id}`;
 					// otherwise a drag that starts mid-transition would jump.
 					track.style.transition = 'none';
 					track.style.setProperty('--idx', String(idx));
-					try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+					try { viewport.setPointerCapture(e.pointerId); } catch { /* pointer capture unsupported */ }
 				});
 
 				viewport.addEventListener('pointermove', function (e) {
@@ -391,7 +391,7 @@ const resourceUrl = (id: string) => `${IOT_HUB_API_URL}/api/resources/${id}`;
 				function endDrag(e) {
 					if (!dragging || e.pointerId !== dragPointerId) return;
 					dragging = false;
-					try { viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+					try { viewport.releasePointerCapture(e.pointerId); } catch { /* capture may already be lost */ }
 					// Restore the smooth transition so the snap animates.
 					track.style.transition = '';
 					if (dragRecognized) {
