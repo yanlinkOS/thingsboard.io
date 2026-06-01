@@ -99,8 +99,6 @@ export const getPlaceholderIcon = (item: IconableListing): string => {
 	switch (item.itemType) {
 		case 'WIDGET':
 			return 'widgets';
-		case 'DASHBOARD':
-			return 'dashboard';
 		case 'SOLUTION_TEMPLATE':
 			return 'integration_instructions';
 		case 'CALCULATED_FIELD':
@@ -146,6 +144,21 @@ export const IOT_HUB_STRINGS = {
 		resultPlural: 'results',
 	},
 	emptyState: 'No items available yet.',
+	installDialog: {
+		title: 'Install item',
+		titleConnect: 'Connect item',
+		// `\n` is a hard line break, rendered via `white-space: pre-line` to match
+		// the two-line layout in the design (Figma node 1189-9364).
+		subtitle:
+			'Choose a ThingsBoard instance to install this item into.\nCopy the install link or open it directly in a new tab.',
+		closeAriaLabel: 'Close',
+		copy: 'Copy link',
+		copied: 'Copied',
+		editLocal: 'Edit local URL',
+		save: 'Save',
+		cancel: 'Cancel',
+		invalidUrl: 'Enter a valid URL, e.g. http://localhost:8080',
+	},
 } as const;
 
 // Maps raw subtype keys from the API (`timeseries`, `SIMPLE`, `CORE`, …)
@@ -204,7 +217,6 @@ export const getTbVersionLabel = (
 
 export const itemTypeEnum = z.enum([
 	'WIDGET',
-	'DASHBOARD',
 	'SOLUTION_TEMPLATE',
 	'CALCULATED_FIELD',
 	'RULE_CHAIN',
@@ -251,6 +263,7 @@ export const listingViewSchema = z.object({
 	creatorDisplayName: z.string().nullable(),
 	creatorAvatarUrl: z.string().nullable(),
 	creatorVerified: z.boolean().default(false),
+	creatorAffiliateId: z.string().nullable().default(null),
 	screenshots: z.array(screenshotResourceSchema).default([]),
 });
 
@@ -318,3 +331,79 @@ export type ListingDetail = z.infer<typeof listingDetailSchema>;
 export type IotHubCategoryData = z.infer<typeof iotHubCategorySchema>;
 export type FilterParamInfo = z.infer<typeof filterParamInfoSchema>;
 export type ItemTypeFilterInfo = z.infer<typeof itemTypeFilterInfoSchema>;
+
+// --- Install / Connect dialog -------------------------------------------
+// URL logic ported from the upstream Angular preview-links-dialog
+// (thingsboard/iot-hub @ acb157d). The Local instance base is editable and
+// persisted to localStorage on this static site (no logged-in user here).
+
+export const INSTALL_LOCAL_DEFAULT = 'http://localhost:8080';
+export const INSTALL_LOCAL_STORAGE_KEY = 'tb:iot-hub:local-url';
+export const INSTALL_PREVIEW_PATH = '/iot-hub/listing/';
+
+/** scheme + host[:port] only — no path, no trailing slash. */
+export const INSTALL_LOCAL_URL_PATTERN = /^https?:\/\/[^/\s]+$/;
+
+export interface InstallInstance {
+	key: 'na' | 'eu' | 'local';
+	label: string;
+	base: string;
+	/** Icon key (see `ICON_PATHS` in install-dialog.ts) rendered in the row tile. */
+	icon: string;
+	/** Cloud rows append `?fpr=<affiliateId>` when one is available. */
+	referral?: boolean;
+	/** Local row: user-editable + persisted to localStorage. */
+	editable?: boolean;
+}
+
+// Order matches the Figma frame (node 1189-8154): NA, EU, Local.
+export const INSTALL_INSTANCES: readonly InstallInstance[] = [
+	{
+		key: 'na',
+		label: 'ThingsBoard Cloud (North America)',
+		base: 'https://thingsboard.cloud',
+		icon: 'cloud',
+		referral: true,
+	},
+	{
+		key: 'eu',
+		label: 'ThingsBoard Cloud (Europe)',
+		base: 'https://eu.thingsboard.cloud',
+		icon: 'cloud',
+		referral: true,
+	},
+	{
+		key: 'local',
+		label: 'Local ThingsBoard',
+		base: INSTALL_LOCAL_DEFAULT,
+		icon: 'server',
+		editable: true,
+	},
+];
+
+export const stripTrailingSlash = (s: string): string =>
+	s.endsWith('/') ? s.slice(0, -1) : s;
+
+export const stripScheme = (s: string): string => s.replace(/^https?:\/\//, '');
+
+export interface BuildInstallUrlOptions {
+	referral?: boolean;
+	affiliateId?: string | null;
+}
+
+export const buildInstallUrl = (
+	base: string,
+	slug: string,
+	{ referral = false, affiliateId = null }: BuildInstallUrlOptions = {}
+): string => {
+	// `base` is always a valid origin (cloud constants or a pattern-validated
+	// local URL), so the URL API safely handles slug/param encoding for us.
+	const url = new URL(INSTALL_PREVIEW_PATH + encodeURIComponent(slug), base);
+	if (referral && affiliateId) url.searchParams.set('fpr', affiliateId);
+	return url.toString();
+};
+
+// `itemType` is `string` (not `IotHubItemType`) because one caller passes a raw
+// value read from a DOM data-attribute.
+export const getInstallVerb = (itemType: string): 'Install' | 'Connect' =>
+	itemType === 'DEVICE' ? 'Connect' : 'Install';

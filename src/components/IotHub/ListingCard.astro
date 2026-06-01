@@ -9,6 +9,7 @@ import IotHubIcon from './IotHubIcon.astro';
 // Self-hosted Material Icons font — used for `verified`, `person`, `download`
 // on every card. Compact-card placeholder glyphs are rendered via IotHubIcon.
 import '@fontsource/material-icons';
+import InstallButton from '@components/IotHub/InstallButton.astro';
 
 interface Props {
 	item: ListingView;
@@ -20,7 +21,6 @@ const { name, image, color, creatorDisplayName, creatorVerified, installCount, i
 	item;
 const href = `/iot-hub/${categorySlug}/${slug}/`;
 const author = creatorDisplayName ?? 'ThingsBoard';
-const cta = itemType === 'DEVICE' ? 'Connect' : 'Install';
 const isCompact = getCardVariant(itemType) === 'small';
 
 const imageUrl = isCompact ? null : resolveImage(image);
@@ -86,10 +86,26 @@ const placeholderIcon = getPlaceholderIcon(item);
 				<span class="material-icons iot-hub-card__install-icon" aria-hidden="true">download</span>
 				<span>{installCount}</span>
 			</div>
-			{!isCompact && <button type="button" class="iot-hub-card__cta">{cta}</button>}
+			{!isCompact && (
+				<InstallButton
+					slug={slug}
+					itemType={itemType}
+					name={name}
+					affiliateId={item.creatorAffiliateId}
+					variant="card"
+				/>
+			)}
 		</div>
 	</div>
-	{isCompact && <button type="button" class="iot-hub-card__cta">{cta}</button>}
+	{isCompact && (
+		<InstallButton
+			slug={slug}
+			itemType={itemType}
+			name={name}
+			affiliateId={item.creatorAffiliateId}
+			variant="card"
+		/>
+	)}
 </a>
 
 <style lang="scss">
@@ -297,25 +313,4 @@ const placeholderIcon = getPlaceholderIcon(item);
 		color: var(--sl-color-gray-3);
 	}
 
-	.iot-hub-card__cta {
-		margin-left: auto;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 4px 8px;
-		font-family: inherit;
-		font-size: 14px;
-		font-weight: $font-weight-medium;
-		line-height: 24px;
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-		color: var(--color-primary);
-		background: transparent;
-		flex-shrink: 0;
-		cursor: pointer;
-
-		&:hover {
-			border-color: var(--color-primary);
-		}
-	}
 </style>

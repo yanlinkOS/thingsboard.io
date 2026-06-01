@@ -1,6 +1,5 @@
 ---
 import {
-	IOT_HUB_API_URL,
 	IOT_HUB_CATEGORIES,
 	getCardVariant,
 	getPlaceholderIcon,
@@ -9,6 +8,7 @@ import {
 	type ListingDetail,
 } from '@models/iot-hub';
 import IotHubChevron from './IotHubChevron.astro';
+import InstallButton from './InstallButton.astro';
 import IotHubIcon from './IotHubIcon.astro';
 import DetailGallery from './DetailGallery.astro';
 
@@ -41,8 +41,6 @@ const heroImg = !isCompact && !showGallery ? resolveImage(detail.image) : null;
 const tileColor = detail.color ?? '#4caf50';
 const placeholderIcon = isCompact ? getPlaceholderIcon(detail) : null;
 
-const installUrl = `${IOT_HUB_API_URL}/listings/${detail.slug}`;
-
 // Sub-title meta row — name for the listing's item type (not the subtype;
 // hardwareType / widgetType / cfType / ruleChainType already surface in the
 // Type chip in DetailMeta below).
@@ -61,7 +59,7 @@ const subTypeLabel = (() => {
 		case 'RULE_CHAIN':
 			return 'Rule Chain';
 		default:
-			return detail.itemType
+			return String(detail.itemType)
 				.toLowerCase()
 				.replace(/_/g, ' ')
 				.replace(/\b\w/g, (c) => c.toUpperCase());
@@ -225,15 +223,13 @@ const tbVersionLabel = getTbVersionLabel(detail.minTbVersion, detail.maxTbVersio
 				{detail.description && (
 					<p class="iot-hub-detail-hero__desc">{detail.description}</p>
 				)}
-				<a
-					class="iot-hub-detail-hero__cta"
-					href={installUrl}
-					target="_blank"
-					rel="noopener"
-				>
-					<span>Install</span>
-					<IotHubChevron direction="right" />
-				</a>
+				<InstallButton
+					variant="hero"
+					slug={detail.slug}
+					itemType={detail.itemType}
+					name={detail.name}
+					affiliateId={detail.creatorAffiliateId}
+				/>
 			</div>
 		) : (
 			<>
@@ -345,15 +341,13 @@ const tbVersionLabel = getTbVersionLabel(detail.minTbVersion, detail.maxTbVersio
 						{detail.description && (
 							<p class="iot-hub-detail-hero__desc">{detail.description}</p>
 						)}
-						<a
-							class="iot-hub-detail-hero__cta"
-							href={installUrl}
-							target="_blank"
-							rel="noopener"
-						>
-							<span>{detail.itemType === 'DEVICE' ? 'Connect' : 'Install'}</span>
-							<IotHubChevron direction="right" />
-						</a>
+						<InstallButton
+							variant="hero"
+							slug={detail.slug}
+							itemType={detail.itemType}
+							name={detail.name}
+							affiliateId={detail.creatorAffiliateId}
+						/>
 					</div>
 				</div>
 			</>
@@ -496,31 +490,13 @@ const tbVersionLabel = getTbVersionLabel(detail.minTbVersion, detail.maxTbVersio
 		}
 	}
 
-	// --- Description + CTA (shared) ------------------------------------------
+	// --- Description (CTA is the shared <InstallButton variant="hero">) ------
 
 	.iot-hub-detail-hero__desc {
 		font-size: 16px;
 		line-height: 24px;
 		margin: 0;
 		color: var(--color-text-secondary);
-	}
-
-	.iot-hub-detail-hero__cta {
-		@include button-primary;
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-		align-self: flex-start;
-		padding: 14px 16px;
-		font-size: 16px;
-		font-weight: $font-weight-semibold;
-		line-height: 28px;
-		border-radius: 8px;
-		text-decoration: none;
-
-		svg {
-			display: block;
-		}
 	}
 
 	// --- Variant A: big preview -------------------------------------------

@@ -115,16 +115,6 @@ const searchPlaceholder = heroTitle
 	</main>
 </BaseLayout>
 
-<style lang="scss" is:global>
-	// Paired with inline `padding-right` set by the lock script so the
-	// scrollbar gutter stays reserved while overflow is hidden and the
-	// fixed site header / body don't jump wider.
-	html.iot-hub-filter-scroll-locked,
-	html.iot-hub-filter-scroll-locked body {
-		overflow: hidden !important;
-	}
-</style>
-
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
 
@@ -203,6 +193,8 @@ const searchPlaceholder = heroTitle
 </style>
 
 <script>
+	import { lockScroll, unlockScroll } from '@util/scroll-lock';
+
 	document
 		.querySelectorAll<HTMLElement>('[data-iot-hub-listings-wrap]')
 		.forEach((wrap) => {
@@ -219,47 +211,8 @@ const searchPlaceholder = heroTitle
 			// breakpoint where the panel switches to overlay-drawer.
 			const mobileMq = window.matchMedia('(max-width: 1023px)');
 
-			// Without the padding compensation, hiding the scrollbar
-			// widens the ICB and the fixed site header / body jump
-			// wider when the drawer opens.
-			const html = document.documentElement;
-			let headerOriginalPadding = '';
-			let htmlOriginalPadding = '';
-			let headerCompensated = false;
-			const lockScroll = () => {
-				const sw = window.innerWidth - html.clientWidth;
-				htmlOriginalPadding = html.style.paddingRight;
-				if (sw > 0) {
-					html.style.paddingRight = sw + 'px';
-					const header = document.querySelector<HTMLElement>('header.header');
-					if (header) {
-						const cur = parseFloat(getComputedStyle(header).paddingRight) || 0;
-						headerOriginalPadding = header.style.paddingRight;
-						header.style.transition = 'none';
-						header.style.paddingRight = cur + sw + 'px';
-						requestAnimationFrame(() => {
-							header.style.transition = '';
-						});
-						headerCompensated = true;
-					}
-				}
-				html.classList.add('iot-hub-filter-scroll-locked');
-			};
-			const unlockScroll = () => {
-				html.classList.remove('iot-hub-filter-scroll-locked');
-				html.style.paddingRight = htmlOriginalPadding;
-				if (headerCompensated) {
-					const header = document.querySelector<HTMLElement>('header.header');
-					if (header) {
-						header.style.transition = 'none';
-						header.style.paddingRight = headerOriginalPadding;
-						requestAnimationFrame(() => {
-							header.style.transition = '';
-						});
-					}
-					headerCompensated = false;
-				}
-			};
+			// Scroll lock while the mobile drawer is open. The shared util also
+			// compensates the fixed site header so it doesn't jump wider.
 			const setScrollLock = (lock: boolean) => {
 				if (lock) lockScroll();
 				else unlockScroll();
