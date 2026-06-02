@@ -1,8 +1,9 @@
 ---
 import '@astrojs/starlight/style/markdown.css';
-import { Code } from '@astrojs/starlight/components';
+import 'node_modules/@astrojs/starlight/style/asides.css';
+import { Aside, Code, Icon, LinkButton } from '@astrojs/starlight/components';
 import ImageGallery from '@components/ImageGallery.astro';
-import { resolveImage } from '@models/iot-hub';
+import { resolveImage, type ListingDetail } from '@models/iot-hub';
 import { getMarkdownProcessor } from '@util/markdown-processor';
 
 // Renders IoT Hub listing readme markdown. Plain prose flows through the
@@ -19,18 +20,28 @@ import { getMarkdownProcessor } from '@util/markdown-processor';
 
 interface Props {
 	markdown: string | null | undefined;
+	/** Optional listing context — passed in by detail-page renders so future
+	 *  detectors can resolve variables / per-listing values from the same DTO
+	 *  the rest of the page sees. */
+	listingDetail?: ListingDetail;
 }
 
-const { markdown } = Astro.props;
+const { markdown, listingDetail } = Astro.props;
 
 // Registry of slot kinds we know how to render. Each slot stores the
 // props the matching Astro component will be invoked with.
 type CodeSlotProps = { code: string; lang?: string; meta?: string };
 type GalleryImage = { src: string; alt: string; caption?: string };
 type GallerySlotProps = { images: GalleryImage[] };
+type AsideType = 'note' | 'caution' | 'danger';
+type AsideSlotProps = { type: AsideType; content: string };
+type IconName = Parameters<typeof Icon>[0]['name'];
+type DocLinkSlotProps = { href: string; label: string; icon: IconName };
 type Slot =
 	| { kind: 'code'; props: CodeSlotProps }
-	| { kind: 'gallery'; props: GallerySlotProps };
+	| { kind: 'gallery'; props: GallerySlotProps }
+	| { kind: 'aside'; props: AsideSlotProps }
+	| { kind: 'docLink'; props: DocLinkSlotProps };
 
 // Sentinel: HTML comments survive markdown→HTML conversion unmodified, so
 // we can splice slots back into the rendered HTML by plain string matching.
@@ -64,7 +75,6 @@ function extractCodeBlocks(src: string, slots: Slot[]): string {
 		// (e.g. `title="…"`) come first so they aren't overridden.
 		const tokens: string[] = [];
 		if (userMeta) tokens.push(userMeta);
-		if (cleaned.includes('\n')) tokens.push('showLineNumbers');
 		tokens.push('maxLines=20');
 		const meta = tokens.join(' ');
 		const i = slots.push({ kind: 'code', props: { code: cleaned, lang, meta } }) - 1;
@@ -116,6 +126,52 @@ function extractImageGalleries(src: string, slots: Slot[]): string {
 	});
 }
 
+// Callouts: `${note(…)}`, `${warn(…)}`, `${error(…)}` — mapped to Starlight's
+// <Aside> with type note / caution / danger respectively. Content can include
+// inline HTML (e.g. `<span style="…">`, `<b>…</b>`) so we pass it through to
+// the Aside body via set:html. Lazy `[\s\S]*?` paired with `\)\s*}` skips
+// over nested `(…)` parens correctly, matching the platform's
+// `resolveVariables` callout branch in iot-hub-markdown.component.ts.
+const CALLOUT_RE = /\$\{(note|warn|error)\(([\s\S]*?)\)\s*}/g;
+const CALLOUT_TYPE_TO_ASIDE: Record<string, AsideType> = {
+	note: 'note',
+	warn: 'caution',
+	error: 'danger',
+};
+function extractCallouts(src: string, slots: Slot[]): string {
+	return src.replace(CALLOUT_RE, (_full, key: string, content: string) => {
+		const type = CALLOUT_TYPE_TO_ASIDE[key];
+		if (!type) return _full;
+		const i = slots.push({ kind: 'aside', props: { type, content } }) - 1;
+		return `\n\n${slotComment(i)}\n\n`;
+	});
+}
+
+// Documentation link buttons: `${product.button}` and `${datasheet.button}`,
+// resolved against the listing's `dataDescriptor.{productURL,datasheetURL}`.
+// Mirrors `resolveDocLinkPlaceholders` in the platform's
+// iot-hub-markdown.utils.ts — a placeholder whose URL isn't set on the
+// dataDescriptor is dropped from the output, rather than rendered as an
+// empty button.
+type DataDescriptor = { productURL?: string | null; datasheetURL?: string | null };
+const PRODUCT_BUTTON_RE = /\$\{product\.button}/g;
+const DATASHEET_BUTTON_RE = /\$\{datasheet\.button}/g;
+function extractDocLinks(src: string, slots: Slot[], detail: ListingDetail | undefined): string {
+	const dd = (detail?.dataDescriptor ?? null) as DataDescriptor | null;
+	const name = detail?.name ?? '';
+	const pushButton = (href: string, label: string, icon: IconName): string => {
+		const i = slots.push({ kind: 'docLink', props: { href, label, icon } }) - 1;
+		return `\n\n${slotComment(i)}\n\n`;
+	};
+	return src
+		.replace(PRODUCT_BUTTON_RE, () =>
+			dd?.productURL ? pushButton(dd.productURL, `${name} Product page`, 'external') : ''
+		)
+		.replace(DATASHEET_BUTTON_RE, () =>
+			dd?.datasheetURL ? pushButton(dd.datasheetURL, `${name} Datasheet`, 'document') : ''
+		);
+}
+
 // --- Pipeline ----------------------------------------------------------------
 
 const slots: Slot[] = [];
@@ -134,6 +190,8 @@ if (markdown && markdown.trim().length > 0) {
 
 	// 3. Extract any remaining patterns. Add new detectors here.
 	src = extractImageGalleries(src, slots);
+	src = extractCallouts(src, slots);
+	src = extractDocLinks(src, slots, listingDetail);
 
 	// 4. Markdown → HTML.
 	const processor = await getMarkdownProcessor();
@@ -162,7 +220,26 @@ if (markdown && markdown.trim().length > 0) {
 					case 'code':
 						return <Code {...p.slot.props} />;
 					case 'gallery':
-						return <ImageGallery {...p.slot.props} />;
+						return <ImageGallery images={p.slot.props.images} />;
+					case 'aside':
+						return (
+							<Aside type={p.slot.props.type}>
+								<Fragment set:html={p.slot.props.content} />
+							</Aside>
+						);
+					case 'docLink':
+						return (
+							<LinkButton
+								href={p.slot.props.href}
+								icon={p.slot.props.icon}
+								variant="secondary"
+								iconPlacement="start"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{p.slot.props.label}
+							</LinkButton>
+						);
 					// Future: more cases here.
 					default:
 						return null;
@@ -176,23 +253,29 @@ if (markdown && markdown.trim().length > 0) {
 	@use '~/styles/_variables.scss' as *;
 	
 	.sl-markdown-content {
+		line-height: var(--sl-line-height);
+		-webkit-font-smoothing: antialiased;
+		color: var(--sl-color-text);
+		background-color: var(--sl-color-bg);
 
-		:global(p) { 
-			line-height: var(--sl-line-height);
-			-webkit-font-smoothing: antialiased;
-			color: var(--sl-color-text);
-			font-size: var(--sl-font-size);
-		}
-
-		:global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6) {
-			font-size: 24px;
-			font-weight: 600;
-			line-height: 32px;
-			letter-spacing: 0.1px;
-			color: var(--sl-color-text);
-			margin: 0;
-			padding: 0;
-		}
+		@layer reset {
+			:global(p) { 
+				line-height: var(--sl-line-height);
+				-webkit-font-smoothing: antialiased;
+				color: var(--sl-color-text);
+				font-size: var(--sl-font-size);
+			}
+	
+			:global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6) {
+				font-size: 24px;
+				font-weight: 600;
+				line-height: 32px;
+				letter-spacing: 0.1px;
+				color: var(--sl-color-text);
+				margin: 0;
+				padding: 0;
+			}
+	  }
 
 		:global(> h1), :global(> h2), :global(> h3), :global(> h4), :global(> h5), :global(> h6) {
 			padding: 0 0 6px;
@@ -205,8 +288,24 @@ if (markdown && markdown.trim().length > 0) {
 			padding-right: 0;
 		}
 
-		:global(ul), :global(li) {
-			list-style: disc;
+		:global(ul) { 
+			:global(li) {
+				list-style: disc;
+			}
+		}
+
+		:global(ol) {
+			:global(li) {
+				list-style: decimal;
+			}
+		}
+
+		:global(:is(dir, menu, ol, ul)) {
+			:global(ul) {
+				:global(li) {
+					list-style: circle;
+				}
+			}
 		}
 
 		:global(> p), :global(> div) {
@@ -243,10 +342,6 @@ if (markdown && markdown.trim().length > 0) {
 			margin-bottom: 8px;
 		}
 
-		:global(ul), :global(li) {
-			list-style: disc;
-		}
-
 		:global(img) {
 			max-width: 100%;
 		}
@@ -255,38 +350,40 @@ if (markdown && markdown.trim().length > 0) {
 			margin: 0;
 		}
 
-		:global(.tb-callout) {
-			display: flex;
-			align-items: flex-start;
-			gap: 10px;
-			padding: 12px 16px;
-			border-radius: 4px;
-			border: 1px solid;
-			margin: 12px 0;
-			font-size: 16px;
-			line-height: 24px;
+		:global(table:not(:where(.not-content *))) {
+			display: block;
+			overflow-x: auto;
+			border-collapse: collapse;
+		}
 
-			:global(.tb-callout-icon) {
-				font-size: 20px;
-				flex-shrink: 0;
+		:global(:is(th, td):not(:where(.not-content *))) {
+			border: 1px solid var(--sl-color-hairline-light);
+			padding: 0.5rem 1rem;
+		}
+
+		:global(:is(th:first-child, td:first-child):not(:where(.not-content *))) {
+			padding-inline-start: 1rem;
+		}
+
+		:global(:is(th:last-child, td:last-child):not(:where(.not-content *))) {
+			padding-inline-end: 1rem;
+		}
+
+		:global(thead tr:not(:where(.not-content *))) {
+			background-color: var(--sl-color-gray-7, var(--sl-color-gray-6));
+		}
+
+		:global(tbody) {
+			:global(tr:nth-child(even):not(:where(.not-content *))) {
+				background-color: var(--sl-color-gray-7, var(--sl-color-gray-6));
 			}
+		}
 
-			&.tb-callout-note {
-				background: #e3f2fd;
-				border-color: #90caf9;
-				color: #1565c0;
-			}
-
-			&.tb-callout-warn {
-				background: #fff8e1;
-				border-color: #ffe082;
-				color: #f57f17;
-			}
-
-			&.tb-callout-error {
-				background: #fce4ec;
-				border-color: #ef9a9a;
-				color: #c62828;
+		:global(.starlight-aside) {
+			:global(tbody) {
+				:global(tr:nth-child(odd):not(:where(.not-content *))) {
+					background-color: var(--sl-color-bg);
+				}
 			}
 		}
 	}

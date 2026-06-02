@@ -81,7 +81,7 @@ const ruleNodes: IotHubNodeInfo[] =
 							{ruleNodes.length > 0 && <DetailRuleNodes nodes={ruleNodes} />}
 							{detail.readmeContent && (
 								<div class="iot-hub-detail__readme">
-									<IotHubMarkdown markdown={detail.readmeContent} />
+									<IotHubMarkdown markdown={detail.readmeContent} listingDetail={detail} />
 								</div>
 							)}
 						</div>
