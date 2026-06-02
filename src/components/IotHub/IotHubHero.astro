@@ -1,4 +1,8 @@
 ---
+// Material Icons font for the popup result cards (person glyph, type
+// fallbacks). Each per-component import is deduped by Vite.
+import '@fontsource/material-icons';
+
 // Composite cluster SVGs — one per category, layered absolutely over the
 // hero; the active one fades + scales in while the rest collapse out.
 import devicesCluster from '@root/assets/iot-hub/hero-device-cluster.svg';
@@ -93,12 +97,29 @@ const highlights = [
 						stroke-linejoin="round"></path>
 				</svg>
 			</button>
+			<div
+				class="iot-hub-hero__search-popup"
+				hidden
+				data-iot-hub-hero-popup
+				role="listbox"
+				aria-label="Search results"
+			>
+				<div class="iot-hub-hero__search-popup-body" data-popup-body></div>
+				<a
+					class="iot-hub-hero__search-popup-footer"
+					href="/iot-hub/search/"
+					data-popup-footer
+				>
+					See all results
+				</a>
+			</div>
 		</form>
 	</div>
 </section>
 
 <style lang="scss">
 	@use '~/styles/_variables.scss' as *;
+	@use '~/styles/_iot-hub.scss' as *;
 
 	.iot-hub-hero {
 		position: relative;
@@ -258,6 +279,7 @@ const highlights = [
 	}
 
 	.iot-hub-hero__search {
+		position: relative; // anchors the absolute-positioned search popup
 		width: 100%;
 		max-width: 528px;
 		display: flex;
@@ -369,6 +391,216 @@ const highlights = [
 	.iot-hub-hero__search-input:not(:placeholder-shown) ~ .iot-hub-hero__search-button {
 		margin-left: -4px;
 	}
+
+	// --- Search popup ---------------------------------------------------------
+	// Dropped below the search input. Items are rendered client-side from the
+	// IoT Hub API (see <script> below); the body classes use :global so the
+	// JS-built DOM picks up these styles too.
+	.iot-hub-hero__search-popup {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		max-height: 424px;
+		background: var(--color-bg-surface);
+		border: 1px solid var(--neutral---sl-color-gray-4, #888c96);
+		border-radius: 8px;
+		box-shadow:
+			0 7px 16px rgba(0, 0, 0, 0.04),
+			0 29px 29px rgba(0, 0, 0, 0.03),
+			0 64px 38px rgba(0, 0, 0, 0.02);
+		z-index: 10;
+		overflow: hidden;
+
+		:global([data-theme='dark']) & {
+			border-color: #353841;
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	.iot-hub-hero__search-popup-body {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		padding: 8px 0;
+	}
+
+	.iot-hub-hero__search-popup-footer {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		min-height: 40px;
+		padding: 8px 16px;
+		border-top: 1px solid var(--color-border);
+		background: var(--color-bg-surface);
+		font-size: 14px;
+		font-weight: $font-weight-semibold;
+		line-height: 20px;
+		letter-spacing: 0.25px;
+		color: var(--color-primary);
+		text-decoration: none;
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--color-bg-light);
+			text-decoration: underline;
+		}
+
+		:global([data-theme='dark']) & {
+			color: #b3c7ff;
+			border-color: #353841;
+		}
+	}
+
+	// --- Popup body content (client-rendered) ---------------------------------
+	// All of these target classes that JS creates inside [data-popup-body].
+	// They're :global so the unscoped JS-built DOM picks them up.
+
+	:global(.iot-hub-hero__search-popup-group) {
+		padding-bottom: 4px;
+	}
+
+	:global(.iot-hub-hero__search-popup-group + .iot-hub-hero__search-popup-group) {
+		margin-top: 8px;
+	}
+
+	:global(.iot-hub-hero__search-popup-group-label) {
+		padding: 4px 16px;
+		min-height: 28px;
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		font-weight: $font-weight-medium;
+		line-height: 20px;
+		letter-spacing: 0.25px;
+		color: var(--color-text-muted);
+	}
+
+	:global(.iot-hub-hero__search-popup-item) {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 8px 16px;
+		text-decoration: none;
+		color: inherit;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--color-bg-light);
+			text-decoration: none;
+		}
+	}
+
+	:global(.iot-hub-hero__search-popup-thumb) {
+		flex-shrink: 0;
+		width: 99px;
+		height: 56px;
+		border-radius: 4px;
+		border: 1px solid var(--iot-hub-hairline, rgba(0, 0, 0, 0.12));
+		background: rgba(0, 0, 0, 0.04);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			display: block;
+		}
+	}
+
+	:global([data-theme='dark']) :global(.iot-hub-hero__search-popup-thumb) {
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	:global(.iot-hub-hero__search-popup-thumb--compact) {
+		width: 56px;
+		height: 56px;
+		border: none;
+		border-radius: 4.667px;
+		color: #fff;
+	}
+
+	:global(.iot-hub-hero__search-popup-thumb-icon),
+	:global(.iot-hub-hero__search-popup-thumb-fallback) {
+		@include iot-hub-material-icon;
+		font-size: 28px;
+		line-height: 1;
+	}
+
+	:global(.iot-hub-hero__search-popup-thumb-fallback) {
+		font-size: 24px;
+		color: var(--color-text-muted);
+	}
+
+	:global(.iot-hub-hero__search-popup-text) {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	:global(.iot-hub-hero__search-popup-name) {
+		font-size: 14px;
+		font-weight: $font-weight-medium;
+		line-height: 20px;
+		letter-spacing: 0.25px;
+		color: var(--color-text);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		text-align: start;
+	}
+
+	:global(.iot-hub-hero__search-popup-author) {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 12px;
+		line-height: 16px;
+		letter-spacing: 0.25px;
+		color: var(--color-text-muted);
+		white-space: nowrap;
+	}
+
+	:global(.iot-hub-hero__search-popup-author-icon) {
+		@include iot-hub-material-icon;
+		font-size: 16px;
+		line-height: 1;
+	}
+
+	:global(.iot-hub-hero__search-popup-status) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 24px 16px;
+		min-height: 80px;
+		font-size: 14px;
+		color: var(--color-text-muted);
+	}
+
+	:global(.iot-hub-hero__search-popup-empty) {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 16px;
+		font-size: 14px;
+		color: var(--color-text-muted);
+	}
+
+	:global(.iot-hub-hero__search-popup-empty-icon) {
+		@include iot-hub-material-icon;
+		font-size: 24px;
+		line-height: 1;
+	}
 </style>
 
 <script is:inline>
@@ -468,4 +700,269 @@ const highlights = [
 			});
 		});
 	})();
+</script>
+
+<script>
+	// Hero search popup. Opens on focus, fetches /api/listings/published with
+	// installCount DESC + a 10-item page, groups results by category in
+	// IOT_HUB_CATEGORIES priority order, and renders each as a small card
+	// linking to the listing detail. "See all results" footer keeps its
+	// href in sync with the input so it always jumps to the same query as
+	// the submit button would.
+	import {
+		IOT_HUB_API_URL,
+		IOT_HUB_CATEGORIES,
+		getCardVariant,
+		getPlaceholderIcon,
+		resolveImage,
+		type IotHubItemType,
+		type ListingView,
+	} from '@models/iot-hub';
+
+	const DEBOUNCE_MS = 300;
+	const PAGE_SIZE = 10;
+	const SEARCH_PATH = '/iot-hub/search/';
+
+	// Fallback type icons mirror IotHubListingLink's getTypeIcon switch.
+	const TYPE_FALLBACK_ICON: Record<string, string> = {
+		WIDGET: 'widgets',
+		SOLUTION_TEMPLATE: 'integration_instructions',
+		CALCULATED_FIELD: 'functions',
+		ALARM_RULE: 'notification_important',
+		RULE_CHAIN: 'account_tree',
+		DEVICE: 'memory',
+	};
+
+	const ITEM_TYPE_BY_CATEGORY = new Map(
+		IOT_HUB_CATEGORIES.map((c) => [c.itemType, c])
+	);
+
+	function buildSearchUrl(text: string): string {
+		const q = text.trim();
+		return q ? `${SEARCH_PATH}?q=${encodeURIComponent(q)}` : SEARCH_PATH;
+	}
+
+	async function fetchListings(text: string, signal: AbortSignal): Promise<ListingView[]> {
+		const params = new URLSearchParams({
+			pageSize: String(PAGE_SIZE),
+			page: '0',
+			sortProperty: 'installCount',
+			sortOrder: 'DESC',
+		});
+		const trimmed = text.trim();
+		if (trimmed) params.set('textSearch', trimmed);
+		const res = await fetch(
+			`${IOT_HUB_API_URL}/api/listings/published?${params.toString()}`,
+			{ signal }
+		);
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		const body = (await res.json()) as { data: ListingView[] };
+		return body.data ?? [];
+	}
+
+	// Group by itemType in IOT_HUB_CATEGORIES priority order. Items whose
+	// itemType isn't in the registry (defensive) are dropped.
+	type Group = { label: string; items: ListingView[] };
+	function groupByCategory(items: ListingView[]): Group[] {
+		const byType = new Map<IotHubItemType, ListingView[]>();
+		for (const it of items) {
+			const cat = ITEM_TYPE_BY_CATEGORY.get(it.itemType as IotHubItemType);
+			if (!cat) continue;
+			const list = byType.get(cat.itemType) ?? [];
+			list.push(it);
+			byType.set(cat.itemType, list);
+		}
+		return IOT_HUB_CATEGORIES
+			.filter((c) => byType.has(c.itemType))
+			.map((c) => ({ label: c.label, items: byType.get(c.itemType)! }));
+	}
+
+	// Build one result card. Mirrors IotHubListingLink visually; uses the
+	// same class names (declared :global in the component's <style>).
+	function renderCard(item: ListingView): HTMLAnchorElement {
+		const cat = ITEM_TYPE_BY_CATEGORY.get(item.itemType as IotHubItemType);
+		const href = cat ? `/iot-hub/${cat.slug}/${item.slug}/` : '#';
+		const a = document.createElement('a');
+		a.className = 'iot-hub-hero__search-popup-item';
+		a.href = href;
+
+		const isCompact = getCardVariant(item.itemType) === 'small';
+		const thumb = document.createElement('span');
+		thumb.className = 'iot-hub-hero__search-popup-thumb';
+		thumb.setAttribute('aria-hidden', 'true');
+		if (isCompact) {
+			thumb.classList.add('iot-hub-hero__search-popup-thumb--compact');
+			thumb.style.background = item.color ?? '#048ad3';
+			const glyph = document.createElement('span');
+			glyph.className = 'iot-hub-hero__search-popup-thumb-icon';
+			glyph.textContent = textIcon(getPlaceholderIcon(item), item.itemType);
+			thumb.appendChild(glyph);
+		} else {
+			const imageUrl = resolveImage(item.image);
+			if (imageUrl) {
+				const img = document.createElement('img');
+				img.src = imageUrl;
+				img.alt = '';
+				img.loading = 'lazy';
+				img.decoding = 'async';
+				thumb.appendChild(img);
+			} else {
+				const fallback = document.createElement('span');
+				fallback.className = 'iot-hub-hero__search-popup-thumb-fallback';
+				fallback.textContent = TYPE_FALLBACK_ICON[item.itemType] ?? 'category';
+				thumb.appendChild(fallback);
+			}
+		}
+		a.appendChild(thumb);
+
+		const text = document.createElement('span');
+		text.className = 'iot-hub-hero__search-popup-text';
+		const name = document.createElement('span');
+		name.className = 'iot-hub-hero__search-popup-name';
+		name.textContent = item.name;
+		text.appendChild(name);
+		if (item.creatorDisplayName) {
+			const author = document.createElement('span');
+			author.className = 'iot-hub-hero__search-popup-author';
+			const icon = document.createElement('span');
+			icon.className = 'iot-hub-hero__search-popup-author-icon';
+			icon.textContent = 'person';
+			author.appendChild(icon);
+			author.append(' ', item.creatorDisplayName);
+			text.appendChild(author);
+		}
+		a.appendChild(text);
+		return a;
+	}
+
+	// MDI icons aren't in the Material Icons font; substitute a type fallback
+	// rather than render a junk glyph.
+	function textIcon(rawIcon: string, itemType: string): string {
+		if (rawIcon.startsWith('mdi:')) {
+			return TYPE_FALLBACK_ICON[itemType] ?? 'category';
+		}
+		return rawIcon;
+	}
+
+	function renderState(
+		body: HTMLElement,
+		state: 'loading' | 'empty' | 'error',
+		query: string
+	): void {
+		body.replaceChildren();
+		if (state === 'loading') {
+			const div = document.createElement('div');
+			div.className = 'iot-hub-hero__search-popup-status';
+			div.textContent = 'Loading…';
+			body.appendChild(div);
+		} else if (state === 'empty') {
+			const div = document.createElement('div');
+			div.className = 'iot-hub-hero__search-popup-empty';
+			const icon = document.createElement('span');
+			icon.className = 'iot-hub-hero__search-popup-empty-icon';
+			icon.textContent = 'search_off';
+			div.appendChild(icon);
+			const msg = document.createElement('span');
+			msg.textContent = query.trim()
+				? `No results for "${query.trim()}"`
+				: 'No items available';
+			div.appendChild(msg);
+			body.appendChild(div);
+		} else {
+			const div = document.createElement('div');
+			div.className = 'iot-hub-hero__search-popup-status';
+			div.textContent = 'Couldn’t load results';
+			body.appendChild(div);
+		}
+	}
+
+	function renderGroups(body: HTMLElement, groups: Group[]): void {
+		body.replaceChildren();
+		for (const group of groups) {
+			const section = document.createElement('div');
+			section.className = 'iot-hub-hero__search-popup-group';
+			const label = document.createElement('div');
+			label.className = 'iot-hub-hero__search-popup-group-label';
+			label.textContent = group.label;
+			section.appendChild(label);
+			for (const item of group.items) {
+				section.appendChild(renderCard(item));
+			}
+			body.appendChild(section);
+		}
+	}
+
+	function setupPopup(form: HTMLFormElement): void {
+		const input = form.querySelector<HTMLInputElement>('input[type="search"]');
+		const popup = form.querySelector<HTMLElement>('[data-iot-hub-hero-popup]');
+		const body = form.querySelector<HTMLElement>('[data-popup-body]');
+		const footer = form.querySelector<HTMLAnchorElement>('[data-popup-footer]');
+		if (!input || !popup || !body || !footer) return;
+
+		let abort: AbortController | null = null;
+		let debounceTimer: number | undefined;
+		let lastQuery = ' '; // sentinel: never matches a real first value
+
+		function updateFooter(q: string): void {
+			footer!.href = buildSearchUrl(q);
+		}
+
+		function runSearch(text: string, force = false): void {
+			if (!force && text === lastQuery) return;
+			lastQuery = text;
+			if (abort) abort.abort();
+			abort = new AbortController();
+			renderState(body!, 'loading', text);
+			updateFooter(text);
+			fetchListings(text, abort.signal)
+				.then((items) => {
+					if (items.length === 0) renderState(body!, 'empty', text);
+					else renderGroups(body!, groupByCategory(items));
+				})
+				.catch((err: unknown) => {
+					if (err instanceof DOMException && err.name === 'AbortError') return;
+					renderState(body!, 'error', text);
+				});
+		}
+
+		function openPopup(): void {
+			popup!.hidden = false;
+			runSearch(input!.value, true);
+		}
+
+		function closePopup(): void {
+			popup!.hidden = true;
+			if (abort) {
+				abort.abort();
+				abort = null;
+			}
+			if (debounceTimer !== undefined) {
+				clearTimeout(debounceTimer);
+				debounceTimer = undefined;
+			}
+		}
+
+		input.addEventListener('focus', openPopup);
+		input.addEventListener('input', () => {
+			updateFooter(input.value);
+			if (debounceTimer !== undefined) clearTimeout(debounceTimer);
+			debounceTimer = window.setTimeout(() => runSearch(input.value), DEBOUNCE_MS);
+		});
+		input.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				closePopup();
+				input.blur();
+			}
+		});
+		// Hide when the user clicks anywhere outside the form. Clicks on
+		// popup result links navigate away (full reload), so we don't need
+		// to intercept those.
+		document.addEventListener('click', (e) => {
+			if (!form.contains(e.target as Node)) closePopup();
+		});
+	}
+
+	document
+		.querySelectorAll<HTMLFormElement>('[data-iot-hub-hero-search]')
+		.forEach(setupPopup);
 </script>

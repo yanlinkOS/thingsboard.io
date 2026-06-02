@@ -4,22 +4,33 @@ import {
 	getCardVariant,
 	getPlaceholderIcon,
 	resolveImage,
+	type ListingView,
 } from '@models/iot-hub';
 import IotHubIcon from './IotHubIcon.astro';
 import { getListingBySlug } from './iot-hub-listing-link-cache';
 
 // Build-time inline card linking to another IoT Hub listing. Rendered by
-// IotHubMarkdown for `${listing-link:<slug>}` placeholders. (slug → detail)
-// fetches are memoised in iot-hub-listing-link-cache.ts so a slug referenced
-// from multiple readmes hits the API once.
+// IotHubMarkdown for `${listing-link:<slug>}` placeholders. Pass `slug` and
+// the component fetches+memoises a ListingDetail (see
+// iot-hub-listing-link-cache.ts), or pass an already-loaded `item` to skip
+// the fetch entirely — the card only ever reads the few fields that
+// ListingView and ListingDetail share, so either source works.
 
 interface Props {
-	slug: string;
+	slug?: string;
+	item?: ListingView;
 }
 
-const { slug } = Astro.props;
+const { slug, item } = Astro.props;
 
-const detail = await getListingBySlug(slug);
+if (!slug && !item) {
+	throw new Error('IotHubListingLink requires either `slug` or `item`.');
+}
+
+// Skip the slug→detail fetch when the caller already has a view. Both shapes
+// expose the fields the card actually consumes (itemType, color, icon,
+// image, name, slug, creatorDisplayName, …).
+const detail = item ?? (slug ? await getListingBySlug(slug) : null);
 
 const categorySlug = detail
 	? (IOT_HUB_CATEGORIES.find((c) => c.itemType === detail.itemType)?.slug ?? null)
