@@ -1,4 +1,4 @@
-@use '~/styles/_variables.scss' as *;
+@use '../../styles/_variables.scss' as *;
 
 // Shared reset for the dialog's transparent, centered icon buttons
 // (close / pencil / copy / save / cancel). Each consumer adds its own

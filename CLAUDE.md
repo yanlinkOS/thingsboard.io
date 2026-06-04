@@ -67,7 +67,7 @@ Prefer the most specific alias whenever one matches the target folder; fall back
 
 Example: `import { foo } from '@util/fetch-utils';` (not `~/util/fetch-utils` or `../../util/fetch-utils`).
 
-`~/*` (maps to `./src/*`) still exists for legacy code, but always prefer an `@` alias. SCSS `@use`/`@import` are resolved by sass, not these aliases — leave SCSS paths as-is.
+`~/*` (maps to `./src/*`) still exists for legacy code, but always prefer an `@` alias. SCSS `@use`/`@import` use **relative paths** (e.g., `@use '../../styles/_variables.scss' as *;`); inside `src/styles/` use sibling imports like `@use 'variables' as *;`.
 
 ### Starlight Customization
 

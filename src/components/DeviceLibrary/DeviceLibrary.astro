@@ -593,7 +593,7 @@ const initialDevices = devicesWithHref.slice(0, PAGE_SIZE);
 </script>
 
 <style lang="scss">
-	@use '~/styles/_variables.scss' as *;
+	@use '../../styles/_variables.scss' as *;
 
 	.device-library {
 		display: flex;
@@ -705,7 +705,7 @@ const initialDevices = devicesWithHref.slice(0, PAGE_SIZE);
 </style>
 
 <style lang="scss" is:global>
-	@use '~/styles/_variables.scss' as *;
+	@use '../../styles/_variables.scss' as *;
 
 	/* Card layout for both SSR-rendered DeviceCard.astro and the JS-template
 	   cards rendered on filter/pagination. Subgrid spans 4 parent row tracks
