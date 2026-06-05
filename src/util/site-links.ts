@@ -9,16 +9,6 @@ import docsRedirects from '../../public/redirects.json';
 //   - paths that moved are remapped through the generated redirects table
 //     (`public/redirects.json`)
 
-// Exact `pathname#hash` fixes for links whose target never existed on either
-// site, so neither slash normalization nor the redirects table can resolve
-// them. Checked after trailing-slash normalization, before the redirect map.
-const KNOWN_LINK_FIXES: Record<string, string> = {
-	// Polygons/Circles are tabs (not headings) on the new map widget page,
-	// so the fragment is dropped along with the path fix.
-	'/docs/reference/widgets/map-widgets/#polygon': '/docs/reference/widgets/maps/map/',
-	'/docs/reference/widgets/map-widgets/#circle': '/docs/reference/widgets/maps/map/',
-};
-
 const REDIRECTS = docsRedirects as Record<string, string>;
 
 // Trailing slash is only added to paths without a real file extension so file
@@ -44,9 +34,6 @@ export function normalizeSiteUrl(url: string): string {
 
 	let pathname = parsed.pathname;
 	if (!pathname.endsWith('/') && !FILE_EXTENSION_RE.test(pathname)) pathname += '/';
-
-	const fixed = KNOWN_LINK_FIXES[pathname + parsed.hash];
-	if (fixed) return fixed;
 
 	const target = REDIRECTS[pathname];
 	if (!target) return pathname + parsed.search + parsed.hash;
