@@ -33,7 +33,7 @@ export const mainNavItems: NavItem[] = [
 	{ label: 'Company', submenuId: 'nav-company' },
 	{ label: 'Partners', submenuId: 'nav-partners' },
 	{ label: 'Docs', submenuId: 'nav-docs' },
-	{ label: 'Device Library', href: '/device-library/?platform=ce' },
+	{ label: 'IoT Hub', href: '/iot-hub/' },
 	{ label: 'Blog', href: '/blog/' },
 ];
 

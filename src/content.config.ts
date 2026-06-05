@@ -3,9 +3,19 @@ import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
 import { defineCollection, type CollectionEntry } from 'astro:content';
 import { z } from 'astro/zod';
 import { file, glob } from 'astro/loaders';
-import { logoKeys } from './data/logos';
-import { Products } from './models/site.models';
-import { PLATFORM_VALUES, type DevicePlatform } from './util/device-platform';
+import { logoKeys } from '@data/logos';
+import { Products } from '@models/site.models';
+import { PLATFORM_VALUES, type DevicePlatform } from '@util/device-platform';
+import {
+	IOT_HUB_API_URL,
+	IOT_HUB_CATEGORIES,
+	API_FETCH_PAGE_SIZE,
+	iotHubCategorySchema,
+	itemTypeFilterInfoSchema,
+	type ListingView,
+	type ItemTypeFilterInfo,
+} from '@models/iot-hub';
+import { fetchWithRetry } from '@util/fetch-utils';
 
 export { PLATFORM_VALUES };
 export type { DevicePlatform };
@@ -323,5 +333,72 @@ export const collections = {
 			generateId: ({ entry }) => entry.replace(/\.mdx$/, ''),
 		}),
 		schema: deviceSchema,
+	}),  
+	iotHubCategories: defineCollection({
+		loader: async () => {
+			const fetchCategory = async (itemType: string): Promise<ListingView[]> => {
+				const items: ListingView[] = [];
+				let page = 0;
+				while (true) {
+					const url =
+						`${IOT_HUB_API_URL}/api/listings/published` +
+						`?pageSize=${API_FETCH_PAGE_SIZE}&page=${page}` +
+						`&type=${itemType}` +
+						`&sortProperty=installCount&sortOrder=DESC`;
+					const res = await fetchWithRetry(url);
+					const body = (await res.json()) as { data: ListingView[]; hasNext: boolean };
+					items.push(...body.data);
+					if (!body.hasNext) break;
+					page++;
+				}
+				return items;
+			};
+			// Filter facet counts can't be derived from the per-page
+			// listing payload — they aggregate across the whole catalog.
+			// Empty facets (totalItems === 0) are dropped so the FilterPanel
+			// never renders checkboxes that would yield zero results.
+			const fetchFilterInfo = async (itemType: string): Promise<ItemTypeFilterInfo> => {
+				const url = `${IOT_HUB_API_URL}/api/item-listing/listingFilterInfo/${itemType}`;
+				const res = await fetchWithRetry(url);
+				const body = await res.json();
+				const parsed = itemTypeFilterInfoSchema.parse(body);
+				const nonEmpty = (list: typeof parsed.types) =>
+					list.filter((entry) => entry.totalItems > 0);
+				return {
+					types: nonEmpty(parsed.types),
+					categories: nonEmpty(parsed.categories),
+					useCases: nonEmpty(parsed.useCases),
+					vendors: nonEmpty(parsed.vendors),
+					hardwareTypes: nonEmpty(parsed.hardwareTypes),
+					connectivities: Object.fromEntries(
+						Object.entries(parsed.connectivities)
+							.map(([bucket, entries]) => [bucket, nonEmpty(entries)] as const)
+							.filter(([, entries]) => entries.length > 0)
+					),
+				};
+			};
+			try {
+				// One entry per category, keyed by slug. See `iotHubCategorySchema`.
+				const [perCategoryItems, perCategoryFilters] = await Promise.all([
+					Promise.all(IOT_HUB_CATEGORIES.map((cat) => fetchCategory(cat.itemType))),
+					Promise.all(IOT_HUB_CATEGORIES.map((cat) => fetchFilterInfo(cat.itemType))),
+				]);
+				return IOT_HUB_CATEGORIES.map((cat, i) => ({
+					id: cat.slug,
+					itemType: cat.itemType,
+					label: cat.label,
+					items: perCategoryItems[i],
+					filterInfo: perCategoryFilters[i],
+				}));
+			} catch (e) {
+				if (import.meta.env.DEV) {
+					const msg = e instanceof Error ? e.message : String(e);
+					console.warn(`[iot-hub] loader failed in dev, using empty collection: ${msg}`);
+					return [];
+				}
+				throw e;
+			}
+		},
+		schema: iotHubCategorySchema,
 	}),
 };

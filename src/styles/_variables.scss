@@ -399,7 +399,7 @@ $z-tooltip: 1200;
 }
 
 // Section badge: 16px semibold accent — small label above section titles,
-// rendered as text with a thin accent left-border (matches Figma "topic" style)
+// rendered as text with a thin accent left-border (matches the design "topic" style)
 @mixin section-badge {
 	font-family: $font-family-base;
 	font-size: $font-size-base;

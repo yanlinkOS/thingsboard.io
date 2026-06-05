@@ -4,9 +4,9 @@
 // Driven by the existing `getVersionFromSlug` + `Products` enum in path-utils.ts —
 // same source of truth as the docs URL routing.
 
-import { Products } from '~/models/site.models';
-import { getVersionFromSlug } from '~/util/path-utils';
-import type { SlabClass } from './colors';
+import { Products } from '@models/site.models';
+import { getVersionFromSlug } from '@util/path-utils';
+import type { SlabClass } from '@root/pages/open-graph/_shared/colors';
 
 export type IconKey =
 	| 'cm' | 'p' | 'c' | 'e'

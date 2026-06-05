@@ -6,11 +6,13 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
+      "@root/*": ["src/*"],
       "@models/*": ["src/models/*"],
       "@components/*": ["src/components/*"],
       "@layouts/*": ["src/layouts/*"],
       "@styles/*": ["src/styles/*"],
       "@data/*": ["src/data/*"],
+      "@util/*": ["src/util/*"],
       "@includes/*": ["src/content/_includes/*"]
     }
   }

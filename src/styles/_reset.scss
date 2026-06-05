@@ -10,22 +10,23 @@ body {
 
 // Wrapped in :where() so scoped component styles (also (0,0,1) under
 // scopedStyleStrategy: 'where') can override these defaults without :where().
-:where(ul, li) {
-	list-style: none;
-}
+@layer reset {
+	:where(ul, li) {
+		list-style: none;
+	}
 
-:where(a) {
-	text-decoration: none;
-}
+	:where(a) {
+		text-decoration: none;
+	}
 
-:where(input, button) {
-	outline: none;
-}
+	:where(input, button) {
+		outline: none;
+	}
 
-:where(button) {
-	cursor: pointer;
+	:where(button) {
+		cursor: pointer;
+	}
 }
-
 // Utility classes used across landing/legacy components
 .light-text {
 	color: white;

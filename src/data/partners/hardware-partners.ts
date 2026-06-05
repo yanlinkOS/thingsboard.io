@@ -1,4 +1,4 @@
-import type { HardwarePartner } from './types';
+import type { HardwarePartner } from '@data/partners/types';
 
 export const PRIORITY_PARTNERS = [
 	'Milesight',

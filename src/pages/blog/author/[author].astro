@@ -53,7 +53,7 @@ const posts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueO
 </BlogLayout>
 
 <style lang="scss" is:global>
-	@use '~/styles/_variables.scss' as *;
+	@use '../../../styles/_variables.scss' as *;
 
 	.author-page .author-container { @include container; max-width: 1200px; }
 	.author-page { padding: calc(#{$header-height} + #{$spacing-10}) 0 #{$spacing-16}; }

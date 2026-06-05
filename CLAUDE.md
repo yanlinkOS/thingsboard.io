@@ -50,7 +50,24 @@ All documentation lives in `src/content/docs/{lang}/` as `.mdx` files with YAML 
 
 ### Path Alias
 
-`~/*` maps to `./src/*` (configured in tsconfig.json).
+**Always use the `@`-prefixed path aliases for local imports** — never relative paths (`../../`) and never the legacy `~/*` alias for new code. Aliases are configured in `tsconfig.json`:
+
+| Alias | Maps to |
+|-------|---------|
+| `@models/*` | `src/models/*` |
+| `@components/*` | `src/components/*` |
+| `@layouts/*` | `src/layouts/*` |
+| `@styles/*` | `src/styles/*` |
+| `@data/*` | `src/data/*` |
+| `@util/*` | `src/util/*` |
+| `@includes/*` | `src/content/_includes/*` |
+| `@root/*` | `src/*` (catch-all for paths without a dedicated alias, e.g. `@root/consts`, `@root/pages/...`) |
+
+Prefer the most specific alias whenever one matches the target folder; fall back to `@root/*` only for `src/` paths no other alias covers.
+
+Example: `import { foo } from '@util/fetch-utils';` (not `~/util/fetch-utils` or `../../util/fetch-utils`).
+
+`~/*` (maps to `./src/*`) still exists for legacy code, but always prefer an `@` alias. SCSS `@use`/`@import` use **relative paths** (e.g., `@use '../../styles/_variables.scss' as *;`); inside `src/styles/` use sibling imports like `@use 'variables' as *;`.
 
 ### Starlight Customization
 
@@ -259,6 +276,7 @@ Use the `release` skill for the full checklist. Key files:
 - Tabs for indentation in code files; spaces for JSON, Markdown, MDX, YAML, TOML
 - Prettier with `prettier-plugin-astro`, printWidth 100, single quotes, trailing commas
 - ESLint flat config with TypeScript and Astro plugins
+- **No Figma references in comments.** Don't write "Figma", "Figma node 1234:5678", or any tool-specific node IDs in source comments — they're meaningless to anyone without access to the Figma file and rot fast. Refer to the visual spec as "the design" (or "per the design", "matches the design") and describe what's actually being implemented (sizes, colors, behaviors) so the comment stands on its own.
 
 ## CI Checks
 

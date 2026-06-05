@@ -9,7 +9,7 @@ import {
 	getCareerCardInputs,
 	getCollectionIndexInputs,
 	type CardInput,
-} from '~/pages/open-graph/_shared/page-data';
+} from '@root/pages/open-graph/_shared/page-data';
 
 const COLLECTION_INDEX_URLS: Record<string, string> = {
 	'docs-index':           '/docs',
