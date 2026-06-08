@@ -1,6 +1,6 @@
 ---
 import GtmNoscript from '~/components/GtmNoscript.astro';
-import { Icons } from '@starlight/icons';
+import { Icon } from '@astrojs/starlight/components';
 
 // Theme-switcher icon palette (light/dark/auto) that `updatePickers()` clones
 // into the `<starlight-theme-select>` label icon. Rendered here at the top of
@@ -17,9 +17,9 @@ const forceLight = locals.bsl === true && locals.bslForceLight === true;
 {
 	!forceLight && (
 		<template id="theme-icons">
-			<svg aria-hidden="true" class="light" viewBox="0 0 24 24" fill="currentColor" set:html={Icons.sun} />
-			<svg aria-hidden="true" class="dark" viewBox="0 0 24 24" fill="currentColor" set:html={Icons.moon} />
-			<svg aria-hidden="true" class="auto" viewBox="0 0 24 24" fill="currentColor" set:html={Icons.laptop} />
+			<Icon name="sun" class="light" />
+			<Icon name="moon" class="dark" />
+			<Icon name="laptop" class="auto" />
 		</template>
 	)
 }

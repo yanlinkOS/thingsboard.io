@@ -13,7 +13,9 @@
       "@styles/*": ["src/styles/*"],
       "@data/*": ["src/data/*"],
       "@util/*": ["src/util/*"],
-      "@includes/*": ["src/content/_includes/*"]
+      "@includes/*": ["src/content/_includes/*"],
+      "@starlight/icons": ["node_modules/@astrojs/starlight/components-internals/Icons.ts"],
+      "@starlight/rehype-tabs": ["node_modules/@astrojs/starlight/user-components/rehype-tabs.ts"]
     }
   }
 }

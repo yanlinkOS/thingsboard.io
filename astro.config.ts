@@ -29,7 +29,6 @@ const site =
 	NETLIFY_PREVIEW_SITE ||
 	`${PROD_ORIGIN}/`;
 
-// https://astro.build/config
 export default defineConfig({
     site,
     base: '/',
@@ -39,19 +38,6 @@ export default defineConfig({
     },
     redirects,
     vite: {
-        resolve: {
-            alias: {
-                '@starlight/icons': fileURLToPath(
-                    new URL('./node_modules/@astrojs/starlight/components-internals/Icons.ts', import.meta.url)
-                ),
-                '@starlight/rehype-tabs': fileURLToPath(
-                    new URL(
-                        './node_modules/@astrojs/starlight/user-components/rehype-tabs.ts',
-                        import.meta.url
-                    )
-                ),
-            },
-        },
         optimizeDeps: {
             include: ['photoswipe', 'photoswipe/lightbox'],
         },
@@ -76,23 +62,20 @@ export default defineConfig({
                         name: 'preset-default',
                         params: {
                             overrides: {
-                                // Вимикаємо видалення viewBox (щоб не зламати aspect-ratio)
-                                removeViewBox: false,
-                                // Вимикаємо очистку ID (щоб не зламати анімації)
-                                cleanupIds: false,
+                                removeViewBox: false, // preserve aspect-ratio
+                                cleanupIds: false, // preserve animation hooks
                             },
                         },
                     },
-                    // Додаткові плагіни, які ми хочемо увімкнути:
                     'removeXMLNS',
-                    'prefixIds', // Допомагає уникнути конфліктів ID між різними SVG
+                    'prefixIds', // avoid ID collisions between SVGs
                 ],
             }),
         ],
     },
     integrations: [icon(), devServerFileWatcher([
-        './config/**', // Custom plugins and integrations
-        './astro.sidebar.ts', // Sidebar configuration file
+        './config/**',
+        './astro.sidebar.ts',
 		]), starlight({
         title: 'Docs',
         markdown: {
