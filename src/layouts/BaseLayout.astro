@@ -5,6 +5,7 @@ import UtmTracker from '@components/UtmTracker.astro';
 import { formatMarketingTitle, SITE_NAME } from '@root/consts.ts';
 import { getOgImageUrl } from '@util/getOgImageUrl';
 import { getSectionFromPath } from '@util/path-utils';
+import { resolveHeaderConfig, type HeaderVariant, type HeaderCta, type HeaderTryStyle } from '@util/header-config';
 
 // BaseLayout — site-wide marketing layout backed by `<StarlightPage>`.
 // The body content is copied verbatim into the page's default slot
@@ -26,6 +27,16 @@ interface Props {
 	 */
 	gitHubPlatform?: import('@models/site.models').Products;
 	forceLightTheme?: boolean;
+	/** Marketing-header appearance. Defaults to the docs look. */
+	headerVariant?: HeaderVariant;
+	/** Pricing/Try button shape. Defaults per variant (solid-shadow → marketing). */
+	headerCta?: HeaderCta;
+	/** Try button accent. Defaults to brand blue. */
+	headerTry?: HeaderTryStyle;
+	/** Override search-icon visibility (defaults to the variant default). */
+	showSearch?: boolean;
+	/** Override theme-toggle visibility (defaults to the variant default). */
+	showThemeToggle?: boolean;
 	ogImage?: string;
 	ogType?: string;
 	ogImageAlt?: string;
@@ -50,6 +61,11 @@ const {
 	noCanonical = false,
 	gitHubPlatform,
 	forceLightTheme = false,
+	headerVariant,
+	headerCta,
+	headerTry,
+	showSearch,
+	showThemeToggle,
 	ogImage: ogImageProp,
 	ogType = 'website',
 	ogImageAlt,
@@ -92,6 +108,19 @@ locals.bslNoCanonical = noCanonical;
 locals.bslForceLight = forceLightTheme;
 if (gitHubPlatform !== undefined) locals.bslGitHubPlatform = gitHubPlatform;
 
+// Resolve the header appearance and bridge it to the Starlight Header override.
+// Unconfigured pages default to the `common` variant (the legacy `pageId='common'`
+// look: docs chrome with search hidden).
+const headerConfig = resolveHeaderConfig({
+	variant: headerVariant ?? 'common',
+	cta: headerCta,
+	tryStyle: headerTry,
+	forceLight: forceLightTheme,
+	showSearch,
+	showThemeToggle,
+});
+locals.bslHeaderConfig = headerConfig;
+
 type HeadEntry = {
 	tag: 'title' | 'base' | 'link' | 'style' | 'meta' | 'script' | 'noscript' | 'template';
 	attrs?: Record<string, string | boolean | undefined>;
@@ -117,14 +146,11 @@ const head: HeadEntry[] = [
 	{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
 	{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
 	{ tag: 'meta', attrs: { name: 'twitter:site', content: '@thingsboard' } },
-	// Stamp the `pageId` (used by the flip-nav script below) and the
-	// optional force-light flag onto <html> before paint — Starlight
-	// owns the <html> element, so we can't set attributes directly.
+	// Stamp the `pageId` onto <html> before paint — Starlight owns the <html>
+	// element, so we set it here rather than as an attribute.
 	{
 		tag: 'script',
-		content:
-			`(function(){var h=document.documentElement;h.id=${JSON.stringify(pageId)};` +
-			`})();`,
+		content: `(function(){var h=document.documentElement;h.id=${JSON.stringify(pageId)};` + `})();`,
 	},
 ];
 if (preloadLcpImage) {
@@ -188,10 +214,6 @@ if (jsonLd) {
 	<!-- Footer is rendered by Starlight's chrome — `src/components/starlight/
 	     Footer.astro` swaps in `Landing/Footer` when `Astro.locals.bsl` is set. -->
 
-	<!-- flip-nav sentinel: IntersectionObserver toggles `flip-nav` on <html> when
-	     user scrolls past 50px, replacing a non-passive scroll listener that
-	     triggered ~500ms forced reflow on first paint. -->
-	<div id="flip-nav-sentinel" aria-hidden="true"></div>
 	<style is:global lang="scss">
 		@use '../styles/variables' as *;
 		:root {
@@ -199,52 +221,8 @@ if (jsonLd) {
 			--__sl-font: #{$font-family-base};
 			--sl-line-height: 1.5;
 		}
-		.main-frame.header-transparent {
-			padding-top: 0;
-		}
 		[data-has-hero] .main-pane {
 			background: none;
 		}
 	</style>
-	<style is:inline>
-		#flip-nav-sentinel {
-			position: absolute;
-			top: 50px;
-			left: 0;
-			width: 1px;
-			height: 1px;
-			pointer-events: none;
-			visibility: hidden;
-		}
-	</style>
-	<script is:inline>
-		(function () {
-			const html = document.documentElement;
-			const pagesWithTransparentHeader = [
-				'home',
-				'thingsboard-paas',
-				'thingsboard-pe',
-				'thingsboard-edge',
-				'mqtt-broker',
-				'pricing',
-				'affiliate',
-			];
-			if (!pagesWithTransparentHeader.includes(html.id)) return;
-
-			const mainFrame = document.getElementsByClassName('main-frame');
-			if (mainFrame.length) {
-				mainFrame[0].classList.add('header-transparent');
-			}
-
-			const sentinel = document.getElementById('flip-nav-sentinel');
-			if (!sentinel) return;
-
-			new IntersectionObserver(
-				function (entries) {
-					html.classList.toggle('flip-nav', !entries[0].isIntersecting);
-				},
-				{ threshold: 0 }
-			).observe(sentinel);
-		})();
-	</script>
 </StarlightPage>

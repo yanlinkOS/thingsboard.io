@@ -21,11 +21,12 @@ const allDevices = await Promise.all(
 			useCase: entry.data.useCase,
 			platforms: entry.data.platforms,
 		};
-	}),
+	})
 );
 ---
 
 <BaseLayout
+	headerVariant="base"
 	title="Device library"
 	description="Browse the ThingsBoard Device Library — a catalog of supported IoT hardware with connection guides and code snippets for popular development boards and sensors."
 	pageId="device-library"
@@ -34,7 +35,13 @@ const allDevices = await Promise.all(
 		<div class="container hero-layout">
 			<div class="hero-text">
 				<h1>ThingsBoard Device Library</h1>
-				<p>The Device Library is a collection of guides and code snippets that explain how to connect popular IoT development boards to the ThingsBoard platform. We intentionally concentrate on the code snippets for programmable devices to boost the productivity of the firmware engineers. Device Library is a constantly extending resource. We encourage our community members to <a href="/device-library/guidelines/">contribute</a>.</p>
+				<p>
+					The Device Library is a collection of guides and code snippets that explain how to connect popular IoT
+					development boards to the ThingsBoard platform. We intentionally concentrate on the code snippets for
+					programmable devices to boost the productivity of the firmware engineers. Device Library is a constantly
+					extending resource. We encourage our community members to <a href="/device-library/guidelines/">contribute</a
+					>.
+				</p>
 			</div>
 			<div class="hero-cta-card">
 				<img src="/images/devices-library-icon.svg" alt="" class="hero-cta-icon" />

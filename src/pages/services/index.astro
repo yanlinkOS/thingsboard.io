@@ -100,6 +100,9 @@ const recommendations = [
 ---
 
 <BaseLayout
+	headerVariant="solid-border"
+	showSearch={false}
+	showThemeToggle={false}
 	title="Support and Services | ThingsBoard"
 	customTitle
 	description="Professional support, managed platform operations, and on-demand experts — everything you need to run ThingsBoard with confidence."
@@ -111,8 +114,8 @@ const recommendations = [
 			<div class="sp-container sp-hero__inner">
 				<h1 class="sp-hero__title">Support and Services</h1>
 				<p class="sp-hero__lead">
-					Professional support, managed platform operations, and on-demand experts —
-					everything you need to run ThingsBoard with confidence.
+					Professional support, managed platform operations, and on-demand experts — everything you need to run
+					ThingsBoard with confidence.
 				</p>
 				<div class="sp-hero__ctas">
 					<a class="sp-btn sp-btn--primary" href="/contact-us/">
@@ -129,12 +132,14 @@ const recommendations = [
 		<section class="sp-stats">
 			<div class="sp-container">
 				<ul class="sp-stats__grid">
-					{heroStats.map((s) => (
-						<li class="sp-stat">
-							<div class="sp-stat__value">{s.value}</div>
-							<div class="sp-stat__label">{s.label}</div>
-						</li>
-					))}
+					{
+						heroStats.map((s) => (
+							<li class="sp-stat">
+								<div class="sp-stat__value">{s.value}</div>
+								<div class="sp-stat__label">{s.label}</div>
+							</li>
+						))
+					}
 				</ul>
 			</div>
 		</section>
@@ -147,25 +152,21 @@ const recommendations = [
 					<div class="sp-section__title-block">
 						<h2 class="sp-section__title">Support and platform operations, on us</h2>
 						<p class="sp-section__lead">
-							Professional support from the Pilot plan and above. Fully-managed operations
-							on Public Cloud, Private Cloud, and Managed Services.
+							Professional support from the Pilot plan and above. Fully-managed operations on Public Cloud, Private
+							Cloud, and Managed Services.
 						</p>
 					</div>
 				</header>
 
 				{/* ── We Support card ───────────────────────────────────── */}
 				<article class="we-card" data-card="support">
-					<button
-						class="we-card__head"
-						type="button"
-						aria-expanded="false"
-						aria-controls="we-card-support-body"
-					>
+					<button class="we-card__head" type="button" aria-expanded="false" aria-controls="we-card-support-body">
 						<span class="we-card__icon" aria-hidden="true">
 							<Icon name="tabler:headset" />
 						</span>
 						<h3 class="we-card__title">
-							<strong>We Support</strong> <span class="we-card__sep">—</span>
+							<strong>We Support</strong>
+							<span class="we-card__sep">—</span>
 							<span class="we-card__desc">Technical support for paid ThingsBoard plans</span>
 						</h3>
 						<span class="we-card__toggle">
@@ -176,25 +177,25 @@ const recommendations = [
 
 					<div class="we-card__intro">
 						<p>
-							Open a ticket, get an expert response. Our support team is the same team that
-							builds ThingsBoard — committed response SLA, unlimited tickets, no
-							named-contact limits.
+							Open a ticket, get an expert response. Our support team is the same team that builds ThingsBoard —
+							committed response SLA, unlimited tickets, no named-contact limits.
 						</p>
 					</div>
 
 					<div class="we-card__body" id="we-card-support-body" inert aria-hidden="true">
 						<div class="we-card__body-inner">
 							<p class="we-card__opener">
-								<strong>A direct line to the engineers behind ThingsBoard.</strong> When something
-								in the platform isn't working the way you expect, open a ticket — and get a real
-								answer from someone who knows the code.
+								<strong>A direct line to the engineers behind ThingsBoard.</strong> When something in the platform isn't working
+								the way you expect, open a ticket — and get a real answer from someone who knows the code.
 							</p>
 
 							<div class="we-card__grid we-card__grid--2">
 								<div>
 									<h4 class="we-card__h4">What you can ask us about</h4>
 									<ul class="we-list we-list--check">
-										<li><Icon name="tabler:check" aria-hidden="true" />Questions about standard ThingsBoard functionality</li>
+										<li>
+											<Icon name="tabler:check" aria-hidden="true" />Questions about standard ThingsBoard functionality
+										</li>
 										<li><Icon name="tabler:check" aria-hidden="true" />Installation and upgrade assistance</li>
 										<li><Icon name="tabler:check" aria-hidden="true" />License management</li>
 										<li><Icon name="tabler:check" aria-hidden="true" />Tenant administration and password resets</li>
@@ -204,12 +205,14 @@ const recommendations = [
 								<div>
 									<h4 class="we-card__h4">How it works</h4>
 									<dl class="we-sla">
-										{supportSLA.map((row) => (
-											<div class="we-sla__cell">
-												<dt>{row.label}</dt>
-												<dd>{row.value}</dd>
-											</div>
-										))}
+										{
+											supportSLA.map((row) => (
+												<div class="we-sla__cell">
+													<dt>{row.label}</dt>
+													<dd>{row.value}</dd>
+												</div>
+											))
+										}
 									</dl>
 								</div>
 							</div>
@@ -217,12 +220,14 @@ const recommendations = [
 							<div class="we-card__plans">
 								<h4 class="we-card__h4">Included on</h4>
 								<ul class="we-plans">
-									{supportPlans.map((p) => (
-										<li class="we-plan">
-											<div class="we-plan__label">{p.label}</div>
-											<div class="we-plan__note">{p.note}</div>
-										</li>
-									))}
+									{
+										supportPlans.map((p) => (
+											<li class="we-plan">
+												<div class="we-plan__label">{p.label}</div>
+												<div class="we-plan__note">{p.note}</div>
+											</li>
+										))
+									}
 								</ul>
 							</div>
 						</div>
@@ -230,9 +235,7 @@ const recommendations = [
 
 					<footer class="we-card__footer">
 						<div class="we-card__footer-row">
-							<p class="we-card__note">
-								Average first response in ~30 minutes during business hours.
-							</p>
+							<p class="we-card__note">Average first response in ~30 minutes during business hours.</p>
 							<a class="we-card__cta" href="/pricing/?section=thingsboard-pe-options&product=thingsboard-cloud">
 								Explore Plans <Icon name="tabler:chevron-right" />
 							</a>
@@ -242,17 +245,13 @@ const recommendations = [
 
 				{/* ── We Maintain card ──────────────────────────────────── */}
 				<article class="we-card" data-card="maintain">
-					<button
-						class="we-card__head"
-						type="button"
-						aria-expanded="false"
-						aria-controls="we-card-maintain-body"
-					>
+					<button class="we-card__head" type="button" aria-expanded="false" aria-controls="we-card-maintain-body">
 						<span class="we-card__icon" aria-hidden="true">
 							<Icon name="tabler:server-cog" />
 						</span>
 						<h3 class="we-card__title">
-							<strong>We Maintain</strong> <span class="we-card__sep">—</span>
+							<strong>We Maintain</strong>
+							<span class="we-card__sep">—</span>
 							<span class="we-card__desc">Fully-managed platform operations</span>
 						</h3>
 						<span class="we-card__toggle">
@@ -263,38 +262,44 @@ const recommendations = [
 
 					<div class="we-card__intro">
 						<p>
-							We run ThingsBoard for you — upgrades, backups, monitoring, scaling, and
-							security patching, all handled by our platform team. Included with Public
-							Cloud, Private Cloud, and Managed Services.
+							We run ThingsBoard for you — upgrades, backups, monitoring, scaling, and security patching, all handled by
+							our platform team. Included with Public Cloud, Private Cloud, and Managed Services.
 						</p>
 					</div>
 
 					<div class="we-card__body" id="we-card-maintain-body" inert aria-hidden="true">
 						<div class="we-card__body-inner">
 							<p class="we-card__opener">
-								<strong>Your platform, operated by our team.</strong> On Public Cloud, Private
-								Cloud, and Managed Services, our platform team keeps ThingsBoard running —
-								proactively. You focus on what you're building; we make sure it stays up.
+								<strong>Your platform, operated by our team.</strong> On Public Cloud, Private Cloud, and Managed Services,
+								our platform team keeps ThingsBoard running — proactively. You focus on what you're building; we make sure
+								it stays up.
 							</p>
 
 							<div class="we-card__grid we-card__grid--2">
 								<div>
 									<h4 class="we-card__h4">What's handled for you</h4>
 									<ul class="we-list we-list--check">
-										{maintainHandled.map((item) => (
-											<li><Icon name="tabler:check" aria-hidden="true" />{item}</li>
-										))}
+										{
+											maintainHandled.map((item) => (
+												<li>
+													<Icon name="tabler:check" aria-hidden="true" />
+													{item}
+												</li>
+											))
+										}
 									</ul>
 								</div>
 								<div>
 									<h4 class="we-card__h4">Uptime SLA</h4>
 									<dl class="we-sla we-sla--two">
-										{maintainSLA.map((row) => (
-											<div class="we-sla__cell">
-												<dt>{row.label}</dt>
-												<dd>{row.value}</dd>
-											</div>
-										))}
+										{
+											maintainSLA.map((row) => (
+												<div class="we-sla__cell">
+													<dt>{row.label}</dt>
+													<dd>{row.value}</dd>
+												</div>
+											))
+										}
 									</dl>
 								</div>
 							</div>
@@ -305,8 +310,8 @@ const recommendations = [
 									<strong>Your application vision, delivered by our team</strong>
 								</div>
 								<p>
-									Rule chains, dashboards, integrations, and custom data models are yours to
-									design and evolve. If you want expert hands on them, that's what our
+									Rule chains, dashboards, integrations, and custom data models are yours to design and evolve. If you
+									want expert hands on them, that's what our
 									<a href="#advise">Advisory Engineers</a> and
 									<a href="/services/development-services/">Development Services</a> are for.
 								</p>
@@ -348,25 +353,21 @@ const recommendations = [
 					<div class="sp-section__title-block">
 						<h2 class="sp-section__title">Expert hands on your solution</h2>
 						<p class="sp-section__lead">
-							On-demand help when you want expert hands on your solution. Available on top
-							of any Support or Maintenance plan.
+							On-demand help when you want expert hands on your solution. Available on top of any Support or Maintenance
+							plan.
 						</p>
 					</div>
 				</header>
 
 				{/* ── We Advise card ─────────────────────────────────── */}
 				<article id="advise" class="we-card" data-card="advise">
-					<button
-						class="we-card__head"
-						type="button"
-						aria-expanded="false"
-						aria-controls="we-card-advise-body"
-					>
+					<button class="we-card__head" type="button" aria-expanded="false" aria-controls="we-card-advise-body">
 						<span class="we-card__icon" aria-hidden="true">
 							<Icon name="tabler:user-star" />
 						</span>
 						<h3 class="we-card__title">
-							<strong>We Advise</strong> <span class="we-card__sep">—</span>
+							<strong>We Advise</strong>
+							<span class="we-card__sep">—</span>
 							<span class="we-card__desc">A fractional ThingsBoard architect embedded with your team</span>
 						</h3>
 						<span class="we-card__toggle">
@@ -377,40 +378,44 @@ const recommendations = [
 
 					<div class="we-card__intro">
 						<p>
-							A dedicated ThingsBoard engineer working 20 hours a month alongside your team —
-							architecture reviews, performance tuning, integration design, weekly calls,
-							direct Slack access.
+							A dedicated ThingsBoard engineer working 20 hours a month alongside your team — architecture reviews,
+							performance tuning, integration design, weekly calls, direct Slack access.
 						</p>
 					</div>
 
 					<div class="we-card__body" id="we-card-advise-body" inert aria-hidden="true">
 						<div class="we-card__body-inner">
 							<p class="we-card__opener">
-								<strong>The expert your engineers wish they worked with.</strong> We Advise
-								pairs you with a dedicated ThingsBoard engineer who learns your deployment and
-								works alongside your team — reviewing designs, tuning performance, answering
-								hard questions in the weekly call, and responding on Slack in between. Your
-								engineers stay in control of production; our engineer makes them faster and
-								better at everything ThingsBoard-related.
+								<strong>The expert your engineers wish they worked with.</strong> We Advise pairs you with a dedicated ThingsBoard
+								engineer who learns your deployment and works alongside your team — reviewing designs, tuning performance,
+								answering hard questions in the weekly call, and responding on Slack in between. Your engineers stay in control
+								of production; our engineer makes them faster and better at everything ThingsBoard-related.
 							</p>
 
 							<div class="we-card__grid we-card__grid--2">
 								<div>
 									<h4 class="we-card__h4">How it works</h4>
 									<ul class="we-list we-list--check">
-										{adviseHow.map((item) => (
-											<li><Icon name="tabler:check" aria-hidden="true" />{item}</li>
-										))}
+										{
+											adviseHow.map((item) => (
+												<li>
+													<Icon name="tabler:check" aria-hidden="true" />
+													{item}
+												</li>
+											))
+										}
 									</ul>
 								</div>
 								<div>
 									<h4 class="we-card__h4">What customers use them for</h4>
 									<ul class="we-uses">
-										{adviseUses.map((row) => (
-											<li>
-												<strong>{row.title}</strong> — {row.desc}
-											</li>
-										))}
+										{
+											adviseUses.map((row) => (
+												<li>
+													<strong>{row.title}</strong> — {row.desc}
+												</li>
+											))
+										}
 									</ul>
 								</div>
 							</div>
@@ -421,9 +426,9 @@ const recommendations = [
 									<strong>Scope of Responsibility</strong>
 								</div>
 								<p>
-									Your Advisory Engineer is a senior expert, not a contractor. They won't
-									ship code into your production environment or deliver a full project
-									single-handed — that's where <a href="#deliver">We Deliver</a> picks up.
+									Your Advisory Engineer is a senior expert, not a contractor. They won't ship code into your production
+									environment or deliver a full project single-handed — that's where <a href="#deliver">We Deliver</a> picks
+									up.
 								</p>
 							</aside>
 						</div>
@@ -431,9 +436,7 @@ const recommendations = [
 
 					<footer class="we-card__footer">
 						<div class="we-card__footer-row">
-							<p class="we-card__note">
-								20 hours / month · 6-month minimum · same engineer every month.
-							</p>
+							<p class="we-card__note">20 hours / month · 6-month minimum · same engineer every month.</p>
 							<a class="we-card__cta" href="/contact-us/">
 								Talk to Us About Advise <Icon name="tabler:chevron-right" />
 							</a>
@@ -443,17 +446,13 @@ const recommendations = [
 
 				{/* ── We Train card ──────────────────────────────────── */}
 				<article id="train" class="we-card" data-card="train">
-					<button
-						class="we-card__head"
-						type="button"
-						aria-expanded="false"
-						aria-controls="we-card-train-body"
-					>
+					<button class="we-card__head" type="button" aria-expanded="false" aria-controls="we-card-train-body">
 						<span class="we-card__icon" aria-hidden="true">
 							<Icon name="tabler:school" />
 						</span>
 						<h3 class="we-card__title">
-							<strong>We Train</strong> <span class="we-card__sep">—</span>
+							<strong>We Train</strong>
+							<span class="we-card__sep">—</span>
 							<span class="we-card__desc">Live instructor-led courses for developers, admins, and architects</span>
 						</h3>
 						<span class="we-card__toggle">
@@ -464,28 +463,29 @@ const recommendations = [
 
 					<div class="we-card__intro">
 						<p>
-							Four structured course tracks, taught live by the engineers who build
-							ThingsBoard. Written materials and a certificate of completion included.
+							Four structured course tracks, taught live by the engineers who build ThingsBoard. Written materials and a
+							certificate of completion included.
 						</p>
 					</div>
 
 					<div class="we-card__body" id="we-card-train-body" inert aria-hidden="true">
 						<div class="we-card__body-inner">
 							<p class="we-card__opener">
-								<strong>Bring your team up to speed — fast.</strong> Live, instructor-led
-								training delivered by the engineers who build ThingsBoard. Each track is
-								structured as 2-hour sessions with Q&amp;A, written materials, and a
+								<strong>Bring your team up to speed — fast.</strong> Live, instructor-led training delivered by the engineers
+								who build ThingsBoard. Each track is structured as 2-hour sessions with Q&amp;A, written materials, and a
 								certificate of completion.
 							</p>
 
 							<h4 class="we-card__h4">Four course tracks</h4>
 							<ul class="we-tracks">
-								{trainTracks.map((track) => (
-									<li class="we-track">
-										<div class="we-track__title">{track.title}</div>
-										<div class="we-track__desc">{track.desc}</div>
-									</li>
-								))}
+								{
+									trainTracks.map((track) => (
+										<li class="we-track">
+											<div class="we-track__title">{track.title}</div>
+											<div class="we-track__desc">{track.desc}</div>
+										</li>
+									))
+								}
 							</ul>
 
 							<aside class="we-callout">
@@ -500,9 +500,7 @@ const recommendations = [
 
 					<footer class="we-card__footer">
 						<div class="we-card__footer-row">
-							<p class="we-card__note">
-								Live sessions · written materials · certificate of completion.
-							</p>
+							<p class="we-card__note">Live sessions · written materials · certificate of completion.</p>
 							<a class="we-card__cta" href="/services/trainings/">
 								Explore Training Courses <Icon name="tabler:chevron-right" />
 							</a>
@@ -512,17 +510,13 @@ const recommendations = [
 
 				{/* ── We Deliver card ────────────────────────────────── */}
 				<article id="deliver" class="we-card" data-card="deliver">
-					<button
-						class="we-card__head"
-						type="button"
-						aria-expanded="false"
-						aria-controls="we-card-deliver-body"
-					>
+					<button class="we-card__head" type="button" aria-expanded="false" aria-controls="we-card-deliver-body">
 						<span class="we-card__icon" aria-hidden="true">
 							<Icon name="tabler:code" />
 						</span>
 						<h3 class="we-card__title">
-							<strong>We Deliver</strong> <span class="we-card__sep">—</span>
+							<strong>We Deliver</strong>
+							<span class="we-card__sep">—</span>
 							<span class="we-card__desc">Full IoT solutions, built by ThingsBoard</span>
 						</h3>
 						<span class="we-card__toggle">
@@ -533,37 +527,43 @@ const recommendations = [
 
 					<div class="we-card__intro">
 						<p>
-							Fixed-scope, fixed-cost development engagements. Full implementations, custom
-							integrations, white-label mobile apps, custom widgets, and more — with a
-							12-month maintenance period included on every delivery.
+							Fixed-scope, fixed-cost development engagements. Full implementations, custom integrations, white-label
+							mobile apps, custom widgets, and more — with a 12-month maintenance period included on every delivery.
 						</p>
 					</div>
 
 					<div class="we-card__body" id="we-card-deliver-body" inert aria-hidden="true">
 						<div class="we-card__body-inner">
 							<p class="we-card__opener">
-								<strong>Your project, built by the team who built ThingsBoard.</strong> If you
-								want the platform and your solution in the same hands, <strong>We Deliver</strong>
-								is our full development service. Fixed scope, fixed cost, a structured timeline
-								— and a year of maintenance included on everything we ship.
+								<strong>Your project, built by the team who built ThingsBoard.</strong> If you want the platform and your
+								solution in the same hands, <strong>We Deliver</strong>
+								is our full development service. Fixed scope, fixed cost, a structured timeline — and a year of maintenance
+								included on everything we ship.
 							</p>
 
 							<h4 class="we-card__h4">What we build</h4>
 							<ul class="we-list we-list--check we-list--single">
-								{deliverBuilds.map((item) => (
-									<li><Icon name="tabler:check" aria-hidden="true" />{item}</li>
-								))}
+								{
+									deliverBuilds.map((item) => (
+										<li>
+											<Icon name="tabler:check" aria-hidden="true" />
+											{item}
+										</li>
+									))
+								}
 							</ul>
 
 							<h4 class="we-card__h4 we-card__h4--with-gap">How it works</h4>
 							<ol class="we-steps">
-								{deliverSteps.map((step) => (
-									<li class="we-step">
-										<div class="we-step__n">Step {step.n}</div>
-										<div class="we-step__title">{step.title}</div>
-										<div class="we-step__desc">{step.desc}</div>
-									</li>
-								))}
+								{
+									deliverSteps.map((step) => (
+										<li class="we-step">
+											<div class="we-step__n">Step {step.n}</div>
+											<div class="we-step__title">{step.title}</div>
+											<div class="we-step__desc">{step.desc}</div>
+										</li>
+									))
+								}
 							</ol>
 
 							<aside class="we-callout">
@@ -572,9 +572,8 @@ const recommendations = [
 									<strong>Advise or Deliver — how to choose</strong>
 								</div>
 								<p>
-									<strong>Advise</strong> if you have an engineering team and want a part-time
-									ThingsBoard expert alongside them. <strong>Deliver</strong> if you want our
-									team to build it for you, fast.
+									<strong>Advise</strong> if you have an engineering team and want a part-time ThingsBoard expert alongside
+									them. <strong>Deliver</strong> if you want our team to build it for you, fast.
 								</p>
 							</aside>
 						</div>
@@ -582,9 +581,7 @@ const recommendations = [
 
 					<footer class="we-card__footer">
 						<div class="we-card__footer-row">
-							<p class="we-card__note">
-								Fixed scope · fixed cost · 12 months of maintenance included.
-							</p>
+							<p class="we-card__note">Fixed scope · fixed cost · 12 months of maintenance included.</p>
 							<a class="we-card__cta" href="/services/development-services/">
 								Explore Development Services <Icon name="tabler:chevron-right" />
 							</a>
@@ -601,20 +598,21 @@ const recommendations = [
 					<div class="sp-mix__heading">
 						<h2 class="sp-mix__title">Need help choosing the right mix?</h2>
 						<p class="sp-mix__lead">
-							Most ThingsBoard engagements combine a couple of these services. Tell us
-							what you're building — we'll recommend the right combination in a short call.
+							Most ThingsBoard engagements combine a couple of these services. Tell us what you're building — we'll
+							recommend the right combination in a short call.
 						</p>
 					</div>
 					<ul class="sp-mix__grid">
-						{recommendations.map((r) => (
-							<li class="sp-mix__item">
-								<h3 class="sp-mix__item-title">
-									{r.title}{' '}
-									<span class="sp-mix__item-suffix">({r.suffix})</span>
-								</h3>
-								<p class="sp-mix__item-desc">{r.desc}</p>
-							</li>
-						))}
+						{
+							recommendations.map((r) => (
+								<li class="sp-mix__item">
+									<h3 class="sp-mix__item-title">
+										{r.title} <span class="sp-mix__item-suffix">({r.suffix})</span>
+									</h3>
+									<p class="sp-mix__item-desc">{r.desc}</p>
+								</li>
+							))
+						}
 					</ul>
 					<div class="sp-mix__cta">
 						<a class="sp-btn sp-btn--primary" href="/contact-us/">
@@ -876,8 +874,12 @@ const recommendations = [
 		font-weight: $font-weight-normal;
 		line-height: 24px;
 		text-decoration: none;
-		transition: background-color 0.15s, color 0.15s, border-color 0.15s,
-			box-shadow 0.15s, transform 0.05s;
+		transition:
+			background-color 0.15s,
+			color 0.15s,
+			border-color 0.15s,
+			box-shadow 0.15s,
+			transform 0.05s;
 		cursor: pointer;
 		border: 1px solid transparent;
 		white-space: nowrap;
@@ -921,7 +923,7 @@ const recommendations = [
 			}
 		}
 	}
-	
+
 	// ── Hero ─────────────────────────────────────────────────────────────
 	// Hero has a generous top gap from the header, and a balanced bottom
 	// gap to the stats band (~100px). On mobile the fixed header is ~80px
@@ -1160,7 +1162,9 @@ const recommendations = [
 		border-radius: 8px;
 		padding: $spacing-6;
 		margin: 0 0 $spacing-6;
-		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		transition:
+			border-color 0.2s ease,
+			box-shadow 0.2s ease;
 
 		// When jumped to via in-page hash (#advise, #train, #deliver),
 		// keep the card title clear of the fixed site header (80px) instead
@@ -1278,7 +1282,10 @@ const recommendations = [
 			background: transparent;
 			justify-self: stretch;
 			white-space: nowrap;
-			transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+			transition:
+				border-color 0.15s,
+				background-color 0.15s,
+				color 0.15s;
 
 			@include media-up(md) {
 				justify-self: end;
@@ -1326,7 +1333,9 @@ const recommendations = [
 			display: grid;
 			grid-template-rows: 0fr;
 			margin-top: 0;
-			transition: grid-template-rows 0.35s ease, margin-top 0.35s ease;
+			transition:
+				grid-template-rows 0.35s ease,
+				margin-top 0.35s ease;
 		}
 
 		&__body-inner {
@@ -1338,7 +1347,9 @@ const recommendations = [
 			opacity: 0;
 			padding-top: 0;
 			border-top: 1px solid transparent;
-			transition: opacity 0.3s ease 0.05s, padding-top 0.35s ease,
+			transition:
+				opacity 0.3s ease 0.05s,
+				padding-top 0.35s ease,
 				border-top-color 0.35s ease;
 		}
 
@@ -1848,11 +1859,7 @@ const recommendations = [
 	// color-mix-with-white was producing. Solid 1px accent border for the
 	// same uniform-edge treatment as light mode.
 	[data-theme='dark'] .we-callout {
-		background: linear-gradient(
-			to bottom,
-			var(--card-accent-soft) 0%,
-			rgba(0, 0, 0, 0) 100%
-		);
+		background: linear-gradient(to bottom, var(--card-accent-soft) 0%, rgba(0, 0, 0, 0) 100%);
 		border: 1px solid var(--card-accent);
 	}
 
@@ -1918,11 +1925,7 @@ const recommendations = [
 		}
 
 		&__card {
-			background: linear-gradient(
-				181.79deg,
-				rgba(61, 80, 245, 0.08) 3.9%,
-				rgba(255, 255, 255, 0.08) 97.1%
-			);
+			background: linear-gradient(181.79deg, rgba(61, 80, 245, 0.08) 3.9%, rgba(255, 255, 255, 0.08) 97.1%);
 			border: 1px solid rgba(61, 80, 245, 0.5);
 			border-radius: 8px;
 			padding: $spacing-10; // 40px
@@ -1934,11 +1937,7 @@ const recommendations = [
 
 		// Dark theme: tint via blue overlay on dark surface.
 		[data-theme='dark'] &__card {
-			background: linear-gradient(
-				181.79deg,
-				rgba(139, 155, 255, 0.12) 3.9%,
-				rgba(139, 155, 255, 0.02) 97.1%
-			);
+			background: linear-gradient(181.79deg, rgba(139, 155, 255, 0.12) 3.9%, rgba(139, 155, 255, 0.02) 97.1%);
 			border-color: rgba(139, 155, 255, 0.4);
 		}
 

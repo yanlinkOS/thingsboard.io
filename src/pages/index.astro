@@ -18,7 +18,8 @@ import { homeEcosystem } from '~/data/homeEcosystem';
 import { homeCarouselItems } from '~/data/homeCarousel';
 ---
 
-<BaseLayout	
+<BaseLayout
+	headerVariant="transparent"
 	forceLightTheme
 	title="ThingsBoard - Open-source IoT Platform"
 	description="ThingsBoard is an open-source IoT platform for device management, data collection, processing, and visualization for your IoT projects."
@@ -33,10 +34,19 @@ import { homeCarouselItems } from '~/data/homeCarousel';
 		subtitle="Device management, data collection, processing and visualization for your IoT solution"
 		buttons={[
 			{ text: 'Try It Now', href: '/installations/', variant: 'white' },
-			{ text: 'Learn More', href: '/docs/pe/', variant: 'outline', target: '_blank', ariaLabel: 'Learn more about ThingsBoard in the documentation' },
+			{
+				text: 'Learn More',
+				href: '/docs/pe/',
+				variant: 'outline',
+				target: '_blank',
+				ariaLabel: 'Learn more about ThingsBoard in the documentation',
+			},
 		]}
 		anchorLink="#intro"
-		videoBackground={{ webm: 'https://video.thingsboard.io/tb-cover2.webm', mp4: 'https://video.thingsboard.io/tb-cover2.mp4' }}
+		videoBackground={{
+			webm: 'https://video.thingsboard.io/tb-cover2.webm',
+			mp4: 'https://video.thingsboard.io/tb-cover2.mp4',
+		}}
 	/>
 
 	<section id="overflow">

@@ -179,6 +179,7 @@ const tbmqGroups = [
 ---
 
 <BaseLayout
+	headerVariant="transparent"
 	forceLightTheme
 	title="TBMQ - Open Source MQTT Broker - Scalable IoT Messaging"
 	description="Deliver 3M+ MQTT messages/sec with TBMQ — a fault-tolerant open-source MQTT broker with clustering and message durability."
@@ -196,11 +197,14 @@ const tbmqGroups = [
 					href: '/contact-us/?subject=TBMQ&tbmqorder&message=I%20am%20interested%20in%20TBMQ&customTitle=GetTBMQ',
 					variant: 'outline',
 				},
-				{ text: 'Get started', href: '/docs/mqtt-broker/getting-started/', variant: 'outline', },
+				{ text: 'Get started', href: '/docs/mqtt-broker/getting-started/', variant: 'outline' },
 			]}
 			anchorLink="#content"
 			backgroundImage="/hero/tbmq-cover.webp"
-			videoBackground={{ webm: 'https://video.thingsboard.io/tbmq-cover.webm', mp4: 'https://video.thingsboard.io/tbmq-cover.mp4' }}
+			videoBackground={{
+				webm: 'https://video.thingsboard.io/tbmq-cover.webm',
+				mp4: 'https://video.thingsboard.io/tbmq-cover.mp4',
+			}}
 			achievement={null}
 		/>
 

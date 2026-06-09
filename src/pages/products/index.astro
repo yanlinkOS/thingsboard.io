@@ -95,18 +95,20 @@ const cards = [
 ];
 ---
 
-<BaseLayout forceLightTheme title="Products Ecosystem" description="Explore the ThingsBoard IoT product suite. Discover our scalable platforms, edge computing solutions, analytics tools, and MQTT brokers for your business." pageId="products">
+<BaseLayout
+	headerVariant="solid-shadow"
+	forceLightTheme
+	title="Products Ecosystem"
+	description="Explore the ThingsBoard IoT product suite. Discover our scalable platforms, edge computing solutions, analytics tools, and MQTT brokers for your business."
+	pageId="products"
+>
 	<div class="products-page">
 		<h1 class="main-title">Products</h1>
 
 		<div class="products-cards">
 			{
 				cards.map((card) => (
-					<a
-						href={card.href}
-						class={`card ${card.cls}`}
-						style={`--hover-color: ${card.color}`}
-					>
+					<a href={card.href} class={`card ${card.cls}`} style={`--hover-color: ${card.color}`}>
 						<img src={card.icon} alt={card.alt} />
 						<h5 class="title">{card.title}</h5>
 						<p>{card.desc}</p>

@@ -89,9 +89,7 @@
 
 	// Shadows
 	--shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 1px 0 rgba(0, 0, 0, 0.07);
-	--shadow-md:
-		0 1px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14),
-		0 3px 3px -2px rgba(0, 0, 0, 0.12);
+	--shadow-md: 0 1px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12);
 	--shadow-lg: 0 50px 50px -20px rgba(0, 0, 0, 0.15), 0 0 30px 0 rgba(0, 0, 0, 0.05);
 	--shadow-xl: 0 30px 60px -30px rgba(0, 0, 0, 0.3), 0 50px 100px -20px rgba(0, 0, 0, 0.25);
 	--shadow-primary: 0 18px 16px -10px rgba(var(--color-primary-rgb), 0.25);
@@ -110,8 +108,7 @@
 	// Legacy support (for old code)
 	--tb-main-color: #{$color-primary};
 	--tb-main-background: rgba(48, 86, 128, 0.08);
-	--tb-main-color-filter: invert(37%) sepia(84%) saturate(891%) hue-rotate(184deg) brightness(105%)
-		contrast(88%);
+	--tb-main-color-filter: invert(37%) sepia(84%) saturate(891%) hue-rotate(184deg) brightness(105%) contrast(88%);
 	--imageBorderRadius: #{$radius-md};
 
 	// Colors - Products (light mode)
@@ -136,6 +133,15 @@
 	// inline-SVG nav icons (`fill="currentColor"`) match the rest of the
 	// site's accent.
 	--menu-icon-color: var(--color-primary);
+
+	// Per-product brand accents for the nav dropdown (icon + heading hover);
+	// switch per theme so one reference serves light and dark.
+	--brand-ce: #305680;
+	--brand-cloud: #5fa8e8;
+	--brand-pe: #1f8b4d;
+	--brand-edge: #009688;
+	--brand-gateway: #7a4dc3;
+	--brand-trendz: #2696f3;
 }
 
 [data-theme='dark'] {
@@ -158,9 +164,7 @@
 
 	// Shadows
 	--shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 1px 0 rgba(0, 0, 0, 0.2);
-	--shadow-md:
-		0 1px 8px 0 rgba(0, 0, 0, 0.4), 0 3px 4px 0 rgba(0, 0, 0, 0.3),
-		0 3px 3px -2px rgba(0, 0, 0, 0.25);
+	--shadow-md: 0 1px 8px 0 rgba(0, 0, 0, 0.4), 0 3px 4px 0 rgba(0, 0, 0, 0.3), 0 3px 3px -2px rgba(0, 0, 0, 0.25);
 	--shadow-lg: 0 50px 50px -20px rgba(0, 0, 0, 0.35), 0 0 30px 0 rgba(0, 0, 0, 0.15);
 	--shadow-card: 0 50px 50px -20px rgba(0, 0, 0, 0.35), 0 0 30px 0 rgba(0, 0, 0, 0.1);
 	--shadow-header: 0 0 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.2);
@@ -186,4 +190,12 @@
 	// Menu icon tint — dark mode uses the project primary (which itself
 	// resolves to Starlight's accent-high ≈ #b3c7ff in dark theme).
 	--menu-icon-color: var(--color-primary);
+
+	// Per-product brand accents — lighter variants for the dark dropdown bg.
+	--brand-ce: #7da9d8;
+	--brand-cloud: #7dd3fc;
+	--brand-pe: #4ade80;
+	--brand-edge: #2dd4bf;
+	--brand-gateway: #a78bfa;
+	--brand-trendz: #60a5fa;
 }

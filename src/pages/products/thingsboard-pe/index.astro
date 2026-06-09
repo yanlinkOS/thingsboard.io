@@ -11,6 +11,7 @@ import { Products } from '@models/site.models';
 ---
 
 <BaseLayout
+	headerVariant="transparent"
 	forceLightTheme
 	title="ThingsBoard Professional Edition"
 	description="Advanced ThingsBoard IoT Platform distribution with white-labeling, advanced RBAC, platform integrations, entity groups, scheduler, reporting, and more."
@@ -24,7 +25,10 @@ import { Products } from '@models/site.models';
 			buttons={[{ text: 'Get it now', href: '/pricing/', variant: 'outline' }]}
 			anchorLink="#intro"
 			backgroundImage="/hero/pe-cover.webp"
-			videoBackground={{ webm: 'https://video.thingsboard.io/pe-cover.webm', mp4: 'https://video.thingsboard.io/pe-cover.mp4' }}
+			videoBackground={{
+				webm: 'https://video.thingsboard.io/pe-cover.webm',
+				mp4: 'https://video.thingsboard.io/pe-cover.mp4',
+			}}
 		/>
 
 		<section id="overflow">
@@ -98,13 +102,15 @@ import { Products } from '@models/site.models';
 				id="scheduler-section"
 				left={{
 					heading: 'Scheduler',
-					description: 'Schedule various types of events including report generation, commands to devices and configuration updates with flexible schedule configuration.',
+					description:
+						'Schedule various types of events including report generation, commands to devices and configuration updates with flexible schedule configuration.',
 					readMoreHref: '/docs/pe/user-guide/scheduler/',
 					readMoreText: 'Read more about scheduler',
 				}}
 				right={{
 					heading: 'Reporting',
-					description: 'Generate great looking reports using dashboards visualization capabilities. Generate reports by schedule or export by demand.',
+					description:
+						'Generate great looking reports using dashboards visualization capabilities. Generate reports by schedule or export by demand.',
 					readMoreHref: '/docs/pe/user-guide/reporting/report-templates/',
 					readMoreText: 'Read more about reporting',
 				}}

@@ -3,6 +3,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
+	headerVariant="solid-shadow"
 	forceLightTheme
 	title="ThingsBoard choose region"
 	description="ThingsBoard is an open-source IoT platform for device management, data collection, processing and visualization for your IoT projects"
@@ -42,9 +43,7 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 <script>
 	document.getElementById('map')!.addEventListener('load', function (this: HTMLObjectElement) {
 		const svgDoc = this.contentDocument!;
-		const buttons = document
-			.querySelector('.region-button-section')!
-			.querySelectorAll<HTMLElement>('.button');
+		const buttons = document.querySelector('.region-button-section')!.querySelectorAll<HTMLElement>('.button');
 
 		buttons.forEach((button) => {
 			button.addEventListener('mouseenter', () => {

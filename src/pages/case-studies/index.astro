@@ -21,6 +21,7 @@ const filterValues = caseStudyCategories.map((cat) => ({
 ---
 
 <BaseLayout
+	headerVariant="solid-border"
 	title="IoT Case Studies"
 	description="Discover how companies in retail, energy, logistics, and more drive digital transformation with ThingsBoard's IoT platform to boost efficiency, growth, and innovation."
 	pageId="case-studies"
@@ -50,67 +51,76 @@ const filterValues = caseStudyCategories.map((cat) => ({
 		<div class="cs-toolbar">
 			<div class="cs-search-bar">
 				<Icon name="tabler:search" class="cs-search-icon" />
-				<input type="text" id="cs-search" class="cs-search-input" placeholder="Search case studies..." autocomplete="off" aria-label="Search case studies" />
+				<input
+					type="text"
+					id="cs-search"
+					class="cs-search-input"
+					placeholder="Search case studies..."
+					autocomplete="off"
+					aria-label="Search case studies"
+				/>
 				<button type="button" class="cs-search-clear" id="cs-search-clear" hidden aria-label="Clear search">
 					<Icon name="tabler:x" class="cs-search-clear-icon" />
 				</button>
 			</div>
 			<div class="cs-filter-pills">
-				{filterValues.map((item) => (
-					<h2 class="cs-filter-pill">
-						<label>
-							<input type="checkbox" name="category" value={item.value} />
-							<span class="cs-filter-pill-label">{item.value}</span>
-						</label>
-					</h2>
-				))}
+				{
+					filterValues.map((item) => (
+						<h2 class="cs-filter-pill">
+							<label>
+								<input type="checkbox" name="category" value={item.value} />
+								<span class="cs-filter-pill-label">{item.value}</span>
+							</label>
+						</h2>
+					))
+				}
 				<button type="button" class="cs-filter-clear" id="cs-clear-filters" hidden>Clear all</button>
 			</div>
 		</div>
 
-			<!-- Card grid -->
+		<!-- Card grid -->
 		<div class="cs-card-grid" id="cs-card-grid">
-			{caseStudyCards.map((card, index) => (
-				<a
-					href={`/case-studies/${card.slug}/`}
-					class:list={['cs-client-card', { 'is-hidden': index >= PAGE_SIZE }]}
-					style={`--card-bg: linear-gradient(0deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.30) 100%), url('${card.backgroundImage}')`}
-					data-slug={card.slug}
-					data-title={card.title}
-					data-description={card.description}
-					data-categories={JSON.stringify(card.categories)}
-				>
-					<div class="cs-card-content">
-						<div class="cs-card-top">
-							<img
-								class="cs-card-logo"
-								src={card.logo}
-								alt={card.logoAlt}
-								loading="lazy"
-								style={card.logoHeight ? `height: ${card.logoHeight}px` : undefined}
-							/>
-						</div>
-						<div class="cs-card-bottom">
-							<div class="cs-card-categories">
-								{card.categories.map((cat) => (
-									<span class="cs-card-category">{cat}</span>
-								))}
+			{
+				caseStudyCards.map((card, index) => (
+					<a
+						href={`/case-studies/${card.slug}/`}
+						class:list={['cs-client-card', { 'is-hidden': index >= PAGE_SIZE }]}
+						style={`--card-bg: linear-gradient(0deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.30) 100%), url('${card.backgroundImage}')`}
+						data-slug={card.slug}
+						data-title={card.title}
+						data-description={card.description}
+						data-categories={JSON.stringify(card.categories)}
+					>
+						<div class="cs-card-content">
+							<div class="cs-card-top">
+								<img
+									class="cs-card-logo"
+									src={card.logo}
+									alt={card.logoAlt}
+									loading="lazy"
+									style={card.logoHeight ? `height: ${card.logoHeight}px` : undefined}
+								/>
 							</div>
-							<h3 class="cs-card-title">{card.title}</h3>
-							<p class="cs-card-link">
-								Learn more
-								<Icon name="tabler:arrow-right" class="cs-card-arrow" />
-							</p>
+							<div class="cs-card-bottom">
+								<div class="cs-card-categories">
+									{card.categories.map((cat) => (
+										<span class="cs-card-category">{cat}</span>
+									))}
+								</div>
+								<h3 class="cs-card-title">{card.title}</h3>
+								<p class="cs-card-link">
+									Learn more
+									<Icon name="tabler:arrow-right" class="cs-card-arrow" />
+								</p>
+							</div>
 						</div>
-					</div>
-				</a>
-			))}
+					</a>
+				))
+			}
 		</div>
 
 		<!-- No results -->
-		<div class="cs-no-results" id="cs-no-results" hidden>
-			No case studies match your filters.
-		</div>
+		<div class="cs-no-results" id="cs-no-results" hidden>No case studies match your filters.</div>
 
 		<!-- Pagination -->
 		<nav class="cs-pagination" id="cs-pagination" hidden aria-label="Pagination">
@@ -190,9 +200,10 @@ const filterValues = caseStudyCategories.map((cat) => ({
 
 		function search(query: string, categories: string[], page: number) {
 			const q = query.toLowerCase();
-			const filtered = allCards.filter((c) =>
-				(!q || c.searchText.includes(q)) &&
-				(categories.length === 0 || categories.some((cat) => c.categories.includes(cat)))
+			const filtered = allCards.filter(
+				(c) =>
+					(!q || c.searchText.includes(q)) &&
+					(categories.length === 0 || categories.some((cat) => c.categories.includes(cat)))
 			);
 
 			const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
@@ -225,11 +236,13 @@ const filterValues = caseStudyCategories.map((cat) => ({
 				pages.push(total);
 			}
 
-			pageNumbers.innerHTML = pages.map((p) =>
-				typeof p === 'number'
-					? `<button type="button" class="cs-num-btn${p === current ? ' active' : ''}" data-page="${p}">${p}</button>`
-					: `<span class="cs-page-ellipsis">${p}</span>`
-			).join('');
+			pageNumbers.innerHTML = pages
+				.map((p) =>
+					typeof p === 'number'
+						? `<button type="button" class="cs-num-btn${p === current ? ' active' : ''}" data-page="${p}">${p}</button>`
+						: `<span class="cs-page-ellipsis">${p}</span>`
+				)
+				.join('');
 		}
 
 		function saveState(query: string, categories: string[]) {
@@ -280,16 +293,22 @@ const filterValues = caseStudyCategories.map((cat) => ({
 				if (state.q) searchInput.value = state.q;
 				if (state.category) {
 					const catList = state.category.split(',');
-					checkboxes.forEach((cb) => { cb.checked = catList.includes(cb.value); });
+					checkboxes.forEach((cb) => {
+						cb.checked = catList.includes(cb.value);
+					});
 				}
 				if (state.page) currentPage = parseInt(state.page, 10);
-			} catch { /* ignore malformed state */ }
+			} catch {
+				/* ignore malformed state */
+			}
 		}
 
 		checkboxes.forEach((cb) => cb.addEventListener('change', resetAndUpdate));
 
 		clearFilters.addEventListener('click', () => {
-			checkboxes.forEach((cb) => { cb.checked = false; });
+			checkboxes.forEach((cb) => {
+				cb.checked = false;
+			});
 			searchInput.value = '';
 			resetAndUpdate();
 		});
@@ -306,18 +325,25 @@ const filterValues = caseStudyCategories.map((cat) => ({
 		});
 
 		pagePrev.addEventListener('click', () => {
-			if (currentPage > 1) { currentPage--; updateDisplay(); }
+			if (currentPage > 1) {
+				currentPage--;
+				updateDisplay();
+			}
 		});
 
 		pageNext.addEventListener('click', () => {
-			currentPage++; updateDisplay();
+			currentPage++;
+			updateDisplay();
 		});
 
 		pageNumbers.addEventListener('click', (e) => {
 			const target = e.target as HTMLElement;
 			if (target.classList.contains('cs-num-btn')) {
 				const page = parseInt(target.dataset.page || '1', 10);
-				if (page !== currentPage) { currentPage = page; updateDisplay(); }
+				if (page !== currentPage) {
+					currentPage = page;
+					updateDisplay();
+				}
 			}
 		});
 
@@ -364,7 +390,10 @@ const filterValues = caseStudyCategories.map((cat) => ({
 		line-height: normal;
 		color: var(--color-text);
 		background: var(--color-bg-surface);
-		transition: border-color $transition-fast, background-color $transition-fast, color $transition-fast;
+		transition:
+			border-color $transition-fast,
+			background-color $transition-fast,
+			color $transition-fast;
 		user-select: none;
 		margin: 0;
 
@@ -518,7 +547,9 @@ const filterValues = caseStudyCategories.map((cat) => ({
 			gap: $spacing-1;
 			transform: translateY(8px);
 			opacity: 0;
-			transition: transform 0.25s ease, opacity 0.25s ease;
+			transition:
+				transform 0.25s ease,
+				opacity 0.25s ease;
 
 			.cs-hero-arrow {
 				width: 12px;
@@ -716,7 +747,9 @@ const filterValues = caseStudyCategories.map((cat) => ({
 		margin: 0;
 		transform: translateY(8px);
 		opacity: 0;
-		transition: transform 0.25s ease, opacity 0.25s ease;
+		transition:
+			transform 0.25s ease,
+			opacity 0.25s ease;
 		white-space: nowrap;
 	}
 
@@ -804,7 +837,9 @@ const filterValues = caseStudyCategories.map((cat) => ({
 		background: var(--color-bg-surface);
 		color: var(--color-text);
 		cursor: pointer;
-		transition: border-color $transition-fast, background-color $transition-fast;
+		transition:
+			border-color $transition-fast,
+			background-color $transition-fast;
 
 		&:hover {
 			border-color: var(--color-primary);
