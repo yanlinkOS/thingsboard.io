@@ -386,6 +386,124 @@ const tbmqSubTabs = enrichTabs([
 				</div>
 			</section>
 		</div>
+
+		{/* Pre-paint state sync. Runs synchronously during body parsing — after
+		    all `.product-tab` / `.sub-tab` / `.pricing-section` /
+		    `.pricing-product-content` nodes are in the DOM but before first
+		    paint. Resolves URL→state via the shared window.__resolvePricingState()
+		    (defined just below) so the correct tabs are highlighted and the
+		    correct section is visible from frame 1, even when arriving via a
+		    deep-link URL. Without this, visitors using `?product=…` / `?section=…`
+		    URLs see the SSR-default state painted briefly before initPricing()
+		    swaps it post-parse.
+
+		    initPricing() later calls the same resolver — no-op for state that's
+		    already correct. */}
+		<script is:inline>
+			(function () {
+				// Single source of truth for the URL→state mapping. Defined on
+				// `window` from this is:inline script — which runs during body
+				// parsing, before the deferred initPricing() module — so BOTH this
+				// pre-paint block and initPricing() resolve identical state from one
+				// pure function (params → { activeProduct, activeSubTab, activeBilling }).
+				// The DOM application differs between the two callers and stays
+				// separate in each.
+				window.__resolvePricingState = function (search) {
+					const p = new URLSearchParams(search);
+					const sectionParam = p.get('section');
+					const productParam = p.get('product');
+					const solutionParam = p.get('solution');
+					const sectionMap = {
+						'thingsboard-pe-options': { product: 'thingsboard', subtab: 'thingsboard-pe' },
+						'tbmq-options': { product: 'tbmq' },
+					};
+					let activeProduct = 'thingsboard';
+					let activeSubTab = null;
+					let activeBilling = null;
+					if (sectionParam && sectionMap[sectionParam]) {
+						activeProduct = sectionMap[sectionParam].product;
+						if (sectionMap[sectionParam].subtab) activeSubTab = sectionMap[sectionParam].subtab;
+					}
+					if (productParam && productParam.startsWith('tbmq')) activeProduct = 'tbmq';
+					if (productParam) activeSubTab = productParam;
+					if (solutionParam) {
+						const sol = solutionParam.replace(/^pe-/, '');
+						if (sol === 'payg' || sol === 'perpetual') activeBilling = sol;
+					}
+					return { activeProduct, activeSubTab, activeBilling };
+				};
+
+				try {
+					const state = window.__resolvePricingState(location.search);
+					const activeProduct = state.activeProduct;
+					const activeBilling = state.activeBilling;
+					let activeSubTab = state.activeSubTab;
+
+					// Mirror initPricing()'s billing-toggle flip so visitors landing on
+					// `?solution=pe-perpetual` don't see PAYG plans flash before JS runs.
+					if (activeBilling === 'perpetual') {
+						document.querySelectorAll('[data-billing-toggle]').forEach(function (input) {
+							input.checked = true;
+							const toggleId = input.dataset.billingToggle;
+							document.querySelectorAll('[data-billing-group="' + toggleId + '"]').forEach(function (el) {
+								el.style.display = el.dataset.billingContent === 'perpetual' ? '' : 'none';
+							});
+							const toggle = input.closest('.billing-toggle');
+							if (toggle) {
+								toggle.querySelectorAll('.billing-toggle-label').forEach(function (lbl, i) {
+									lbl.classList.toggle('active', i === 1);
+								});
+							}
+							const heading = document.querySelector('[data-billing-heading="' + toggleId + '"]');
+							if (heading && heading.dataset.perpetualText) heading.textContent = heading.dataset.perpetualText;
+							const subtitle = document.querySelector('[data-billing-subtitle="' + toggleId + '"]');
+							if (subtitle && subtitle.dataset.perpetualText) subtitle.textContent = subtitle.dataset.perpetualText;
+						});
+					}
+
+					// Product-tab active class
+					document.querySelectorAll('.product-tab').forEach(function (tab) {
+						const isActive = tab.dataset.product === activeProduct;
+						tab.classList.toggle('active', isActive);
+						tab.setAttribute('aria-current', isActive ? 'true' : 'false');
+					});
+
+					// Product-content visibility
+					document.querySelectorAll('.pricing-product-content').forEach(function (el) {
+						el.style.display = el.dataset.productContent === activeProduct ? '' : 'none';
+					});
+
+					// Inside the visible product, swap sub-tab + section state
+					const visible = document.querySelector('.pricing-product-content[data-product-content="' + activeProduct + '"]');
+					if (!visible) return;
+
+					// Default sub-tab = whichever was SSR'd with .active inside the visible product
+					if (!activeSubTab) {
+						const def = visible.querySelector('.sub-tab.active');
+						if (def) activeSubTab = def.dataset.subtab;
+					}
+					if (!activeSubTab) return;
+
+					visible.querySelectorAll('.sub-tab').forEach(function (tab) {
+						const isActive = tab.dataset.subtab === activeSubTab;
+						tab.classList.toggle('active', isActive);
+						tab.setAttribute('aria-current', isActive ? 'true' : 'false');
+					});
+
+					visible.querySelectorAll('.pricing-section').forEach(function (s) {
+						const isActive = s.dataset.section === activeSubTab;
+						if (isActive) {
+							s.classList.add('active', 'visible');
+							s.style.display = '';
+						} else {
+							s.classList.remove('active', 'visible');
+							s.style.display = 'none';
+						}
+					});
+				} catch { /* fall back to SSR defaults */ }
+			})();
+		</script>
+
 		<!-- ═══ FAQ Section ═══ -->
 		<div class="pricing-faq" id="faq">
 			{
@@ -430,61 +548,127 @@ const tbmqSubTabs = enrichTabs([
 
 		let skipAnimation = true; // No animation on initial load
 
-		// ─── Segment highlight animation ───
-		function moveHighlight(container: HTMLElement) {
-			const highlight = container.querySelector('.segment-highlight') as HTMLElement;
-			const activeTab = container.querySelector('.segment-tab.active') as HTMLElement;
-			if (!highlight || !activeTab) return;
-
-			const containerRect = container.getBoundingClientRect();
-			const tabRect = activeTab.getBoundingClientRect();
-			const offsetLeft = tabRect.left - containerRect.left;
-
-			highlight.style.width = tabRect.width + 'px';
-			highlight.style.transform = `translateX(${offsetLeft - 4}px)`;
-		}
-
-		// Init all segment highlights on load
-		function initAllHighlights() {
-			$$('.segment-tabs').forEach((seg) => moveHighlight(seg));
-		}
-
 		// ─── URL state ───
+		// Resolved via the shared window.__resolvePricingState() (defined in the
+		// pre-paint is:inline script near the top of <body>) — the single source
+		// of truth for the param→state mapping, so deep-link first paint and this
+		// post-parse pass can't drift.
 		const params = new URLSearchParams(window.location.search);
 
-		// Legacy param mapping: section=thingsboard-pe-options → product=thingsboard
-		const sectionParam = params.get('section');
-		const productParam = params.get('product');
-		const solutionParam = params.get('solution');
-
+		// These stay `let`: activateProductTab(), activateSubTab() and the billing
+		// toggle reassign them as the user navigates. They're seeded with the
+		// SSR-default state so they remain valid even if the resolver is absent.
 		let activeProduct = 'thingsboard';
 		let activeSubTab: string | null = null;
 		let activeBilling: string | null = null;
-
-		// Map legacy section param to product + subtab
-		const sectionMap: Record<string, { product: string; subtab?: string }> = {
-			'thingsboard-pe-options': { product: 'thingsboard', subtab: 'thingsboard-pe' },
-			'tbmq-options': { product: 'tbmq' },
-		};
-
-		if (sectionParam && sectionMap[sectionParam]) {
-			activeProduct = sectionMap[sectionParam].product;
-			if (sectionMap[sectionParam].subtab) {
-				activeSubTab = sectionMap[sectionParam].subtab!;
-			}
+		// Guard the resolver call: __resolvePricingState is defined by the
+		// pre-paint is:inline script, which could fail to run (e.g. a CSP that
+		// blocks inline scripts, or a future syntax error in that block). Rather
+		// than let an undefined call throw and abort all of initPricing() —
+		// killing every tab, toggle, accordion and calculator on the page — we
+		// fall back to the SSR defaults above. The only degradation is that a
+		// deep-link's tab/section highlighting isn't applied; the page stays
+		// fully interactive.
+		const resolvePricingState = (window as any).__resolvePricingState;
+		if (typeof resolvePricingState === 'function') {
+			({ activeProduct, activeSubTab, activeBilling } = resolvePricingState(
+				window.location.search,
+			));
 		}
 
-		if (productParam?.startsWith('tbmq')) {
-			activeProduct = 'tbmq';
-		}
+		// ─── Single delegated click listener on the pricing root ───
+		// Replaces 10+ per-element forEach(addEventListener('click', …)) loops.
+		// initPricing() runs exactly once per full page load — this project has
+		// no ClientRouter / View Transitions, so the document is never reused
+		// across navigations. A single plain listener on the persistent
+		// `main.pricing-page` root is all that's needed; no AbortController or
+		// per-run bookkeeping.
+		{
+			const pricingRoot = document.querySelector('main.pricing-page');
+			pricingRoot?.addEventListener('click', (e) => {
+				const t = e.target as HTMLElement;
+				if (!t || typeof t.closest !== 'function') return;
 
-		if (productParam) {
-			activeSubTab = productParam;
-		}
+				// Tooltip-info icons that double as "scroll to FAQ" buttons.
+				// Skip if the click landed on a link inside the tooltip body.
+				const faqJump = t.closest<HTMLElement>('.sub-tab-info, .plan-feature-info, .addon-tooltip-trigger, .comparison-tooltip-trigger');
+				if (faqJump) {
+					if (t.closest('a')) return;
+					e.stopPropagation();
+					forceHidePricingTip();
+					const faqId = faqJump.dataset.faqId;
+					if (faqId) scrollToFaqItem(faqId);
+					return;
+				}
 
-		if (solutionParam) {
-			const sol = solutionParam.replace(/^pe-/, '');
-			if (sol === 'payg' || sol === 'perpetual') activeBilling = sol;
+				// Plan-card CTAs that should route through getLicense() instead
+				// of following their href.
+				const planCta = t.closest<HTMLElement>('.plan-card-cta[data-product-id][data-plan-id]');
+				if (planCta) {
+					e.preventDefault();
+					getLicense(planCta.dataset.productId!, planCta.dataset.planId!);
+					return;
+				}
+
+				// Upsell card switch.
+				const upsell = t.closest<HTMLElement>('.upsell-card-btn');
+				if (upsell) {
+					const target = upsell.dataset.switchTo;
+					if (target === 'contact') window.open('/contact-us/', '_blank');
+					else if (target) activateSubTab(target);
+					return;
+				}
+
+				// Top-ups accordion.
+				const topupHeader = t.closest<HTMLElement>('.topup-header');
+				if (topupHeader) {
+					const item = topupHeader.closest('.topup-item');
+					if (item) {
+						item.classList.toggle('expanded');
+						topupHeader.setAttribute('aria-expanded', String(item.classList.contains('expanded')));
+					}
+					return;
+				}
+
+				// Product-tab click (top-level tabs).
+				const productTab = t.closest<HTMLElement>('.product-tab');
+				if (productTab) {
+					activateProductTab(productTab.dataset.product!);
+					return;
+				}
+
+				// Sub-tab click.
+				const subTab = t.closest<HTMLElement>('.sub-tab');
+				if (subTab) {
+					activateSubTab(subTab.dataset.subtab!);
+					return;
+				}
+
+				// Region-toggle label click → flip #region-select, fire change.
+				const regionLabel = t.closest<HTMLElement>('.region-toggle-label');
+				if (regionLabel) {
+					const cb = document.getElementById('region-select') as HTMLInputElement | null;
+					if (cb) {
+						cb.checked = regionLabel.dataset.region === 'eu';
+						cb.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+					return;
+				}
+
+				// Billing-toggle label click → flip the related checkbox, fire change.
+				const billingLabel = t.closest<HTMLElement>('.billing-toggle-label');
+				if (billingLabel) {
+					const toggle = billingLabel.closest('.billing-toggle');
+					const cb = toggle?.querySelector<HTMLInputElement>('[data-billing-toggle]');
+					if (cb && toggle) {
+						const labels = Array.from(toggle.querySelectorAll('.billing-toggle-label'));
+						const idx = labels.indexOf(billingLabel);
+						cb.checked = idx === 1;
+						cb.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+					return;
+				}
+			});
 		}
 
 		// ─── Product tabs ───
@@ -516,16 +700,11 @@ const tbmqSubTabs = enrichTabs([
 			reportPriceOpen(product);
 			document.dispatchEvent(new CustomEvent('pricing:product-activated', { detail: product }));
 
-			// Animate product tab highlight
-			const productNav = $('.segment-tabs--product');
-			if (productNav) moveHighlight(productNav);
+			// Active tab background is now CSS-only — no JS positioning needed.
 
-			// Re-position sub-tab highlight and re-activate the active section
+			// Re-activate the visible product's active sub-tab section.
 			const visibleContent = $(`.pricing-product-content[data-product-content="${product}"]`);
 			if (visibleContent) {
-				const subNav = $('.segment-tabs--sub', visibleContent);
-				if (subNav) moveHighlight(subNav);
-
 				if (!skipSubTabActivation) {
 					// Find the active sub-tab and re-activate its section (ensures visible class)
 					const activeTab = $('.sub-tab.active', visibleContent);
@@ -538,11 +717,7 @@ const tbmqSubTabs = enrichTabs([
 			updateUrl();
 		}
 
-		$$('.product-tab').forEach((tab) => {
-			tab.addEventListener('click', () => {
-				activateProductTab(tab.dataset.product!);
-			});
-		});
+		// `.product-tab` click is delegated above on `main.pricing-page`.
 
 		// ─── FAQ context mapping ───
 		// Maps sub-tab ID to FAQ context ID(s)
@@ -642,18 +817,10 @@ const tbmqSubTabs = enrichTabs([
 			reportPriceOpen(sectionId);
 			updateFaqVisibility(sectionId);
 
-			// Animate sub-tab highlight
-			const subNav = $('.segment-tabs--sub', productContent);
-			if (subNav) moveHighlight(subNav);
-
 			updateUrl();
 		}
 
-		$$('.sub-tab').forEach((tab) => {
-			tab.addEventListener('click', () => {
-				activateSubTab(tab.dataset.subtab!);
-			});
-		});
+		// `.sub-tab` click is delegated above on `main.pricing-page`.
 
 		// ─── Helper: scroll to FAQ item (handles hidden, category, expand) ───
 		function scrollToFaqItem(faqId: string) {
@@ -709,17 +876,7 @@ const tbmqSubTabs = enrichTabs([
 			setTimeout(() => targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 		}
 
-		// ─── Tooltip info icon click → scroll to FAQ ───
-		$$('.sub-tab-info').forEach((info) => {
-			info.addEventListener('click', (e) => {
-				// Don't scroll to FAQ if user clicked a link inside the tooltip
-				if ((e.target as HTMLElement).closest('a')) return;
-				e.stopPropagation();
-				forceHidePricingTip();
-				const faqId = (info as HTMLElement).dataset.faqId;
-				if (faqId) scrollToFaqItem(faqId);
-			});
-		});
+		// `.sub-tab-info` click (FAQ scroll) is delegated above on `main.pricing-page`.
 
 		// ─── Shared tooltip system: JS-only visibility ───
 		let activePricingTip: { trigger: Element; tooltip: HTMLElement } | null = null;
@@ -729,10 +886,11 @@ const tbmqSubTabs = enrichTabs([
 		// Mobile browsers don't fire mouseleave after a tap, so a tooltip
 		// opened on (i)-icon tap stays pinned at its `position: fixed` slot
 		// when the user scrolls. Dismiss on any window scroll as a safety net.
-		// Guard: same pattern as `_pricingClickInit` — initPricing() re-runs on
-		// every astro:page-load, so the listener must be installed once. Resolve
-		// the visible tooltip via DOM query (not closure state) so it still
-		// works after a View Transitions navigation rebinds the closure.
+		// Guard: this window-level listener must be installed only once.
+		// initPricing() runs a single time per page load (no ClientRouter / View
+		// Transitions), but the flag keeps registration idempotent if it's ever
+		// invoked again. Resolve the visible tooltip via DOM query, not closure
+		// state.
 		if (!(window as any)._pricingScrollInit) {
 			(window as any)._pricingScrollInit = true;
 			window.addEventListener(
@@ -878,78 +1036,34 @@ const tbmqSubTabs = enrichTabs([
 			});
 		}
 
-		$$('.sub-tab-info').forEach((info) => {
-			const tooltip = info.querySelector('.sub-tab-tooltip') as HTMLElement | null;
-			if (!tooltip) return;
-			bindPricingTooltip(info, tooltip);
-		});
-
-		// ─── Plan feature tooltip positioning ───
-		$$('.plan-feature-info').forEach((info) => {
-			const tooltip = info.querySelector('.plan-feature-tooltip') as HTMLElement | null;
-			if (!tooltip) return;
-			bindPricingTooltip(info, tooltip);
-		});
-
-		// ─── Plan feature tooltip click → scroll to FAQ ───
-		$$('.plan-feature-info').forEach((info) => {
-			info.addEventListener('click', (e) => {
-				if ((e.target as HTMLElement).closest('a')) return;
-				e.stopPropagation();
-				forceHidePricingTip();
-				const faqId = (info as HTMLElement).dataset.faqId;
-				if (faqId) scrollToFaqItem(faqId);
+		// Tooltip mouseenter/mouseleave bindings (per-element, ~hundreds of
+		// triggers across plan cards, addons, comparison table, sub-tab info
+		// icons). `mouseenter` doesn't bubble, so we can't fully delegate;
+		// instead, defer the bind work until the browser is idle so it
+		// doesn't compete with the LCP frame. First hover within ~50 ms of
+		// page-load might miss a tooltip; acceptable trade-off since the
+		// content isn't blocked, just the tooltip behavior.
+		// `.plan-feature-info` / `.addon-tooltip-trigger` / `.comparison-tooltip-trigger`
+		// click → scroll-to-FAQ is delegated above on `main.pricing-page`.
+		const bindAllPricingTooltips = () => {
+			$$('.sub-tab-info').forEach((info) => {
+				const tooltip = info.querySelector('.sub-tab-tooltip') as HTMLElement | null;
+				if (tooltip) bindPricingTooltip(info, tooltip);
 			});
-		});
-
-		// ─── Addon tooltip positioning (fixed, escapes stacking contexts) ───
-		$$('.addon-tooltip-trigger').forEach((trigger) => {
-			const tooltip = trigger.querySelector('.addon-tooltip') as HTMLElement | null;
-			if (!tooltip) return;
-			bindPricingTooltip(trigger, tooltip);
-		});
-
-		// ─── Comparison table tooltip positioning + click → scroll to FAQ ───
-		$$('.comparison-tooltip-trigger').forEach((trigger) => {
-			const tooltip = trigger.querySelector('.comparison-tooltip') as HTMLElement | null;
-			if (tooltip) {
-				bindPricingTooltip(trigger, tooltip);
-			}
-
-			trigger.addEventListener('click', (e) => {
-				if ((e.target as HTMLElement).closest('a')) return;
-				e.stopPropagation();
-				// Mobile browsers don't fire mouseleave after a tap, so the
-				// tooltip would otherwise stay pinned at its `position: fixed`
-				// slot while we scroll to the FAQ.
-				forceHidePricingTip();
-				const faqId = (trigger as HTMLElement).dataset.faqId;
-				if (faqId) scrollToFaqItem(faqId);
+			$$('.plan-feature-info').forEach((info) => {
+				const tooltip = info.querySelector('.plan-feature-tooltip') as HTMLElement | null;
+				if (tooltip) bindPricingTooltip(info, tooltip);
 			});
-		});
-
-		// ─── Addon tooltip click → scroll to FAQ ───
-		$$('.addon-tooltip-trigger').forEach((trigger) => {
-			trigger.addEventListener('click', (e) => {
-				if ((e.target as HTMLElement).closest('a')) return;
-				e.stopPropagation();
-				forceHidePricingTip();
-				const faqId = (trigger as HTMLElement).dataset.faqId;
-				if (faqId) scrollToFaqItem(faqId);
+			$$('.addon-tooltip-trigger').forEach((trigger) => {
+				const tooltip = trigger.querySelector('.addon-tooltip') as HTMLElement | null;
+				if (tooltip) bindPricingTooltip(trigger, tooltip);
 			});
-		});
-
-		// ─── Upsell card switch ───
-		$$('.upsell-card-btn').forEach((btn) => {
-			btn.addEventListener('click', () => {
-				const target = btn.dataset.switchTo;
-				if (target === 'contact') {
-					window.open('/contact-us/', '_blank');
-				} else if (target) {
-					activateSubTab(target);
-				}
+			$$('.comparison-tooltip-trigger').forEach((trigger) => {
+				const tooltip = trigger.querySelector('.comparison-tooltip') as HTMLElement | null;
+				if (tooltip) bindPricingTooltip(trigger, tooltip);
 			});
-		});
+		};
+		(window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 200)))(bindAllPricingTooltips, { timeout: 1500 });
 
 		// ─── Region toggle ───
 		const regionCheckbox = $('#region-select') as HTMLInputElement | null;
@@ -986,14 +1100,9 @@ const tbmqSubTabs = enrichTabs([
 			regionCheckbox.addEventListener('change', () => {
 				setRegion(regionCheckbox.checked);
 			});
-
-			$$('.region-toggle-label').forEach((lbl) => {
-				lbl.addEventListener('click', () => {
-					const isEu = lbl.dataset.region === 'eu';
-					regionCheckbox.checked = isEu;
-					setRegion(isEu);
-				});
-			});
+			// `.region-toggle-label` click is delegated above on `main.pricing-page`;
+			// it flips `regionCheckbox.checked` and dispatches `change`, which
+			// the handler above picks up.
 
 			// Restore from cookie (supports both new "eu"/"na" and old "/docs/paas/eu/" format)
 			const cookieMatch = document.cookie.match(/cloudServer=([^;]+)/);
@@ -1047,19 +1156,9 @@ const tbmqSubTabs = enrichTabs([
 					}
 				});
 			});
-
-			// Label click
-			const toggle = checkbox.closest('.billing-toggle');
-			if (toggle) {
-				$$('.billing-toggle-label', toggle).forEach((lbl, i) => {
-					lbl.addEventListener('click', () => {
-						checkbox.checked = i === 1;
-						setBilling(i === 1);
-						if (activeSubTab) updateFaqVisibility(activeSubTab);
-						updateUrl();
-					});
-				});
-			}
+			// `.billing-toggle-label` click is delegated above on `main.pricing-page`;
+			// it flips `checkbox.checked` and dispatches `change`, which the
+			// handler above picks up.
 		});
 
 		// ─── Private Cloud billing toggle (monthly/annual) ───
@@ -1085,15 +1184,8 @@ const tbmqSubTabs = enrichTabs([
 				}
 			}
 			pcBillingCheckbox.addEventListener('change', () => setPcBilling(pcBillingCheckbox.checked));
-			const pcToggle = pcBillingCheckbox.closest('.billing-toggle');
-			if (pcToggle) {
-				$$('.billing-toggle-label', pcToggle).forEach((lbl, i) => {
-					lbl.addEventListener('click', () => {
-						pcBillingCheckbox.checked = i === 1;
-						setPcBilling(i === 1);
-					});
-				});
-			}
+			// `.billing-toggle-label` click for the PC toggle is also delegated
+			// above; the change event handler above picks up the result.
 		}
 
 		// ─── getLicense — plan card CTA clicks for self-managed plans ───
@@ -1119,31 +1211,14 @@ const tbmqSubTabs = enrichTabs([
 			window.open(url, '_blank');
 		}
 
-		// Intercept plan card CTA clicks that have productId/planId
-		$$('.plan-card-cta[data-product-id][data-plan-id]').forEach((btn) => {
-			btn.addEventListener('click', (e) => {
-				e.preventDefault();
-				const productId = (btn as HTMLElement).dataset.productId!;
-				const planId = (btn as HTMLElement).dataset.planId!;
-				getLicense(productId, planId);
-			});
-		});
-
-		// ─── Top-ups accordion ───
-		$$('.topup-header').forEach((header) => {
-			header.addEventListener('click', () => {
-				const item = header.closest('.topup-item');
-				if (item) {
-					item.classList.toggle('expanded');
-					header.setAttribute('aria-expanded', String(item.classList.contains('expanded')));
-				}
-			});
-		});
+		// `.plan-card-cta[data-product-id][data-plan-id]` click is delegated above.
+		// `.topup-header` click (accordion) is delegated above.
 
 		// ─── FAQ — single delegated listener for all FAQ interactions ───
-		// Guard: register on document ONCE per page lifetime. initPricing() re-runs on
-		// every astro:page-load (View Transitions keep document alive), which would
-		// otherwise stack duplicate handlers and fire actions N times after N visits.
+		// Guard: register this document-level listener only once. initPricing()
+		// runs a single time per page load (no ClientRouter / View Transitions),
+		// but the flag keeps registration idempotent if it's ever invoked again —
+		// a second run would otherwise stack duplicate handlers and fire twice.
 		if (!(window as any)._pricingClickInit) {
 			(window as any)._pricingClickInit = true;
 			document.addEventListener('click', (e) => {
@@ -1221,21 +1296,24 @@ const tbmqSubTabs = enrichTabs([
 			});
 		}
 
-		// ─── FAQ category from URL ───
+		// ─── FAQ category from URL (?faqSection=…) ───
+		// Deferred to idle — activating a category tab below the fold isn't
+		// LCP-critical. The hash-based deep-link below stays SYNCHRONOUS so
+		// `/pricing/#faq-foo` URLs land on the right item without jank.
 		const faqSectionParam = params.get('faqSection');
 		if (faqSectionParam) {
-			// Activate the specified FAQ category tab in the visible FAQ section
-			$$('.faq-section').forEach((section) => {
-				if ((section as HTMLElement).style.display !== 'none') {
-					const tab = section.querySelector(`.faq-cat-tab[data-faq-cat="${faqSectionParam}"]`);
-					if (tab) {
-						(tab as HTMLElement).click();
+			const activateFaqCategory = () => {
+				$$('.faq-section').forEach((section) => {
+					if ((section as HTMLElement).style.display !== 'none') {
+						const tab = section.querySelector(`.faq-cat-tab[data-faq-cat="${faqSectionParam}"]`);
+						if (tab) (tab as HTMLElement).click();
 					}
-				}
-			});
+				});
+			};
+			(window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 200)))(activateFaqCategory, { timeout: 2000 });
 		}
 
-		// ─── FAQ deep-link on load ───
+		// ─── FAQ deep-link on load (synchronous — preserves /pricing/#faq-id) ───
 		const hash = window.location.hash.slice(1);
 		if (hash) {
 			const targetItem = document.getElementById(hash);
@@ -1295,6 +1373,7 @@ const tbmqSubTabs = enrichTabs([
 			}
 		}
 
+
 		// Set billing toggle from URL
 		if (activeBilling === 'perpetual') {
 			$$('[data-billing-toggle]').forEach((input) => {
@@ -1304,38 +1383,14 @@ const tbmqSubTabs = enrichTabs([
 			});
 		}
 
-		// Handle calculator param — open the calculator for the active sub-tab
-		if (params.has('calculator')) {
-			const calcMap: Record<string, string> = {
-				'thingsboard-cloud': 'openTbPaygCalc',
-				'thingsboard-private-cloud': 'openTbPcCalc',
-				'thingsboard-pe': 'openTbPaygCalc',
-			};
-			const tab = activeSubTab || 'thingsboard-cloud';
-			const fn = calcMap[tab];
-			if (fn) {
-				setTimeout(() => (window as any)[fn]?.(), 300);
-			}
-		}
-
-		// Position segment highlights on init and resize.
-		// Guard: same pattern as `_pricingClickInit` — initPricing() re-runs on
-		// every astro:page-load. Re-export the latest `initAllHighlights` to
-		// window so the once-installed listener always calls the current
-		// closure's function, not a stale one.
-		initAllHighlights();
-		(window as any)._pricingInitAllHighlights = initAllHighlights;
-		if (!(window as any)._pricingResizeInit) {
-			(window as any)._pricingResizeInit = true;
-			window.addEventListener('resize', () => (window as any)._pricingInitAllHighlights?.());
-		}
+		// Segment highlight is now per-tab CSS — no JS positioning or resize
+		// observer needed.
 
 		// Enable animations after initial render
 		skipAnimation = false;
 	}
 
 	initPricing();
-	document.addEventListener('astro:page-load', initPricing);
 </script>
 
 <style lang="scss" is:global>
@@ -1400,6 +1455,7 @@ const tbmqSubTabs = enrichTabs([
 			opacity: 1;
 		}
 	}
+
 
 	.pricing-product-content {
 		&.fade-in {
