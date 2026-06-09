@@ -199,9 +199,16 @@ const needsScrollState = variant === 'transparent' || variant === 'transparent-h
 
 	header.header {
 		position: fixed;
-		top: 0;
+		// Sits below the promo banner; tracks the live offset so it slides to
+		// top:0 as the banner collapses on scroll (--promo-cur → 0).
+		top: var(--promo-cur, var(--promo-h, 0px));
 		left: 0;
-		transition-duration: 0.3s;
+		// Scope to the flip properties only — a blanket `all 0.3s` would also
+		// ease `top`, making the header lag/float behind the scroll-tied offset
+		// instead of tracking it 1:1.
+		transition:
+			background-color 0.3s ease,
+			box-shadow 0.3s ease;
 		width: 100%;
 		height: $header-height;
 		z-index: 8888;
@@ -499,11 +506,13 @@ const needsScrollState = variant === 'transparent' || variant === 'transparent-h
 		}
 	}
 
-	// Transparent header overlays the hero → drop the content frame's top padding
-	// (`.header` and `.main-frame` are siblings under `.page`). Was a JS class.
+	// Transparent header overlays the hero → no header clearance, BUT still
+	// reserve the promo-banner band so the hero starts below the banner (the
+	// transparent nav then floats over the hero as before). Without this the
+	// fixed banner would overlay the top of the hero / crowd the hero title.
 	.page:has(header.header [data-header-variant='transparent']) .main-frame,
 	.page:has(header.header [data-header-variant='transparent-hover']) .main-frame {
-		padding-top: 0;
+		padding-top: var(--promo-h, 0px);
 	}
 
 	// Transparent, opaque on hover + scroll (transparent-hover — pricing, affiliate).
@@ -550,6 +559,10 @@ const needsScrollState = variant === 'transparent' || variant === 'transparent-h
 	// brightest surface per theme, so it sits above the page bg in dark too.
 	header.header.opened-burger {
 		transition: all $transition-base;
+		// The banner is hidden while the drawer is open, so collapse the header
+		// to the very top — otherwise it stays at `top: --promo-cur` and leaves
+		// an empty banner-height band above the drawer.
+		top: 0;
 		background-color: var(--color-bg-light);
 		box-shadow: var(--shadow-header);
 

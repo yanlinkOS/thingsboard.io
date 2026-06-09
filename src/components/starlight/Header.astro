@@ -1,5 +1,6 @@
 ---
 import HeaderContent from '../Landing/HeaderContent.astro';
+import PromoBanner from '../PromoBanner.astro';
 import { Products } from '@models/site.models';
 import { resolveHeaderConfig, type HeaderConfig } from '@util/header-config';
 
@@ -25,4 +26,5 @@ const gitHubPlatform = override ?? getGitHubPlatform(pathname);
 const headerConfig = (locals.bslHeaderConfig as HeaderConfig | undefined) ?? resolveHeaderConfig();
 ---
 
+<PromoBanner />
 <HeaderContent gitHubPlatform={gitHubPlatform} headerConfig={headerConfig} />

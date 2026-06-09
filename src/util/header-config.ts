@@ -59,3 +59,31 @@ export function resolveHeaderConfig(input: HeaderConfigInput = {}): HeaderConfig
 		showThemeToggle,
 	};
 }
+
+// Promo-banner accent. Marketing pages whose "Try it now" CTA is azure tint the
+// banner to match (mirrors the legacy per-page banner colors); everything else
+// (docs + neutral marketing) uses the default indigo cloud token. Keyed by the
+// BaseLayout `pageId` — resolved server-side and bridged via Astro.locals, so it
+// stays data-driven instead of the old `<html>#id`-keyed CSS.
+export type PromoAccent = 'indigo' | 'azure';
+
+const AZURE_PROMO_PAGE_IDS = new Set([
+	'home',
+	'thingsboard-pe',
+	'thingsboard-paas',
+	'thingsboard-edge',
+	'mobile-app',
+	'mobile-pe',
+	'mqtt-broker',
+	'trendz',
+	'development-services',
+	'services',
+	'trainings',
+	'company',
+	'mediakit',
+	'careers',
+]);
+
+export function resolvePromoAccent(pageId: string): PromoAccent {
+	return AZURE_PROMO_PAGE_IDS.has(pageId) ? 'azure' : 'indigo';
+}

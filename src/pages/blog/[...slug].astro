@@ -741,9 +741,12 @@ const jsonLd = {
 
 	.toc-sidebar {
 		position: fixed;
-		top: calc(#{$header-height} + #{$spacing-8});
+		// Track the live header+banner offset (--sl-nav-height = header + promo
+		// band) rather than the bare header height, so the TOC sits below the
+		// banner and lifts with the header as the banner collapses on scroll.
+		top: calc(var(--sl-nav-height) + #{$spacing-8});
 		width: 240px;
-		max-height: calc(100vh - #{$header-height} - #{$spacing-10});
+		max-height: calc(100vh - var(--sl-nav-height) - #{$spacing-10});
 		overflow-y: auto;
 
 		@include media-down(xl) {

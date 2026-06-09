@@ -5,7 +5,13 @@ import UtmTracker from '@components/UtmTracker.astro';
 import { formatMarketingTitle, SITE_NAME } from '@root/consts.ts';
 import { getOgImageUrl } from '@util/getOgImageUrl';
 import { getSectionFromPath } from '@util/path-utils';
-import { resolveHeaderConfig, type HeaderVariant, type HeaderCta, type HeaderTryStyle } from '@util/header-config';
+import {
+	resolveHeaderConfig,
+	resolvePromoAccent,
+	type HeaderVariant,
+	type HeaderCta,
+	type HeaderTryStyle,
+} from '@util/header-config';
 
 // BaseLayout — site-wide marketing layout backed by `<StarlightPage>`.
 // The body content is copied verbatim into the page's default slot
@@ -120,6 +126,8 @@ const headerConfig = resolveHeaderConfig({
 	showThemeToggle,
 });
 locals.bslHeaderConfig = headerConfig;
+// Promo-banner tint for this page (azure for marketing CTA pages, else indigo).
+locals.bslPromoAccent = resolvePromoAccent(pageId);
 
 type HeadEntry = {
 	tag: 'title' | 'base' | 'link' | 'style' | 'meta' | 'script' | 'noscript' | 'template';
