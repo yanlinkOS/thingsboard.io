@@ -12,8 +12,8 @@ import {
 	API_FETCH_PAGE_SIZE,
 	iotHubCategorySchema,
 	itemTypeFilterInfoSchema,
-	type ListingView,
 	type ItemTypeFilterInfo,
+	type ListingDetail,
 } from '@models/iot-hub';
 import { fetchWithRetry } from '@util/fetch-utils';
 
@@ -336,20 +336,31 @@ export const collections = {
 	}),  
 	iotHubCategories: defineCollection({
 		loader: async () => {
-			const fetchCategory = async (itemType: string): Promise<ListingView[]> => {
-				const items: ListingView[] = [];
-				let page = 0;
-				while (true) {
-					const url =
-						`${IOT_HUB_API_URL}/api/listings/published` +
-						`?pageSize=${API_FETCH_PAGE_SIZE}&page=${page}` +
-						`&type=${itemType}` +
-						`&sortProperty=installCount&sortOrder=DESC`;
-					const res = await fetchWithRetry(url);
-					const body = (await res.json()) as { data: ListingView[]; hasNext: boolean };
-					items.push(...body.data);
-					if (!body.hasNext) break;
-					page++;
+			type ListingPage = {
+				data: ListingDetail[];
+				totalPages: number;
+				totalElements: number;
+				hasNext: boolean;
+			};
+			const fetchPage = async (itemType: string, page: number): Promise<ListingPage> => {
+				const url =
+					`${IOT_HUB_API_URL}/api/listings/published/details` +
+					`?pageSize=${API_FETCH_PAGE_SIZE}&page=${page}` +
+					`&type=${itemType}` +
+					`&sortProperty=installCount&sortOrder=DESC`;
+				const res = await fetchWithRetry(url);
+				return (await res.json()) as ListingPage;
+			};
+			const fetchCategory = async (itemType: string): Promise<ListingDetail[]> => {
+				// Fetch page 0 first to learn totalPages, then fan out the
+				// remaining pages in parallel instead of awaiting them serially.
+				const first = await fetchPage(itemType, 0);
+				const items: ListingDetail[] = [...first.data];
+				if (first.totalPages > 1) {
+					const rest = await Promise.all(
+						Array.from({ length: first.totalPages - 1 }, (_, i) => fetchPage(itemType, i + 1))
+					);
+					for (const p of rest) items.push(...p.data);
 				}
 				return items;
 			};
