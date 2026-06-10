@@ -38,6 +38,13 @@ export default defineConfig({
     },
     redirects,
     vite: {
+				resolve: {
+						alias: {
+								'@starlight/rehype-tabs': fileURLToPath(
+										new URL('./node_modules/@astrojs/starlight/user-components/rehype-tabs.ts', import.meta.url),
+								),
+						},
+				},
         optimizeDeps: {
             include: ['photoswipe', 'photoswipe/lightbox'],
         },

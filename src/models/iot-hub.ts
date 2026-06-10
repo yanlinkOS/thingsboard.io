@@ -326,6 +326,17 @@ export const API_FETCH_PAGE_SIZE = 100;
 export const resolveImage = (path: string | null | undefined): string | null =>
 	path ? `${IOT_HUB_API_URL}${path}` : null;
 
+// Same as `resolveImage`, but appends a `/preview` segment to the end of the
+// path while keeping any query params intact (e.g. `…/api/resources/<id>?v=ab`
+// becomes `…/api/resources/<id>/preview?v=ab`).
+export const resolvePreviewImage = (path: string | null | undefined): string | null => {
+	const url = resolveImage(path);
+	if (!url) return null;
+	const parsed = new URL(url);
+	parsed.pathname = `${parsed.pathname.replace(/\/$/, '')}/preview`;
+	return parsed.toString();
+};
+
 // Format the supported ThingsBoard version range for a listing. Backend
 // stores versions as int hundreds (e.g. 420 = 4.2), so divide by 100 and
 // render as `v{min}` / `v{min} - {max}` / `v{min}+` depending on whether

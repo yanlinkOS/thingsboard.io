@@ -5,7 +5,7 @@ import {
 	getCreatorHref,
 	getInstallVerb,
 	getPlaceholderIcon,
-	resolveImage,
+	resolvePreviewImage,
 	type ListingView,
 } from '@models/iot-hub';
 import { bindIotHubIcon } from './iot-hub-icon-bind';
@@ -61,7 +61,7 @@ function bindBigThumb(root: HTMLElement, item: ListingView): void {
 	const img = root.querySelector<HTMLImageElement>('[data-card-img]');
 	const fallback = root.querySelector<HTMLElement>('[data-card-img-fallback]');
 	if (!img || !fallback) return;
-	const imageUrl = resolveImage(item.image);
+	const imageUrl = resolvePreviewImage(item.image);
 	if (imageUrl) {
 		img.src = imageUrl;
 		img.alt = item.name;

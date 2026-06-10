@@ -5,7 +5,7 @@ import {
 	getCardVariant,
 	getCreatorHref,
 	getPlaceholderIcon,
-	resolveImage,
+	resolvePreviewImage,
 	type ListingView,
 } from '@models/iot-hub';
 import IotHubIcon from './IotHubIcon.astro';
@@ -27,7 +27,7 @@ const author = creatorDisplayName ?? 'ThingsBoard';
 const creatorHref = creatorId ? getCreatorHref(creatorId) : null;
 const isCompact = getCardVariant(itemType) === 'small';
 
-const imageUrl = isCompact ? null : resolveImage(image);
+const imageUrl = isCompact ? null : resolvePreviewImage(image);
 
 const tileColor = color ?? '#4caf50';
 const placeholderIcon = getPlaceholderIcon(item);
