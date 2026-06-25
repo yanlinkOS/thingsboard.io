@@ -19,13 +19,23 @@ import { matchRouteComponent } from './route-match';
  * a new data-driven collection must be reflected here — otherwise the page
  * silently falls back to dating the shared `.astro` template, with no build error.
  */
-const SITEMAP_DATA_RULES: { re: RegExp; file: (slug: string) => string }[] = [
-	{ re: /^\/use-cases\/([^/]+)\/$/, file: (s) => `src/data/use-cases/${s}.ts` },
-	{ re: /^\/case-studies\/([^/]+)\/$/, file: (s) => `src/data/case-studies/${s}.ts` },
-	{ re: /^\/blog\/(.+)\/$/, file: (s) => `src/content/blog/${s}.mdx` },
+const SITEMAP_DATA_RULES: { re: RegExp; file: (m: RegExpMatchArray) => string }[] = [
+	{ re: /^\/use-cases\/([^/]+)\/$/, file: (m) => `src/data/use-cases/${m[1]}.ts` },
+	{ re: /^\/case-studies\/([^/]+)\/$/, file: (m) => `src/data/case-studies/${m[1]}.ts` },
+	{ re: /^\/blog\/(.+)\/$/, file: (m) => `src/content/blog/${m[1]}.mdx` },
 	// Careers detail pages all live in one aggregated data file.
 	{ re: /^\/careers\/([^/]+)\/$/, file: () => `src/data/careers/jobs.ts` },
 	{ re: /^\/clients-feedback\/$/, file: () => `src/data/clients-feedback/index.ts` },
+	// Release-notes table: per-version notes include (globbed, so scanner-blind).
+	{
+		re: /^\/docs\/((?:edge\/pe|edge|pe|trendz)\/)?releases\/releases-table\/([^/]+)\/$/,
+		file: (m) => `src/content/_includes/docs/${m[1] ?? ''}releases/${m[2]}.mdx`,
+	},
+	// Upgrade steps render from a per-product data model, shared across versions.
+	{
+		re: /^\/docs\/(trendz\/)?(?:pe\/)?installation\/upgrade-instructions\/[^/]+\/[^/]+\/$/,
+		file: (m) => `src/models/${m[1] ? 'trendz-' : ''}upgrade-instructions.ts`,
+	},
 ];
 
 /**
@@ -37,7 +47,7 @@ export function resolveNonDocSources(pathname: string): string[] {
 	for (const rule of SITEMAP_DATA_RULES) {
 		const match = pathname.match(rule.re);
 		if (!match) continue;
-		const file = rule.file(match[1] ?? '');
+		const file = rule.file(match);
 		// Trust the rule only if its file exists; greedy rules also match sibling
 		// URLs (e.g. `/blog/page/N/`), which fall through to the route component.
 		if (existsSync(join(getRepoRoot(), file))) return [file];
