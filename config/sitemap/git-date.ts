@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { getRepoRoot } from '../sitemap-source-registry';
+import { getRepoRoot, gitEnvTrustingRepo } from '../sitemap-source-registry';
 
 /** Generous ceiling for the one-shot `git log` buffer (output is a few MB for `src/`). */
 const GIT_LOG_MAX_BUFFER = 256 * 1024 * 1024;
@@ -33,6 +33,7 @@ export function getGitDateMap(): Map<string, number> {
 				encoding: 'utf8',
 				maxBuffer: GIT_LOG_MAX_BUFFER,
 				cwd: getRepoRoot(),
+				env: gitEnvTrustingRepo(), // trust other-user checkouts (CI)
 			}
 		);
 		let current = 0;

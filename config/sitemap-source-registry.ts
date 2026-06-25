@@ -14,6 +14,27 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+/**
+ * Env that makes git trust a checkout owned by another user (CI "dubious
+ * ownership"). `safe.directory` is only read from global/system config, so we
+ * point `GIT_CONFIG_GLOBAL` at a temp config setting it to `*`.
+ */
+let cachedGitEnv: NodeJS.ProcessEnv | null = null;
+export function gitEnvTrustingRepo(): NodeJS.ProcessEnv {
+	if (cachedGitEnv) return cachedGitEnv;
+	try {
+		const configPath = join(tmpdir(), 'tb-sitemap-safe-directory.gitconfig');
+		writeFileSync(configPath, '[safe]\n\tdirectory = *\n');
+		cachedGitEnv = { ...process.env, GIT_CONFIG_GLOBAL: configPath };
+	} catch {
+		cachedGitEnv = process.env;
+	}
+	return cachedGitEnv;
+}
 
 /** Lazily create-or-fetch a `globalThis`-anchored `Map` for the given shared symbol. */
 function globalMap<K, V>(key: symbol): Map<K, V> {
@@ -81,6 +102,7 @@ export function getRepoRoot(): string {
 		try {
 			cachedRepoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
 				encoding: 'utf8',
+				env: gitEnvTrustingRepo(),
 			}).trim();
 		} catch {
 			cachedRepoRoot = process.cwd();
