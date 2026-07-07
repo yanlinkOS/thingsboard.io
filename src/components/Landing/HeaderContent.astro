@@ -23,14 +23,6 @@ const needsScrollState = variant === 'transparent' || variant === 'transparent-h
 ---
 
 <div class="logo-burger" data-header-variant={variant} data-header-cta={cta}>
-	<a href="https://u24.gov.ua/" target="_blank" class="support-ukraine">
-		<SmartImage
-			src="/src/assets/images/support-ukraine-banner.webp"
-			alt="Stand with Ukraine flag"
-			width="48"
-			height="31"
-		/>
-	</a>
 	<a href="/" class="logo" aria-label="Link to homepage"></a>
 	<div class="burger-group">
 		<HeaderIcons showSearch={showSearch} showThemeToggle={showThemeToggle} />
@@ -260,22 +252,6 @@ const needsScrollState = variant === 'transparent' || variant === 'transparent-h
 					&:hover {
 						color: var(--color-brand-contrast);
 					}
-				}
-			}
-		}
-
-		.support-ukraine {
-			display: flex;
-			align-items: center;
-			img {
-				height: 31px;
-				width: auto;
-			}
-
-			// Laptop widths — shrink the flag so the nav row doesn't wrap.
-			@media screen and (min-width: 1281px) and (max-width: 1599px) {
-				img {
-					height: 20px;
 				}
 			}
 		}
